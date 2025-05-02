@@ -1,8 +1,8 @@
 #ifndef ATOM_HPP
 #define ATOM_HPP
 
-#include <Particle.hpp>
-#include <Vector.hpp>
+#include "Particle.hpp"
+#include "Vector.hpp"
 
 /**
  * Version: May 2025
@@ -19,15 +19,15 @@ class Atom : public Particle{
         int Z;
     public:
         void setis_Hatom(bool Hatom){is_HAtom=Hatom;}
-        bool getis_Hatom(){return(is_HAtom);}
+        bool getis_Hatom() const {return(is_HAtom);}
         void setCharge(float Charge){charge=Charge;}
-        float getCharge(){return(charge);}
+        float getCharge() const {return(charge);}
         void setSigma_AO(float s_AOxigen){s_AO=s_AOxigen;}
-        float getSigma_AO(){return(s_AO);}
+        float getSigma_AO() const {return(s_AO);}
         void setEpsilon_AO(float e_AOxigen){e_AO=e_AOxigen;}
-        float getEpsilon_AO(){return(e_AO);}
+        float getEpsilon_AO() const {return(e_AO);}
         void setZ(int atom_type){Z=atom_type;is_HAtom= Z==1;}
-        int getZ(){return(Z);}
+        int getZ() const {return(Z);}
 
         Atom(): Particle(), is_HAtom(false), Z(0), charge(0), e_AO(0), s_AO(0) {}
 
@@ -43,7 +43,7 @@ class Atom : public Particle{
          * @param bounds The coordinate of the last point, so the components are the width, height and length
          * @return The potential energy in kJ/mol between the two atoms
          */
-        float getCoulombPotential(Atom a, Vector bounds) {
+        float getCoulombPotential(Atom a, Vector bounds) const {
             return (K_COULOMB*charge*a.getCharge()) / distanceTo(a,bounds);
         }
 

@@ -1,7 +1,7 @@
 #ifndef PARTICLE_HPP
 #define PARTICLE_HPP
 
-#include <Vector.hpp>
+#include "Vector.hpp"
 
 /**
  * Version: May 2025
@@ -15,20 +15,20 @@ class Particle{
         float mass;
     public:
         void setPosition(Vector position){pos=position;}
-        Vector getPosition(){return(pos);}
+        Vector getPosition() const {return(pos);}
 
         void setID(int ID_variable){ID=ID_variable;}
-        int getID(){return(ID);}
+        int getID() const {return(ID);}
 
         void setMass(float mass_variable){mass=mass_variable;}
-        float getMass(){return(mass);}
+        float getMass() const {return(mass);}
         
         Particle():pos({0.0f,0.0f,0.0f}), ID(0), mass(0){}
         Particle (Vector position) : pos(position), ID(0), mass(0) {}
         Particle (Vector position, int id) : pos(position), ID(id), mass(0) {}
         Particle (Vector position, int id, float Mass) : pos(position), ID(id), mass(Mass) {}
 
-        float distanceTo(Particle other, Vector box)
+        float distanceTo(Particle other, const Vector box) const 
             {
                 return(distancePBC(pos,other.getPosition(),box));
             }

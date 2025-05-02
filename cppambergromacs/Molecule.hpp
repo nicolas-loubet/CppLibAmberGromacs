@@ -1,9 +1,9 @@
 #ifndef MOLECULE_HPP
 #define MOLECULE_HPP
 
-#include <Atom.hpp>
-#include <Particle.hpp>
-#include <Vector.hpp>
+#include "Atom.hpp"
+#include "Particle.hpp"
+#include "Vector.hpp"
 
 /**
  * Version: May 2025
@@ -11,7 +11,7 @@
  */
 
 class Molecule : public Particle{
-    private:
+    protected:
     Atom* atoms;
     int n_atoms;
     static float totalMass(Atom* Atoms, int nAtoms){
@@ -38,8 +38,8 @@ class Molecule : public Particle{
     ~Molecule() {
         delete[] atoms;
     }
-    Atom* getAtoms(){return(atoms);}
-    int getNAtoms(){return(n_atoms);}
+    Atom* getAtoms() const {return(atoms);}
+    int getNAtoms() const {return(n_atoms);}
 
 };
 

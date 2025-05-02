@@ -1,16 +1,16 @@
 #ifndef TOOLKIT_HPP
 #define TOOLKIT_HPP
 
-/**
- * Version: April 2025
- * Author: Nicolás Loubet
- */
-
 #include <stdexcept>
 #include <iostream>
 #include <chrono>
 #include <thread>
 #include <vector>
+
+/**
+ * Version: April 2025
+ * Author: Nicolás Loubet
+ */
 
 namespace ToolKit {
     constexpr float k_B= -1.380649*6.02214076*0.001; // Boltzmann constant in kJ/(mol*K)

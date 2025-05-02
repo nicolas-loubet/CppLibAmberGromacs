@@ -20,7 +20,7 @@ string strip(string _s)
 
 map<string,int> read_pointers(ifstream& file_prmtop,int position)
 {
-    ifstream file_pointer_names("amber_pointers.txt");
+    ifstream file_pointer_names("cppambergromacs/amber_pointers.dat");
     
     string line;
     vector<string> list_of_names;
@@ -431,7 +431,7 @@ int main() {
     clock_t start = clock();
 
     for(int i= 0; i < 1000; i++) {
-        ifstream file("jja.prmtop");
+        ifstream file("archivos/jj.prmtop");
         map<string, int> positions_of_flags=flag_position(file);
         map<string,int> dict_pointers = read_pointers(file,positions_of_flags["POINTERS"]);
         vector<tuple<string,float>> map_atoms = read_charge(file, dict_pointers, read_atom_name(file, dict_pointers,positions_of_flags["ATOM_NAME"]),positions_of_flags["CHARGE"]);
@@ -439,7 +439,6 @@ int main() {
         vector<int> atom_type_index=read_ati(file,dict_pointers,positions_of_flags["ATOM_TYPE_INDEX"]); 
         vector<float> mass=read_mass(file,dict_pointers,positions_of_flags["MASS"]);
         map<tuple<int,int>,tuple<float,float>> lj_coefficient=read_lj(file,dict_pointers,positions_of_flags["LENNARD_JONES_ACOEF"]);
-    
     }
 
     clock_t end = clock();

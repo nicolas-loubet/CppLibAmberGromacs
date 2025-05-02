@@ -1,7 +1,4 @@
-#include <Vector.hpp>
-#include <Particle.hpp>
-#include <Atom.hpp>
-#include <Molecule.hpp>
+#include "../cppambergromacs/Molecule.hpp"
 #include <iostream>
 using namespace std;
 
