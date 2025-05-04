@@ -21,53 +21,58 @@ class Configuration {
 		Vector bounds; //The bounds of the system
 
 	public:
-        static constexpr int CLASSIFICATION_D_MOLECULE= 0;
-        static constexpr int CLASSIFICATION_T0_MOLECULE= 1;
-        static constexpr int CLASSIFICATION_T1_MOLECULE= 2;
-        static constexpr int CLASSIFICATION_T2_MOLECULE= 3;
-        static constexpr int ERROR_VALUE= -314159;
+		static constexpr int CLASSIFICATION_D_MOLECULE= 0;
+		static constexpr int CLASSIFICATION_T0_MOLECULE= 1;
+		static constexpr int CLASSIFICATION_T1_MOLECULE= 2;
+		static constexpr int CLASSIFICATION_T2_MOLECULE= 3;
 
 		//Getters
 		int getNMolec() const { return N_MOLEC; }
 		Molecule* getMolec(int id) const { return molecs[id-1]; }
 		Vector getBounds() const { return bounds; }
 
-        struct TopolInfo {
-            int num_molecules;
-            int* num_atoms_per_molecule;
-            std::string* molecule_types;
-            Atom** atoms;
+		/**
+		 * This struct is an adapter to read the topology file
+		 */
+		struct TopolInfo {
+			int num_molecules;
+			int* num_atoms_per_molecule;
+			std::string* molecule_types;
+			Atom** atoms;
 
-            TopolInfo() : num_molecules(0), num_atoms_per_molecule(nullptr), molecule_types(nullptr), atoms(nullptr) {}
-            
-            ~TopolInfo() {
-                delete[] num_atoms_per_molecule;
-                delete[] molecule_types;
-                for(int i= 0; i < num_molecules; i++)
-                    delete[] atoms[i];
-                delete[] atoms;
-            }
-        };
+			TopolInfo() : num_molecules(0), num_atoms_per_molecule(nullptr), molecule_types(nullptr), atoms(nullptr) {}
+			
+			~TopolInfo() {
+				delete[] num_atoms_per_molecule;
+				delete[] molecule_types;
+				for(int i= 0; i < num_molecules; i++)
+					delete[] atoms[i];
+				delete[] atoms;
+			}
+		};
 
-        class CoordinateReader {
-            public:
-                virtual ~CoordinateReader()= default;
-                virtual bool readCoordinates(const Molecule** molecules, const int num_molecules, const TopolInfo& topol_info) const = 0;
-        };
+		/**
+		 * This class is an adapter to read the coordinates file
+		 */
+		class CoordinateReader {
+			public:
+				virtual ~CoordinateReader()= default;
+				virtual bool readCoordinates(const Molecule** molecules, const int num_molecules, const TopolInfo& topol_info) const = 0;
+		};
 
-        /**
-         * Constructor. It reads the topology and coordinates files
-         * @param coord_reader Object that reads the coordinates file
-         * @param topol_info Object that reads the topology file
-         */
+		/**
+		 * Constructor. It reads the topology and coordinates files
+		 * @param coord_reader Object that reads the coordinates file
+		 * @param topol_info Object that reads the topology file
+		 */
 		Configuration(const CoordinateReader& coord_reader, const TopolInfo& topol_info) {
-            N_MOLEC= topol_info.num_molecules;
-            molecs= new Molecule*[N_MOLEC];
-    
-            if(!coord_reader.readCoordinates(molecs, N_MOLEC, topol_info))
-                throw std::runtime_error("Failed to read coordinates");
-        }
-    
+			N_MOLEC= topol_info.num_molecules;
+			molecs= new Molecule*[N_MOLEC];
+	
+			if(!coord_reader.readCoordinates(molecs, N_MOLEC, topol_info))
+				throw std::runtime_error("Failed to read coordinates");
+		}
+	
 		/**
 		 * Destructor. It destroys the molecule array
 		 */
@@ -143,19 +148,19 @@ class Configuration {
 		 * @return If the vI value if higher that the threshold, or false if it is not Water
 		 */
 		bool isD(const int ID_CENTER, const int V_index=4, const float threshold=-12.0) {
-            //If it has been classified, it returns that value
-            Water* m= dynamic_cast<Water*>(molecs[ID_CENTER-1]);
-            if(m==nullptr) return false; //If it is not a Water
-            if(m->getClassification() != ERROR_VALUE) return m->getClassification()==CLASSIFICATION_D_MOLECULE;
+			//If it has been classified, it returns that value
+			Water* m= dynamic_cast<Water*>(molecs[ID_CENTER-1]);
+			if(m==nullptr) return false; //If it is not a Water
+			if(m->getClassification() != NOT_CLASSIFIED) return m->getClassification()==CLASSIFICATION_D_MOLECULE;
 
-            float v4= vI(ID_CENTER, V_index);
+			float v4= vI(ID_CENTER, V_index);
 
-            if(v4 > threshold) {
-                m->setClassification(CLASSIFICATION_D_MOLECULE);
-                return true;
-            }
-            return false;
-        }
+			if(v4 > threshold) {
+				m->setClassification(CLASSIFICATION_D_MOLECULE);
+				return true;
+			}
+			return false;
+		}
 
 		/**
 		 * It expands recursively the classification of molecules if the system is already classified in D_MOLECULES and T2_MOLECULES
@@ -164,15 +169,15 @@ class Configuration {
 		void expandClassification(const int ID_CENTER) {
 			ToolKit::ArrInt neighbours= findNearby(ID_CENTER,3.2);
 
-            Water* molec= dynamic_cast<Water*>(molecs[ID_CENTER-1]);
-            if(molec==nullptr) return;
+			Water* molec= dynamic_cast<Water*>(molecs[ID_CENTER-1]);
+			if(molec==nullptr) return;
 			for(int i= 0; i < neighbours.size; i++) {
-                Water* molec2= dynamic_cast<Water*>(molecs[neighbours.arr[i]-1]);
-                if(molec2==nullptr) continue;
+				Water* molec2= dynamic_cast<Water*>(molecs[neighbours.arr[i]-1]);
+				if(molec2==nullptr) continue;
 				if(molec2->getClassification() <= molec->getClassification()+1) continue;
 
-                molec2->setClassification(molec->getClassification()+1);
-                expandClassification(neighbours.arr[i]); //When you don't replace it, it's not called anymore; this is indirectly a cut parameter
+				molec2->setClassification(molec->getClassification()+1);
+				expandClassification(neighbours.arr[i]); //When you don't replace it, it's not called anymore; this is indirectly a cut parameter
 			}
 			delete(neighbours.arr);
 		}
@@ -184,40 +189,18 @@ class Configuration {
 		 * @param identificators *ToolKit::ArrInt (use &) To return the ids of the molecules for each potential
 		 * @param potential_matrix **float where to register the potentials to avoid two times search
 		 */
-		/*void getNeighboursByPotential(Water* m, float* pots, ToolKit::ArrInt* identificators, float** potential_matrix) {
-			ToolKit::ArrInt ids= *identificators;
+		void getNeighboursByPotential(Water* m, std::vector<float>& pots, std::vector<int>& identificators, float** potential_matrix) {
 			const float MAX_V4= 5.5; //Cutoff to not compare all the molecules
 
 			for(int i= 0; i < N_MOLEC; i++) {
 				if(i+1 == m->getID()) continue; //If they are the same molecule
 				if(m->distanceTo(*molecs[i], bounds) > MAX_V4) continue; //Cutoff use
-                Water* w2= dynamic_cast<Water*>(molecs[i]);
-                if(w2==nullptr) continue;
+				Water* w2= dynamic_cast<Water*>(molecs[i]);
+				if(w2==nullptr) continue;
 				int min= i<m->getID()-1?i:m->getID()-1;
 				int max= i>m->getID()-1?i:m->getID()-1;
-				if(potential_matrix[max][min] == ERROR_VALUE) {
-					pots[ids.size]= m->potentialWith(*w2, bounds);
-					potential_matrix[max][min]= pots[ids.size];
-					ids.arr[ids.size++]= i+1;
-				} else {
-					pots[ids.size]= potential_matrix[max][min];
-					ids.arr[ids.size++]= i+1;
-				}
-			}
-			(*identificators).size= ids.size;
-		}*/
-        void getNeighboursByPotential(Water* m, std::vector<float>& pots, std::vector<int>& identificators, float** potential_matrix) {
-			const float MAX_V4= 5.5; //Cutoff to not compare all the molecules
-
-			for(int i= 0; i < N_MOLEC; i++) {
-				if(i+1 == m->getID()) continue; //If they are the same molecule
-				if(m->distanceTo(*molecs[i], bounds) > MAX_V4) continue; //Cutoff use
-                Water* w2= dynamic_cast<Water*>(molecs[i]);
-                if(w2==nullptr) continue;
-				int min= i<m->getID()-1?i:m->getID()-1;
-				int max= i>m->getID()-1?i:m->getID()-1;
-				if(potential_matrix[max][min] == ERROR_VALUE) {
-                    float pot= m->potentialWith(*w2, bounds);
+				if(potential_matrix[max][min] == NOT_CLASSIFIED) {
+					float pot= m->potentialWith(*w2, bounds);
 					pots.push_back(pot);
 					potential_matrix[max][min]= pot;
 					identificators.push_back(i+1);
@@ -237,7 +220,7 @@ class Configuration {
 			for(int i= 1; i < N_MOLEC; i++) {
 				potential_matrix[i]= new float[i];
 				for(int j= 0; j < i; j++)
-					potential_matrix[i][j]= ERROR_VALUE;
+					potential_matrix[i][j]= NOT_CLASSIFIED;
 			}
 			return potential_matrix;
 		}
@@ -259,59 +242,67 @@ class Configuration {
 		 * @param threshold The value of potential to which compare the vI return value, default is -12
 		 */
 		void classifyMolecules(const int V_index=4, const float threshold=-12.0) {
-            const int NUMBER_OF_NEIGHBOURS= 4;
+			const int NUMBER_OF_NEIGHBOURS= 4;
 
-            float** potential_matrix= createPotentialMatrix();
+			float** potential_matrix= createPotentialMatrix();
 
-            //Firstly, I want to know every D molecule
-            ToolKit::ArrInt ids;
-            for(int i= 0; i < N_MOLEC; i++) {
-                std::vector<float> pots_neighs_vector;
-                std::vector<int> neighs_vector;
+			//Firstly, I want to know every D molecule
+			ToolKit::ArrInt ids;
+			for(int i= 0; i < N_MOLEC; i++) {
+				std::vector<float> pots_neighs_vector;
+				std::vector<int> neighs_vector;
 
-                Water* w= dynamic_cast<Water*>(molecs[i]);
-                if(w==nullptr) continue;
+				Water* w= dynamic_cast<Water*>(molecs[i]);
+				if(w==nullptr) continue;
 
-                getNeighboursByPotential(w, pots_neighs_vector, neighs_vector, potential_matrix);
-                Sorter::sort(pots_neighs_vector,true);
+				getNeighboursByPotential(w, pots_neighs_vector, neighs_vector, potential_matrix);
+				Sorter::sort(pots_neighs_vector,true);
 
-                if(pots_neighs_vector[V_index-1] > threshold)
-                    w->setClassification(CLASSIFICATION_D_MOLECULE);
-                else
-                    w->setClassification(CLASSIFICATION_T2_MOLECULE); //At this point, I want that if it's not D, its assigned T2
-            }
+				if(pots_neighs_vector[V_index-1] > threshold)
+					w->setClassification(CLASSIFICATION_D_MOLECULE);
+				else
+					w->setClassification(CLASSIFICATION_T2_MOLECULE); //At this point, I want that if it's not D, its assigned T2
+			}
 
-            //I have all the D molecules, and the rest are classified as T2
-            //Now, I search for the T2 molecules if they have a D molecule as a 4th potential or less -> T0
-            //The same for T1, searching T0 neighbours
-            for(int t_order= CLASSIFICATION_T0_MOLECULE; t_order <= CLASSIFICATION_T1_MOLECULE; t_order++)
-                for(int i= 0; i < N_MOLEC; i++) {
-                    Water* w= dynamic_cast<Water*>(molecs[i]);
-                    if(w==nullptr) continue;
-                    if(w->getClassification() != CLASSIFICATION_T2_MOLECULE) continue;
+			//I have all the D molecules, and the rest are classified as T2
+			//Now, I search for the T2 molecules if they have a D molecule as a 4th potential or less -> T0
+			//The same for T1, searching T0 neighbours
+			for(int t_order= CLASSIFICATION_T0_MOLECULE; t_order <= CLASSIFICATION_T1_MOLECULE; t_order++)
+				for(int i= 0; i < N_MOLEC; i++) {
+					Water* w= dynamic_cast<Water*>(molecs[i]);
+					if(w==nullptr) continue;
+					if(w->getClassification() != CLASSIFICATION_T2_MOLECULE) continue;
 
-                    std::vector<float> pots_neighs_vector;
-                    std::vector<int> neighs_vector;
+					std::vector<float> pots_neighs_vector;
+					std::vector<int> neighs_vector;
 
-                    getNeighboursByPotential(w, pots_neighs_vector, neighs_vector, potential_matrix);
-                    Sorter::cosort(pots_neighs_vector, neighs_vector, true);
+					getNeighboursByPotential(w, pots_neighs_vector, neighs_vector, potential_matrix);
+					Sorter::cosort(pots_neighs_vector, neighs_vector, true);
 
-                    for(int i_v= 0; i_v < V_index; i_v++) {
-                        Water* neigh= dynamic_cast<Water*>(molecs[neighs_vector[i_v]-1]);
-                        
-                        if(neigh->getClassification() == t_order-1) {
-                            w->setClassification(t_order);
-                            break;
-                        }
-                    }
-                }
+					for(int i_v= 0; i_v < V_index; i_v++) {
+						Water* neigh= dynamic_cast<Water*>(molecs[neighs_vector[i_v]-1]);
+						
+						if(neigh->getClassification() == t_order-1) {
+							w->setClassification(t_order);
+							break;
+						}
+					}
+				}
 
-            deletePotentialMatrix(potential_matrix);
-        }
+			deletePotentialMatrix(potential_matrix);
+		}
 
+		/**
+		 * It returns the interactions per site of the molecule specified by its ID
+		 * @param ID The ID of the molecule
+		 * @param potential_matrix The matrix with the potential values, default is nullptr
+		 * @param neighbours The neighbours of the molecule, default is nullptr
+		 * @param R_CUT_OFF The cutoff radius, default is 5.
+		 * @return The interactions per site, sorted in descending order
+		 */
 		std::vector<float> getInteractionsPerSite(const int ID, float** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr, const float R_CUT_OFF= 5.) {
 			Water* molecule= dynamic_cast<Water*>(molecs[ID-1]);
-            if(molecule==nullptr) throw std::runtime_error("Error: getInteractionsPerSite(ID, float**, ToolKit::ArrInt*, const float R_CUT_OFF= 5.) -> molecule is not a water");
+			if(molecule==nullptr) throw std::runtime_error("Error: getInteractionsPerSite(ID, float**, ToolKit::ArrInt*, const float R_CUT_OFF= 5.) -> molecule is not a water");
 			Vector o= molecule->getOxygen().getPosition();
 			Vector h1= molecule->getHydrogen_1().getPosition();
 			Vector h2= molecule->getHydrogen_2().getPosition();
@@ -336,7 +327,7 @@ class Configuration {
 					if(potential_matrix != nullptr) {
 						int min= ID-1 < j  ?  ID-1 : j;
 						int max= ID-1 > j  ?  ID-1 : j;
-						if(potential_matrix[max][min] == ERROR_VALUE)
+						if(potential_matrix[max][min] == NOT_CLASSIFIED)
 							potential_matrix[max][min]= molecule->potentialWith(*molecs[j],bounds);
 						sum_per_site[i_close]+= potential_matrix[max][min];
 						if(neighbours != nullptr)
@@ -350,12 +341,24 @@ class Configuration {
 			return sum_per_site;
 		}
 
+		/**
+		 * It returns the V_4S value of the molecule specified by its ID
+		 * @param ID The ID of the molecule
+		 * @param R_CUT_OFF The cutoff radius, default is 5.
+		 * @return The V_4S value
+		 */
 		float v_4S(const int ID, const float R_CUT_OFF= 5.) {
 			std::vector<float> interactions= getInteractionsPerSite(ID, nullptr, nullptr, R_CUT_OFF);
 			float v4s= interactions[3];
 			return v4s;
 		}
 
+		/**
+		 * It returns an array with the V_4S values of all molecules
+		 * @param i_V The potential number V_index of a sorted list of all potentials, default is 4
+		 * @param neighbours An array with the neighbours of each molecule, default is nullptr
+		 * @return An array with the V_4S values
+		 */
 		float* v_4S_arr(const int i_V= 4, ToolKit::ArrInt* neighbours= nullptr) {
 			float* output= new float[N_MOLEC];
 			float** pm= createPotentialMatrix();
@@ -375,7 +378,7 @@ class Configuration {
 		float getTanaka(Water* m, const float MAX_D_HB= 3.5, const float MAX_A_HB= 30.) {
 			const float MAX_D_ANALYSIS= 6.0; //Maximum distance for analysis
 			float dist;
-            std::vector<float> ls_d_HB, ls_d_nHB;
+			std::vector<float> ls_d_HB, ls_d_nHB;
 
 			for(int i= 0; i < N_MOLEC; i++) {
 				if(i+1 == m->getID()) continue;
@@ -383,8 +386,8 @@ class Configuration {
 
 				if(dist > MAX_D_ANALYSIS) continue;
 
-                Water* w2= dynamic_cast<Water*>(molecs[i]);
-                if(w2==nullptr) continue;
+				Water* w2= dynamic_cast<Water*>(molecs[i]);
+				if(w2==nullptr) continue;
 
 				if(m->isHB(*w2, bounds, MAX_D_HB, MAX_A_HB))
 					ls_d_HB.push_back(dist);
@@ -392,10 +395,10 @@ class Configuration {
 					ls_d_nHB.push_back(dist);
 			}
 
-            float min_value= *std::min_element(ls_d_HB.begin(),ls_d_HB.end());
-            float max_value= *std::max_element(ls_d_nHB.begin(),ls_d_nHB.end());
+			float min_value= *std::min_element(ls_d_HB.begin(),ls_d_HB.end());
+			float max_value= *std::max_element(ls_d_nHB.begin(),ls_d_nHB.end());
 			float output= min_value-max_value;
-            
+			
 			return output;
 		}
 
@@ -421,21 +424,21 @@ class Configuration {
 				distances.push_back(d);
 			}
 
-            //Add the first molecule outside the sphere R_MAX
+			//Add the first molecule outside the sphere R_MAX
 			distances.push_back(dist_peripheral);
 
 			Sorter::sort(distances, true);
 			int N= distances.size()-1;
 
 			float sum_deltas= 0.;
-            float sum_squared_deltas= 0.;
+			float sum_squared_deltas= 0.;
 			for(int j= 0; j < N; j++) {
 				float delta_j= distances[j+1]-distances[j];
 				sum_deltas+= delta_j;
-                sum_squared_deltas+= delta_j*delta_j;
+				sum_squared_deltas+= delta_j*delta_j;
 			}
 
-            float mean_delta= sum_deltas/N;
+			float mean_delta= sum_deltas/N;
 			return sum_squared_deltas/N - mean_delta*mean_delta;
 		}
 

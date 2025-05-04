@@ -1,14 +1,14 @@
 #ifndef MOLECULE_HPP
 #define MOLECULE_HPP
 
-#include "Atom.hpp"
-#include "Particle.hpp"
-#include "Vector.hpp"
-
 /**
  * Version: May 2025
  * Author: Ezequiel Cuenca
  */
+
+#include "Atom.hpp"
+#include "Particle.hpp"
+#include "Vector.hpp"
 
 class Molecule : public Particle{
 	protected:

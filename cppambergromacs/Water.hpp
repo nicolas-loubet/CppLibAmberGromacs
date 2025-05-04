@@ -1,13 +1,13 @@
 #ifndef WATER_HPP
 #define WATER_HPP
 
-#include "Molecule.hpp"
-#include "Atom.hpp"
-
 /**
  * Version: April 2025
  * Author: Nicolás Loubet
  */
+
+#include "Molecule.hpp"
+#include "Atom.hpp"
 
 #define NOT_CLASSIFIED -314159265
 
