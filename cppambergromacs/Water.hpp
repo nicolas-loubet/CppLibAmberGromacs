@@ -25,6 +25,10 @@ class Water : public Molecule {
 		int getClassification() const { return classif; }
 		bool isClassified() const { return classif != NOT_CLASSIFIED; }
 
+		Atom getOxygen() const { return atoms[0]; }
+		Atom getHydrogen_1() const { return atoms[1]; }
+		Atom getHydrogen_2() const { return atoms[2]; }
+
 		/**
 		 * Basic constructor
 		 * @param id Number of ID to identify the molecule in the configuration
@@ -32,9 +36,10 @@ class Water : public Molecule {
 		 */
 		Water(const int id, Atom* atoms): Molecule(id, atoms, 3), classif(NOT_CLASSIFIED) {}
 
-		Atom getOxygen() const { return atoms[0]; }
-		Atom getHydrogen_1() const { return atoms[1]; }
-		Atom getHydrogen_2() const { return atoms[2]; }
+		/**
+		 * Virtual destructor
+		 */
+		virtual ~Water()= default;
 
 		/**
 		 * Calculates the potential of this molecule with another specified
