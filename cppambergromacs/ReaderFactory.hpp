@@ -30,12 +30,12 @@ class ReaderFactory {
 		}
 	
 		/**
-		 * Factory method to create a TopologyReader object
+		 * Factory method to create a TopologyInfo struct
 		 * @param format The topology format (AMBER, GROMACS or LAMMPS)
 		 * @param filename The name of the file to read
 		 * @return A TopolInfo struct
 		 */
-		static Configuration::TopolInfo createTopologyReader(const int format, const std::string& filename) {
+		static Configuration::TopolInfo createTopologyInfo(const int format, const std::string& filename) {
 			if(format == AMBER) return TopolReader::readTopolInfoOfAmber(filename);
 			if(format == GROMACS) return TopolReader::readTopolInfoOfGromacs(filename);
 			//if(format == LAMMPS) return TopolReader::readTopolInfoOfLammps(filename);

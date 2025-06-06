@@ -10,6 +10,9 @@
 #include "ToolKit.hpp"
 #include "Sorter.hpp"
 #include "Geometrics.hpp"
+#include <map>
+
+using namespace std;
 
 /**
  * This class creates a Configuration object, with an array of molecules (generic)
@@ -36,19 +39,17 @@ class Configuration {
 		 */
 		struct TopolInfo {
 			int num_molecules;
-			int* num_atoms_per_molecule;
-			std::string* molecule_types;
-			Atom** atoms;
+			int num_solutes;
+			int num_solvents;
+			map<string,int> number_of_each_different_molecule;
+			map<string,int> number_of_atoms_per_different_molecule;
+			vector<map<int,tuple<string,string,float,float>>> atom_type_name_charge_mass;
+			map<string,string> name_type;
+            map<string,pair<float,float>> type_LJparam;
+            map<pair<string,string>,pair<float,float>> special_interaction;
 
-			TopolInfo() : num_molecules(0), num_atoms_per_molecule(nullptr), molecule_types(nullptr), atoms(nullptr) {}
-			
-			~TopolInfo() {
-				delete[] num_atoms_per_molecule;
-				delete[] molecule_types;
-				for(int i= 0; i < num_molecules; i++)
-					delete[] atoms[i];
-				delete[] atoms;
-			}
+			TopolInfo(): num_molecules(0), num_solutes(0), num_solvents(0) {}
+			~TopolInfo()= default;
 		};
 
 		/**
@@ -57,7 +58,7 @@ class Configuration {
 		class CoordinateReader {
 			public:
 				virtual ~CoordinateReader()= default;
-				virtual bool readCoordinates(const Molecule** molecules, const int num_molecules, const TopolInfo& topol_info) const = 0;
+				virtual bool readCoordinates(Molecule** molecules, const int num_molecules, const TopolInfo& topol_info) const= 0;
 		};
 
 		/**
@@ -70,7 +71,7 @@ class Configuration {
 			molecs= new Molecule*[N_MOLEC];
 	
 			if(!coord_reader.readCoordinates(molecs, N_MOLEC, topol_info))
-				throw std::runtime_error("Failed to read coordinates");
+				throw runtime_error("Failed to read coordinates");
 		}
 	
 		/**
@@ -189,7 +190,7 @@ class Configuration {
 		 * @param identificators *ToolKit::ArrInt (use &) To return the ids of the molecules for each potential
 		 * @param potential_matrix **float where to register the potentials to avoid two times search
 		 */
-		void getNeighboursByPotential(Water* m, std::vector<float>& pots, std::vector<int>& identificators, float** potential_matrix) {
+		void getNeighboursByPotential(Water* m, vector<float>& pots, vector<int>& identificators, float** potential_matrix) {
 			const float MAX_V4= 5.5; //Cutoff to not compare all the molecules
 
 			for(int i= 0; i < N_MOLEC; i++) {
@@ -249,8 +250,8 @@ class Configuration {
 			//Firstly, I want to know every D molecule
 			ToolKit::ArrInt ids;
 			for(int i= 0; i < N_MOLEC; i++) {
-				std::vector<float> pots_neighs_vector;
-				std::vector<int> neighs_vector;
+				vector<float> pots_neighs_vector;
+				vector<int> neighs_vector;
 
 				Water* w= dynamic_cast<Water*>(molecs[i]);
 				if(w==nullptr) continue;
@@ -273,8 +274,8 @@ class Configuration {
 					if(w==nullptr) continue;
 					if(w->getClassification() != CLASSIFICATION_T2_MOLECULE) continue;
 
-					std::vector<float> pots_neighs_vector;
-					std::vector<int> neighs_vector;
+					vector<float> pots_neighs_vector;
+					vector<int> neighs_vector;
 
 					getNeighboursByPotential(w, pots_neighs_vector, neighs_vector, potential_matrix);
 					Sorter::cosort(pots_neighs_vector, neighs_vector, true);
@@ -300,15 +301,15 @@ class Configuration {
 		 * @param R_CUT_OFF The cutoff radius, default is 5.
 		 * @return The interactions per site, sorted in descending order
 		 */
-		std::vector<float> getInteractionsPerSite(const int ID, float** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr, const float R_CUT_OFF= 5.) {
+		vector<float> getInteractionsPerSite(const int ID, float** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr, const float R_CUT_OFF= 5.) {
 			Water* molecule= dynamic_cast<Water*>(molecs[ID-1]);
-			if(molecule==nullptr) throw std::runtime_error("Error: getInteractionsPerSite(ID, float**, ToolKit::ArrInt*, const float R_CUT_OFF= 5.) -> molecule is not a water");
+			if(molecule==nullptr) throw runtime_error("Error: getInteractionsPerSite(ID, float**, ToolKit::ArrInt*, const float R_CUT_OFF= 5.) -> molecule is not a water");
 			Vector o= molecule->getOxygen().getPosition();
 			Vector h1= molecule->getHydrogen_1().getPosition();
 			Vector h2= molecule->getHydrogen_2().getPosition();
 			Geometrics::TetrahedronVertices t= Geometrics::getPerfectTetrahedron(o, h1, h2, bounds);
 
-			std::vector<float> sum_per_site(4,0.0f);
+			vector<float> sum_per_site(4,0.0f);
 			Vector sites[4]= {t.H1, t.H2, t.L1, t.L2};
 
 			for(int j= 0; j < N_MOLEC; j++) {
@@ -348,7 +349,7 @@ class Configuration {
 		 * @return The V_4S value
 		 */
 		float v_4S(const int ID, const float R_CUT_OFF= 5.) {
-			std::vector<float> interactions= getInteractionsPerSite(ID, nullptr, nullptr, R_CUT_OFF);
+			vector<float> interactions= getInteractionsPerSite(ID, nullptr, nullptr, R_CUT_OFF);
 			float v4s= interactions[3];
 			return v4s;
 		}
@@ -378,7 +379,7 @@ class Configuration {
 		float getTanaka(Water* m, const float MAX_D_HB= 3.5, const float MAX_A_HB= 30.) {
 			const float MAX_D_ANALYSIS= 6.0; //Maximum distance for analysis
 			float dist;
-			std::vector<float> ls_d_HB, ls_d_nHB;
+			vector<float> ls_d_HB, ls_d_nHB;
 
 			for(int i= 0; i < N_MOLEC; i++) {
 				if(i+1 == m->getID()) continue;
@@ -395,8 +396,8 @@ class Configuration {
 					ls_d_nHB.push_back(dist);
 			}
 
-			float min_value= *std::min_element(ls_d_HB.begin(),ls_d_HB.end());
-			float max_value= *std::max_element(ls_d_nHB.begin(),ls_d_nHB.end());
+			float min_value= *min_element(ls_d_HB.begin(),ls_d_HB.end());
+			float max_value= *max_element(ls_d_nHB.begin(),ls_d_nHB.end());
 			float output= min_value-max_value;
 			
 			return output;
@@ -409,7 +410,7 @@ class Configuration {
 		 */
 		float LSI(const int id) {
 			const float R_MAX= 3.7; //A (CUT-OFF)
-			std::vector<float> distances;
+			vector<float> distances;
 
 			float dist_peripheral= bounds.x+bounds.y+bounds.z;
 
