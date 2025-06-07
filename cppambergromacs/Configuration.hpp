@@ -45,8 +45,8 @@ class Configuration {
 			map<string,int> number_of_atoms_per_different_molecule;
 			vector<map<int,tuple<string,string,float,float>>> atom_type_name_charge_mass;
 			map<string,string> name_type;
-            map<string,pair<float,float>> type_LJparam;
-            map<pair<string,string>,pair<float,float>> special_interaction;
+            map<string,pair<float,float>> type_LJparam; //0=epsilon 1=sigma
+            map<pair<string,string>,pair<float,float>> special_interaction;//keep ij and ji
 
 			TopolInfo(): num_molecules(0), num_solutes(0), num_solvents(0) {}
 			~TopolInfo()= default;
