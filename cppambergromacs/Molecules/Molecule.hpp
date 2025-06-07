@@ -7,8 +7,6 @@
  */
 
 #include "Atom.hpp"
-#include "Particle.hpp"
-#include "../General/Vector.hpp"
 
 class Molecule : public Particle{
 	protected:

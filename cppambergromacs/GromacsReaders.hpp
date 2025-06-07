@@ -130,6 +130,8 @@ class GromacsTopologyReader : public TopologyReader {
 
 
     public:
+        GromacsTopologyReader()= default;
+
         TopolInfo readTopology(const std::string& filename) const override {
             TopolInfo ti= TopolInfo();
 
@@ -163,12 +165,11 @@ class GromacsTopologyReader : public TopologyReader {
 };
 
 class GromacsCoordinateReader : public CoordinateReader {
-    private:
-        std::string filename;
     public:
-        GromacsCoordinateReader(const std::string& file) : filename(file) {}
-        bool readCoordinates(Molecule** molecules, int num_molecules, const TopolInfo& topol_info) const override {
+        GromacsCoordinateReader()= default;
+        bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs) const override {
             // Implementación para leer .gro o .trr de GROMACS
+            // Los datos se guardan en el Molecule**
             return true;
         }
 };

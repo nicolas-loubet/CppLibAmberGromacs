@@ -12,6 +12,9 @@
 #include <vector>
 #include <tuple>
 #include "Molecules/Molecule.hpp"
+#include "General/ToolKit.hpp"
+
+using namespace std;
 
 /**
  * This struct is an adapter to read the topology file
@@ -20,12 +23,12 @@ struct TopolInfo {
     int num_molecules;
     int num_solutes;
     int num_solvents;
-    std::map<std::string,int> number_of_each_different_molecule;
-    std::map<std::string,int> number_of_atoms_per_different_molecule;
-    std::vector<std::map<int,std::tuple<std::string,std::string,float,float>>> atom_type_name_charge_mass;
-    std::map<std::string,std::string> name_type;
-    std::map<std::string,std::pair<float,float>> type_LJparam; //0=epsilon 1=sigma
-    std::map<std::pair<std::string,std::string>,std::pair<float,float>> special_interaction;//keep ij and ji
+    map<string,int> number_of_each_different_molecule;
+    map<string,int> number_of_atoms_per_different_molecule;
+    vector<map<int,tuple<string,string,float,float>>> atom_type_name_charge_mass;
+    map<string,string> name_type;
+    map<string,pair<float,float>> type_LJparam; //0=epsilon 1=sigma
+    map<pair<string,string>,pair<float,float>> special_interaction;//keep ij and ji
 
     TopolInfo(): num_molecules(0), num_solutes(0), num_solvents(0) {}
     ~TopolInfo()= default;
@@ -36,8 +39,17 @@ struct TopolInfo {
  */
 class CoordinateReader {
 public:
+    CoordinateReader()= default;
 	virtual ~CoordinateReader()= default;
-	virtual bool readCoordinates(Molecule** molecules, int num_molecules, const TopolInfo& topol_info) const= 0;
+
+    /**
+     * Reads the coordinates file
+     * @param filename The name of the coordinates file
+     * @param topol_info The topology information
+     * @param molecs An empty array of molecule pointers
+     * @return True if the coordinates were read successfully
+     */
+	virtual bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs) const= 0;
 };
 
 /**
@@ -45,8 +57,9 @@ public:
  */
 class TopologyReader {
 public:
+    TopologyReader()= default;
 	virtual ~TopologyReader()= default;
-	virtual TopolInfo readTopology(const std::string& filename) const= 0;
+	virtual TopolInfo readTopology(const string& filename) const= 0;
 };
 
 #endif

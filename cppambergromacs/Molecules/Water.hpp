@@ -7,7 +7,6 @@
  */
 
 #include "Molecule.hpp"
-#include "Atom.hpp"
 
 #define NOT_CLASSIFIED -314159265
 

@@ -6,7 +6,6 @@
  * Author: Nicolás Loubet
  */
 
-#include "Configurations/Configuration.hpp"
 #include "AmberReaders.hpp"
 #include "GromacsReaders.hpp"
 // TODO: #include "LammpsReaders.hpp"

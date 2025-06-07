@@ -35,6 +35,7 @@ class AmberTopologyReader : public TopologyReader {
         }
 
     public:
+        AmberTopologyReader()= default;
         TopolInfo readTopology(const std::string& filename) const override {
             // Implementación para leer prmtop de AMBER-EZEQUIEL
             return TopolInfo();
@@ -42,12 +43,11 @@ class AmberTopologyReader : public TopologyReader {
 };
 
 class AmberCoordinateReader : public CoordinateReader {
-    private:
-        std::string filename;
     public:
-        AmberCoordinateReader(const std::string& file): filename(file) {}
-        bool readCoordinates(Molecule** molecules, int num_molecules, const TopolInfo& topol_info) const override {
+        AmberCoordinateReader()= default;
+        bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs) const override {
             // Implementación para leer mdcrd de AMBER
+            // Los datos se guardan en el Molecule**
             return true;
         }
 };

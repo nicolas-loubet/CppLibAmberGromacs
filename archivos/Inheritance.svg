@@ -1,0 +1,1791 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="222.14844mm"
+   height="232.14609mm"
+   viewBox="0 0 222.14844 232.14609"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.2 (1:1.4.2+202505120738+ebf0e940d0)"
+   sodipodi:docname="Herencia.svg"
+   inkscape:export-filename="Inheritance.png"
+   inkscape:export-xdpi="800.53998"
+   inkscape:export-ydpi="800.53998"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.47324511"
+     inkscape:cx="678.29543"
+     inkscape:cy="414.1617"
+     inkscape:window-width="1920"
+     inkscape:window-height="1044"
+     inkscape:window-x="1366"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <marker
+       style="overflow:visible"
+       id="DartArrow"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Dart arrow"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         transform="scale(-0.5)"
+         id="path6" />
+    </marker>
+  </defs>
+  <g
+     inkscape:label="Capa 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-18.799093,-3.2449364)">
+    <text
+       xml:space="preserve"
+       style="font-size:2.11667px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;stroke-width:0.264583"
+       x="177.96516"
+       y="76.125496"
+       id="text115"><tspan
+         sodipodi:role="line"
+         id="tspan115"
+         style="stroke-width:0.264583"
+         x="177.96516"
+         y="76.125496"></tspan></text>
+    <g
+       id="g360"
+       transform="matrix(0.96704886,0,0,0.96704886,4.2835936,3.9316646)">
+      <rect
+         style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.6;stroke-dasharray:1.2, 2.4;stroke-dashoffset:0"
+         id="rect1"
+         width="64.043427"
+         height="39.581017"
+         x="27.704119"
+         y="66.060669"
+         ry="2.2717736" />
+      <text
+         xml:space="preserve"
+         style="font-size:3.68782px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#ff0000;stroke-width:0.460975"
+         x="29.096924"
+         y="70.292015"
+         id="text1"><tspan
+           sodipodi:role="line"
+           id="tspan1"
+           style="text-align:start;text-anchor:start;fill:#ff0000;stroke-width:0.460975"
+           x="29.096924"
+           y="70.292015">Configuration.hpp</tspan></text>
+      <rect
+         style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.1;stroke-dasharray:none;stroke-dashoffset:0"
+         id="rect2"
+         width="81.251122"
+         height="50.215958"
+         x="19.101088"
+         y="60.743202"
+         ry="2.8821714" />
+      <text
+         xml:space="preserve"
+         style="font-size:3.07017px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#0000ff;stroke-width:0.38377"
+         x="20.263681"
+         y="64.265869"
+         id="text2"><tspan
+           sodipodi:role="line"
+           id="tspan2"
+           style="text-align:start;text-anchor:start;fill:#0000ff;stroke-width:0.38377"
+           x="20.263681"
+           y="64.265869">Configurations</tspan></text>
+      <rect
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-dashoffset:0"
+         id="rect3"
+         width="43.466499"
+         height="26.863775"
+         x="37.992584"
+         y="72.419289"
+         ry="1.5418607" />
+      <text
+         xml:space="preserve"
+         style="font-size:2.43795px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.304742"
+         x="38.753307"
+         y="75.052513"
+         id="text3"><tspan
+           sodipodi:role="line"
+           id="tspan3"
+           style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.304742"
+           x="38.753307"
+           y="75.052513">Configuration</tspan></text>
+      <path
+         style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+         d="M 37.992584,76.125498 H 81.459082"
+         id="path3" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+         d="M 37.992584,85.573289 H 81.459082"
+         id="path4" />
+      <text
+         xml:space="preserve"
+         style="font-size:1.87567px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.234458"
+         x="38.828026"
+         y="79.129196"
+         id="text4"><tspan
+           sodipodi:role="line"
+           id="tspan4"
+           style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+           x="38.828026"
+           y="79.129196">Molecule** molecs</tspan><tspan
+           sodipodi:role="line"
+           style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+           x="38.828026"
+           y="81.473785"
+           id="tspan5">int N_MOLEC</tspan><tspan
+           sodipodi:role="line"
+           style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+           x="38.828026"
+           y="83.818375"
+           id="tspan6">Vector bounds</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-size:1.92586px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.415908"
+         x="38.806725"
+         y="87.683678"
+         id="text9"><tspan
+           sodipodi:role="line"
+           id="tspan7"
+           style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+           x="38.806725"
+           y="87.683678">getNMolec, getMolec, getBounds</tspan><tspan
+           sodipodi:role="line"
+           style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+           x="38.806725"
+           y="90.091003"
+           id="tspan8">Configuration(ConfigurationReader,TopolInfo)</tspan><tspan
+           sodipodi:role="line"
+           style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+           x="38.806725"
+           y="92.498329"
+           id="tspan9">Otros métodos</tspan></text>
+      <rect
+         style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.1;stroke-dasharray:none;stroke-dashoffset:0"
+         id="rect10"
+         width="219.08026"
+         height="49.828335"
+         x="19.296484"
+         y="3.5449364"
+         ry="2.8599236" />
+      <text
+         xml:space="preserve"
+         style="font-size:3.07017px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#0000ff;stroke-width:0.38377"
+         x="20.263681"
+         y="6.8737936"
+         id="text11"><tspan
+           sodipodi:role="line"
+           id="tspan11"
+           style="text-align:start;text-anchor:start;fill:#0000ff;stroke-width:0.38377"
+           x="20.263681"
+           y="6.8737936">General</tspan></text>
+      <g
+         id="g19">
+        <rect
+           style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.6;stroke-dasharray:1.19999, 2.4;stroke-dashoffset:0"
+           id="rect9"
+           width="46.699947"
+           height="21.917521"
+           x="21.445848"
+           y="8.272603"
+           ry="1.2579678" />
+        <text
+           xml:space="preserve"
+           style="font-size:3.68782px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#ff0000;stroke-width:0.460975"
+           x="22.910587"
+           y="12.575877"
+           id="text10"><tspan
+             sodipodi:role="line"
+             id="tspan10"
+             style="text-align:start;text-anchor:start;fill:#ff0000;stroke-width:0.460975"
+             x="22.910587"
+             y="12.575877">Sorter.hpp</tspan></text>
+        <g
+           id="g18"
+           transform="translate(-14.772903,-0.32406546)">
+          <rect
+             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-dashoffset:0"
+             id="rect11"
+             width="43.587452"
+             height="13.037707"
+             x="37.93211"
+             y="14.966743"
+             ry="0.74830616" />
+          <text
+             xml:space="preserve"
+             style="font-size:2.43795px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.304742"
+             x="38.753307"
+             y="17.660442"
+             id="text12"><tspan
+               sodipodi:role="line"
+               id="tspan12"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.304742"
+               x="38.753307"
+               y="17.660442">Sorter (namespace)</tspan></text>
+          <path
+             style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="M 37.992584,18.733429 H 81.459082"
+             id="path12" />
+          <text
+             xml:space="preserve"
+             style="font-size:1.87567px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.234458"
+             x="38.828026"
+             y="21.737125"
+             id="text15"><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="21.737125"
+               id="tspan15">sort(vector), sort(vector,bool)</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="24.081713"
+               id="tspan17">sort(T*,size_t), sort(T*,size_t,bool)</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="26.4263"
+               id="tspan18">cosort(vector,vector), cosort(vector,vector,bool)</tspan></text>
+        </g>
+      </g>
+      <g
+         id="g26">
+        <rect
+           style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.6;stroke-dasharray:1.19999, 2.4;stroke-dashoffset:0"
+           id="rect19"
+           width="46.645233"
+           height="26.125536"
+           x="70.360657"
+           y="8.2999315"
+           ry="1.4994891" />
+        <text
+           xml:space="preserve"
+           style="font-size:3.68782px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#ff0000;stroke-width:0.460975"
+           x="71.798035"
+           y="12.575877"
+           id="text19"><tspan
+             sodipodi:role="line"
+             id="tspan19"
+             style="text-align:start;text-anchor:start;fill:#ff0000;stroke-width:0.460975"
+             x="71.798035"
+             y="12.575877">ToolKit.hpp</tspan></text>
+        <g
+           id="g23"
+           transform="translate(34.114545,-0.32406546)">
+          <rect
+             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-dashoffset:0"
+             id="rect20"
+             width="43.514923"
+             height="18.224669"
+             x="37.968372"
+             y="15.003008"
+             ry="1.0460145" />
+          <text
+             xml:space="preserve"
+             style="font-size:2.43795px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.304742"
+             x="38.753307"
+             y="17.660442"
+             id="text20"><tspan
+               sodipodi:role="line"
+               id="tspan20"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.304742"
+               x="38.753307"
+               y="17.660442">ToolKit (namespace)</tspan></text>
+          <path
+             style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="M 37.992584,18.733429 H 81.459082"
+             id="path20" />
+          <text
+             xml:space="preserve"
+             style="font-size:1.87567px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.234458"
+             x="38.828026"
+             y="21.737125"
+             id="text23"><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="21.737125"
+               id="tspan21">struct ArrInt, ArrFloat, FlaggedArrFloat</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="24.081713"
+               id="tspan23">strip(string)</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="26.4263"
+               id="tspan24">getBinPosition(float,float,float,int,bool)</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="28.770887"
+               id="tspan25">takeTime(Func)</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="31.115475"
+               id="tspan26">parallel(Func,vector,vector,Args...)</tspan></text>
+        </g>
+      </g>
+      <g
+         id="g34"
+         transform="translate(49.291068)">
+        <rect
+           style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.6;stroke-dasharray:1.19999, 2.4;stroke-dashoffset:0"
+           id="rect26"
+           width="67.345345"
+           height="37.719463"
+           x="70.494247"
+           y="8.4330664"
+           ry="2.1649287" />
+        <text
+           xml:space="preserve"
+           style="font-size:3.68782px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#ff0000;stroke-width:0.460975"
+           x="71.798035"
+           y="12.575877"
+           id="text27"><tspan
+             sodipodi:role="line"
+             id="tspan27"
+             style="text-align:start;text-anchor:start;fill:#ff0000;stroke-width:0.460975"
+             x="71.798035"
+             y="12.575877">Geometrics.hpp</tspan></text>
+        <g
+           id="g33"
+           transform="translate(34.114545,-0.32406546)">
+          <rect
+             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-dashoffset:0"
+             id="rect27"
+             width="63.263103"
+             height="29.62586"
+             x="38.075836"
+             y="15.11047"
+             ry="1.700392" />
+          <text
+             xml:space="preserve"
+             style="font-size:2.43795px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.304742"
+             x="38.753307"
+             y="17.660442"
+             id="text28"><tspan
+               sodipodi:role="line"
+               id="tspan28"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.304742"
+               x="38.753307"
+               y="17.660442">Geometrics (namespace)</tspan></text>
+          <path
+             style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="M 37.992584,18.733429 H 101.33894"
+             id="path28"
+             sodipodi:nodetypes="cc" />
+          <text
+             xml:space="preserve"
+             style="font-size:1.87567px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.234458"
+             x="38.828026"
+             y="21.737125"
+             id="text33"><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="21.737125"
+               id="tspan33">struct TetrahedronVertices (.toArray .toVector)</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="24.081713"
+               id="tspan41">struct Plane, Line, Box, SphereList</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="26.4263"
+               id="tspan37">checkPBC(Vector,Vector,Vector,Vector): Vector*</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="28.770887"
+               id="tspan38">determinant_3x3(float[3][3]): float</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="31.115475"
+               id="tspan39">CramersRule(float[3][3], float[3]): Vector</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="33.460064"
+               id="tspan40">getPerfectTetrahedron(Vector,Vector,Vector,Vector): TetrahedronVertices</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="35.804649"
+               id="tspan42">getPlaneFromPoints(Vector,Vector,Vector,Vector): Plane</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="38.149239"
+               id="tspan43">distanceToPlane(Plane,Vector): float</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="40.493824"
+               id="tspan44">distanceToLine(Line,Vector,Vector): float</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="42.838413"
+               id="tspan45">isInBox(Vector,Box): bool</tspan></text>
+        </g>
+      </g>
+      <g
+         id="g53"
+         transform="translate(119.33464)">
+        <rect
+           style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.6;stroke-dasharray:1.19999, 2.4;stroke-dashoffset:0"
+           id="rect46"
+           width="46.524666"
+           height="37.766846"
+           x="70.420937"
+           y="8.3601017"
+           ry="2.1676483" />
+        <text
+           xml:space="preserve"
+           style="font-size:3.68782px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#ff0000;stroke-width:0.460975"
+           x="71.798035"
+           y="12.575877"
+           id="text46"><tspan
+             sodipodi:role="line"
+             id="tspan46"
+             style="text-align:start;text-anchor:start;fill:#ff0000;stroke-width:0.460975"
+             x="71.798035"
+             y="12.575877">Vector.hpp</tspan></text>
+        <g
+           id="g52"
+           transform="translate(34.114545,-0.32406546)">
+          <rect
+             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-dashoffset:0"
+             id="rect47"
+             width="43.514923"
+             height="18.224669"
+             x="37.968372"
+             y="15.003008"
+             ry="1.0460145" />
+          <text
+             xml:space="preserve"
+             style="font-size:2.43795px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.304742"
+             x="38.753307"
+             y="17.660442"
+             id="text47"><tspan
+               sodipodi:role="line"
+               id="tspan47"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.304742"
+               x="38.753307"
+               y="17.660442">Vector</tspan></text>
+          <path
+             style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="M 37.992584,18.733429 H 81.459082"
+             id="path47" />
+          <text
+             xml:space="preserve"
+             style="font-size:1.87567px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.234458"
+             x="38.828026"
+             y="21.737125"
+             id="text52"><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="21.737125"
+               id="tspan52">float x,y,z</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="24.081713"
+               id="tspan56">Vector(float,float,float)</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="26.4263"
+               id="tspan57">...</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="28.770887"
+               id="tspan58">rotatedAround(Vector,float): Vector</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="31.115475"
+               id="tspan59">toVMD(): string</tspan></text>
+          <text
+             xml:space="preserve"
+             style="font-size:1.87567px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.234458"
+             x="38.828026"
+             y="36.8433"
+             id="text64"><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="36.8433"
+               id="tspan64">...</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="39.187889"
+               id="tspan68">distancePBC(Vector,Vector,Vector): float</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="41.532475"
+               id="tspan69">getAngle(Vector,Vector,Vector,Vector): float</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="38.828026"
+               y="43.877064"
+               id="tspan70">lineVMD(Vector,Vector): string</tspan></text>
+        </g>
+      </g>
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#DartArrow)"
+         d="m 167.04082,47.574528 v 1.879593 l 37.46107,-0.01074 0.0398,-3.316436"
+         id="path70"
+         sodipodi:nodetypes="cccc" />
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#DartArrow)"
+         d="m 63.518143,63.944002 -0.138539,-13.119411 90.038586,-0.01074 0.0398,-4.66132"
+         id="path74"
+         sodipodi:nodetypes="cccc" />
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#DartArrow)"
+         d="m 62.10227,63.944002 -0.138539,-14.652677 32.208909,0.02067 0.0398,-14.886533"
+         id="path75"
+         sodipodi:nodetypes="cccc" />
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#DartArrow)"
+         d="M 60.683576,63.944002 60.545037,50.445984 44.756023,50.304461 44.795823,30.190125"
+         id="path76"
+         sodipodi:nodetypes="cccc" />
+      <text
+         xml:space="preserve"
+         style="font-size:3.07017px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#0000ff;stroke-width:0.38377"
+         x="125.36695"
+         y="64.265869"
+         id="text77"><tspan
+           sodipodi:role="line"
+           id="tspan77"
+           style="text-align:start;text-anchor:start;fill:#0000ff;stroke-width:0.38377"
+           x="125.36695"
+           y="64.265869">Molecules</tspan></text>
+      <g
+         id="g91"
+         transform="translate(14.18854)">
+        <rect
+           style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.6;stroke-dasharray:1.2, 2.40001;stroke-dashoffset:0"
+           id="rect76"
+           width="47.019253"
+           height="30.389048"
+           x="118.53716"
+           y="65.978943"
+           ry="1.7441956" />
+        <text
+           xml:space="preserve"
+           style="font-size:3.68782px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#ff0000;stroke-width:0.460975"
+           x="120.01165"
+           y="70.292015"
+           id="text76"><tspan
+             sodipodi:role="line"
+             id="tspan76"
+             style="text-align:start;text-anchor:start;fill:#ff0000;stroke-width:0.460975"
+             x="120.01165"
+             y="70.292015">Particle.hpp</tspan></text>
+        <g
+           id="g90"
+           transform="translate(-1.0200857)">
+          <rect
+             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-dashoffset:0"
+             id="rect78"
+             width="43.501381"
+             height="22.364872"
+             x="121.31277"
+             y="72.401848"
+             ry="1.2836437" />
+          <text
+             xml:space="preserve"
+             style="font-size:2.43795px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.304742"
+             x="122.09093"
+             y="75.052513"
+             id="text78"><tspan
+               sodipodi:role="line"
+               id="tspan78"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.304742"
+               x="122.09093"
+               y="75.052513">Particle</tspan></text>
+          <path
+             style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="m 121.33022,76.125498 h 43.4665"
+             id="path78" />
+          <path
+             style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="m 121.33022,85.573289 h 43.4665"
+             id="path79" />
+          <text
+             xml:space="preserve"
+             style="font-size:1.87567px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.234458"
+             x="122.16566"
+             y="79.129196"
+             id="text81"><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="122.16566"
+               y="79.129196"
+               id="tspan81">Vector pos</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="122.16566"
+               y="81.473785"
+               id="tspan86">int ID</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="122.16566"
+               y="83.818375"
+               id="tspan87">float mass</tspan></text>
+          <text
+             xml:space="preserve"
+             style="font-size:1.92586px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.415908"
+             x="122.14436"
+             y="88.212845"
+             id="text84"><tspan
+               sodipodi:role="line"
+               style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+               x="122.14436"
+               y="88.212845"
+               id="tspan84">set|getPosition(), set|getID(), set|getMass()</tspan><tspan
+               sodipodi:role="line"
+               style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+               x="122.14436"
+               y="90.620171"
+               id="tspan89">Particle(), Particle(Vector,int,float)</tspan><tspan
+               sodipodi:role="line"
+               style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+               x="122.14436"
+               y="93.027496"
+               id="tspan90">distanceTo(Particle,Vector): float</tspan></text>
+        </g>
+      </g>
+      <path
+         id="rect77"
+         style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.1;stroke-dasharray:none;stroke-dashoffset:0"
+         d="m 127.11947,60.777276 c -1.59576,0 -2.88079,2.191014 -2.88079,4.911865 v 75.746429 c 0,2.72087 1.28503,4.91099 2.88079,4.91099 h 32.90114 14.17976 14.18023 14.17975 32.90167 c 1.59576,0 2.88027,-2.19012 2.88027,-4.91099 V 65.689141 c 0,-2.720851 -1.28451,-4.911865 -2.88027,-4.911865 H 202.56035 188.3806 174.20037 160.02061 Z" />
+      <g
+         id="g99"
+         transform="translate(68.686964)">
+        <rect
+           style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.6;stroke-dasharray:1.2, 2.40001;stroke-dashoffset:0"
+           id="rect91"
+           width="47.019253"
+           height="30.389048"
+           x="118.53716"
+           y="65.978943"
+           ry="1.7441956" />
+        <text
+           xml:space="preserve"
+           style="font-size:3.68782px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#ff0000;stroke-width:0.460975"
+           x="120.01165"
+           y="70.292015"
+           id="text91"><tspan
+             sodipodi:role="line"
+             id="tspan91"
+             style="text-align:start;text-anchor:start;fill:#ff0000;stroke-width:0.460975"
+             x="120.01165"
+             y="70.292015">Atom.hpp</tspan></text>
+        <g
+           id="g98"
+           transform="translate(-1.0200857)">
+          <rect
+             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-dashoffset:0"
+             id="rect92"
+             width="43.501381"
+             height="22.364872"
+             x="121.31277"
+             y="72.401848"
+             ry="1.2836437" />
+          <text
+             xml:space="preserve"
+             style="font-size:2.43795px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.304742"
+             x="122.09093"
+             y="75.052513"
+             id="text92"><tspan
+               sodipodi:role="line"
+               id="tspan92"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.304742"
+               x="122.09093"
+               y="75.052513">Atom</tspan></text>
+          <path
+             style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="m 121.33022,76.125498 h 43.4665"
+             id="path92" />
+          <path
+             style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="m 121.33022,85.573289 h 43.4665"
+             id="path93" />
+          <text
+             xml:space="preserve"
+             style="font-size:1.87567px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.234458"
+             x="122.16566"
+             y="79.129196"
+             id="text95"><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="122.16566"
+               y="79.129196"
+               id="tspan95">bool is_HAtom</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="122.16566"
+               y="81.473785"
+               id="tspan117">float charge, s_AO, e_AO</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="122.16566"
+               y="83.818375"
+               id="tspan118">int Z</tspan></text>
+          <text
+             xml:space="preserve"
+             style="font-size:1.92586px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.415908"
+             x="122.14436"
+             y="88.212845"
+             id="text98"><tspan
+               sodipodi:role="line"
+               style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+               x="122.14436"
+               y="88.212845"
+               id="tspan96">setters &amp; getters</tspan><tspan
+               sodipodi:role="line"
+               style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+               x="122.14436"
+               y="90.620171"
+               id="tspan97">Atom(), Atom(Vector,int,float,float,float,int)</tspan><tspan
+               sodipodi:role="line"
+               style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+               x="122.14436"
+               y="93.027496"
+               id="tspan98">getCoulombPotential(Atom,Vector): float</tspan></text>
+        </g>
+      </g>
+      <rect
+         style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.6;stroke-dasharray:1.2, 2.40002;stroke-dashoffset:0"
+         id="rect99"
+         width="46.902145"
+         height="44.039848"
+         x="132.78426"
+         y="99.148499"
+         ry="2.5276904" />
+      <text
+         xml:space="preserve"
+         style="font-size:3.68782px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#ff0000;stroke-width:0.460975"
+         x="134.2002"
+         y="103.40324"
+         id="text99"><tspan
+           sodipodi:role="line"
+           id="tspan99"
+           style="text-align:start;text-anchor:start;fill:#ff0000;stroke-width:0.460975"
+           x="134.2002"
+           y="103.40324">Water.hpp</tspan></text>
+      <g
+         id="g106"
+         transform="translate(13.168454,33.111227)">
+        <rect
+           style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.428838;stroke-dasharray:none;stroke-dashoffset:0"
+           id="rect100"
+           width="43.501381"
+           height="25.705881"
+           x="121.31277"
+           y="72.401848"
+           ry="1.4754027" />
+        <text
+           xml:space="preserve"
+           style="font-size:2.43795px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.304742"
+           x="122.09093"
+           y="75.052513"
+           id="text100"><tspan
+             sodipodi:role="line"
+             id="tspan100"
+             style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.304742"
+             x="122.09093"
+             y="75.052513">Water</tspan></text>
+        <path
+           style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+           d="m 121.33022,76.125498 h 43.4665"
+           id="path100" />
+        <path
+           style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+           d="m 121.33022,80.281619 h 43.4665"
+           id="path101" />
+        <text
+           xml:space="preserve"
+           style="font-size:1.87567px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.234458"
+           x="122.16566"
+           y="78.749847"
+           id="text103"><tspan
+             sodipodi:role="line"
+             style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+             x="122.16566"
+             y="78.749847"
+             id="tspan103">int classif</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-size:1.92586px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.415908"
+           x="122.14436"
+           y="82.418655"
+           id="text106"><tspan
+             sodipodi:role="line"
+             style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+             x="122.14436"
+             y="82.418655"
+             id="tspan106">set|getClassification()</tspan><tspan
+             sodipodi:role="line"
+             style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+             x="122.14436"
+             y="84.825981"
+             id="tspan126">removeClassification(): void, isClassified(): bool</tspan><tspan
+             sodipodi:role="line"
+             style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+             x="122.14436"
+             y="87.233307"
+             id="tspan127">getOxygen(), getHydrogen_1(), getHydrogen_2()</tspan><tspan
+             sodipodi:role="line"
+             style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+             x="122.14436"
+             y="89.640633"
+             id="tspan132">Water(int,Atom*)</tspan><tspan
+             sodipodi:role="line"
+             style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+             x="122.14436"
+             y="92.047958"
+             id="tspan133">potentialWith(Molecule,Vector): float</tspan><tspan
+             sodipodi:role="line"
+             style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+             x="122.14436"
+             y="94.455284"
+             id="tspan130">isHB(Water,Vector,float,float): bool</tspan><tspan
+             sodipodi:role="line"
+             style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+             x="122.14436"
+             y="96.862602"
+             id="tspan131">getLJPotential(Particle,float,float,Vector)</tspan></text>
+      </g>
+      <g
+         id="g115"
+         transform="translate(68.686964,37.770534)">
+        <rect
+           style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.6;stroke-dasharray:1.2, 2.40001;stroke-dashoffset:0"
+           id="rect107"
+           width="47.019253"
+           height="30.389048"
+           x="118.53716"
+           y="65.978943"
+           ry="1.7441956" />
+        <text
+           xml:space="preserve"
+           style="font-size:3.68782px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#ff0000;stroke-width:0.460975"
+           x="120.01165"
+           y="70.292015"
+           id="text107"><tspan
+             sodipodi:role="line"
+             id="tspan107"
+             style="text-align:start;text-anchor:start;fill:#ff0000;stroke-width:0.460975"
+             x="120.01165"
+             y="70.292015">Molecule.hpp</tspan></text>
+        <g
+           id="g114"
+           transform="translate(-1.0200857)">
+          <rect
+             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-dashoffset:0"
+             id="rect108"
+             width="43.501381"
+             height="22.364872"
+             x="121.31277"
+             y="72.401848"
+             ry="1.2836437" />
+          <text
+             xml:space="preserve"
+             style="font-size:2.43795px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.304742"
+             x="122.09093"
+             y="75.052513"
+             id="text108"><tspan
+               sodipodi:role="line"
+               id="tspan108"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.304742"
+               x="122.09093"
+               y="75.052513">Molecule</tspan></text>
+          <path
+             style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="m 121.33022,76.125498 h 43.4665"
+             id="path108" />
+          <path
+             style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="m 121.33022,85.573289 h 43.4665"
+             id="path109" />
+          <text
+             xml:space="preserve"
+             style="font-size:1.87567px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.234458"
+             x="122.16566"
+             y="79.129196"
+             id="text111"><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="122.16566"
+               y="79.129196"
+               id="tspan109">Atom* atoms</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="122.16566"
+               y="81.473785"
+               id="tspan111">int n_atoms</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="122.16566"
+               y="83.818375"
+               id="tspan119">totalMass(Atom*,int): float</tspan></text>
+          <text
+             xml:space="preserve"
+             style="font-size:1.92586px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.415908"
+             x="122.14436"
+             y="88.212845"
+             id="text114"><tspan
+               sodipodi:role="line"
+               style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+               x="122.14436"
+               y="88.212845"
+               id="tspan114">getAtoms(), getNAtoms()</tspan><tspan
+               sodipodi:role="line"
+               style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+               x="122.14436"
+               y="90.620171"
+               id="tspan123">Molecule(int,Atom*,int)</tspan><tspan
+               sodipodi:role="line"
+               style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+               x="122.14436"
+               y="93.027496"
+               id="tspan122">centerOfMass(Atom*,int): Vector</tspan></text>
+        </g>
+      </g>
+      <g
+         id="g142"
+         transform="matrix(0.29629575,0,0,0.29629575,99.648643,111.32496)">
+        <g
+           id="g148"
+           transform="translate(-3.8012637)">
+          <rect
+             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.35;stroke-dasharray:none;stroke-dashoffset:0"
+             id="rect134"
+             width="36.0303"
+             height="25.824434"
+             x="121.25349"
+             y="72.342567"
+             ry="1.4822072" />
+          <text
+             xml:space="preserve"
+             style="font-size:6.35346px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.794179"
+             x="122.44656"
+             y="79.966293"
+             id="text134"><tspan
+               sodipodi:role="line"
+               id="tspan134"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.794179"
+               x="122.44656"
+               y="79.966293">SPCEWater</tspan></text>
+          <path
+             style="fill:none;stroke:#000000;stroke-width:1.35;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="m 121.33022,83.737022 h 35.95357"
+             id="path134"
+             sodipodi:nodetypes="cc" />
+          <text
+             xml:space="preserve"
+             style="font-size:10.6965px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:2.31002"
+             x="124.21577"
+             y="90.520065"
+             id="text142"><tspan
+               sodipodi:role="line"
+               style="font-size:10.6965px;text-align:start;text-anchor:start;fill:#000000;stroke-width:2.31002"
+               x="124.21577"
+               y="90.520065"
+               id="tspan142">...</tspan></text>
+        </g>
+        <g
+           id="g154"
+           transform="translate(33.179985)">
+          <rect
+             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.35;stroke-dasharray:none;stroke-dashoffset:0"
+             id="rect153"
+             width="36.0303"
+             height="25.824434"
+             x="121.25349"
+             y="72.342567"
+             ry="1.4822072" />
+          <text
+             xml:space="preserve"
+             style="font-size:6.35346px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.794179"
+             x="122.44656"
+             y="79.966293"
+             id="text153"><tspan
+               sodipodi:role="line"
+               id="tspan153"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.794179"
+               x="122.44656"
+               y="79.966293">TIP3PWater</tspan></text>
+          <path
+             style="fill:none;stroke:#000000;stroke-width:1.35;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="m 121.33022,83.737022 h 35.95357"
+             id="path153"
+             sodipodi:nodetypes="cc" />
+          <text
+             xml:space="preserve"
+             style="font-size:10.6965px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:2.31002"
+             x="124.21577"
+             y="90.520065"
+             id="text154"><tspan
+               sodipodi:role="line"
+               style="font-size:10.6965px;text-align:start;text-anchor:start;fill:#000000;stroke-width:2.31002"
+               x="124.21577"
+               y="90.520065"
+               id="tspan154">...</tspan></text>
+        </g>
+        <g
+           id="g156"
+           transform="translate(70.161233)">
+          <rect
+             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.35;stroke-dasharray:none;stroke-dashoffset:0"
+             id="rect154"
+             width="36.0303"
+             height="25.824434"
+             x="121.25349"
+             y="72.342567"
+             ry="1.4822072" />
+          <text
+             xml:space="preserve"
+             style="font-size:6.35346px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.794179"
+             x="122.44656"
+             y="79.966293"
+             id="text155"><tspan
+               sodipodi:role="line"
+               id="tspan155"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.794179"
+               x="122.44656"
+               y="79.966293">TIP4PWater</tspan></text>
+          <path
+             style="fill:none;stroke:#000000;stroke-width:1.35;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="m 121.33022,83.737022 h 35.95357"
+             id="path155"
+             sodipodi:nodetypes="cc" />
+          <text
+             xml:space="preserve"
+             style="font-size:10.6965px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:2.31002"
+             x="124.21577"
+             y="90.520065"
+             id="text156"><tspan
+               sodipodi:role="line"
+               style="font-size:10.6965px;text-align:start;text-anchor:start;fill:#000000;stroke-width:2.31002"
+               x="124.21577"
+               y="90.520065"
+               id="tspan156">...</tspan></text>
+        </g>
+        <g
+           id="g158"
+           transform="translate(107.14248)">
+          <rect
+             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.35;stroke-dasharray:none;stroke-dashoffset:0"
+             id="rect156"
+             width="36.0303"
+             height="25.824434"
+             x="121.25349"
+             y="72.342567"
+             ry="1.4822072" />
+          <text
+             xml:space="preserve"
+             style="font-size:6.35346px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.794179"
+             x="122.44656"
+             y="79.966293"
+             id="text157"><tspan
+               sodipodi:role="line"
+               id="tspan157"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.794179"
+               x="122.44656"
+               y="79.966293">TIP5PWater</tspan></text>
+          <path
+             style="fill:none;stroke:#000000;stroke-width:1.35;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="m 121.33022,83.737022 h 35.95357"
+             id="path157"
+             sodipodi:nodetypes="cc" />
+          <text
+             xml:space="preserve"
+             style="font-size:10.6965px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:2.31002"
+             x="124.21577"
+             y="90.520065"
+             id="text158"><tspan
+               sodipodi:role="line"
+               style="font-size:10.6965px;text-align:start;text-anchor:start;fill:#000000;stroke-width:2.31002"
+               x="124.21577"
+               y="90.520065"
+               id="tspan158">...</tspan></text>
+        </g>
+      </g>
+      <path
+         style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DartArrow)"
+         d="m 177.9826,83.584284 h 8.23607"
+         id="path158"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DartArrow)"
+         d="m 177.9826,94.766724 9.71173,13.691906"
+         id="path159"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DartArrow)"
+         d="m 188.77965,118.36601 h -8.23607"
+         id="path160"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DartArrow)"
+         d="m 210.73375,96.367988 v 5.874182"
+         id="path161"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DartArrow)"
+         d="m 180.08185,79.541202 h 5.87418"
+         id="path162"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DartArrow)"
+         d="m 187.10581,113.87967 h -5.87418"
+         id="path163"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#DartArrow)"
+         d="M 168.62833,64.481774 V 50.922201 l 37.46107,-0.01074 0.0398,-4.784516"
+         id="path164"
+         sodipodi:nodetypes="cccc" />
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DartArrow)"
+         d="M 132.78425,121.16843 H 110.27568 L 109.8747,85.837635 93.340935,85.851176"
+         id="path165"
+         sodipodi:nodetypes="cccc" />
+      <text
+         xml:space="preserve"
+         style="font-size:3.07017px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#0000ff;stroke-width:0.38377"
+         x="20.227377"
+         y="153.01021"
+         id="text165"><tspan
+           sodipodi:role="line"
+           id="tspan165"
+           style="text-align:start;text-anchor:start;fill:#0000ff;stroke-width:0.38377"
+           x="20.227377"
+           y="153.01021">Factory</tspan></text>
+      <path
+         id="path174"
+         style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:0.1;stroke-dasharray:none;stroke-dashoffset:0"
+         d="m 21.980054,149.52158 c -1.59576,0 -2.880961,2.19099 -2.880961,4.91184 v 75.7468 c 0,2.72087 1.285201,4.91081 2.880961,4.91081 h 32.900834 14.180013 14.180013 14.180013 29.698443 3.20291 29.69844 14.1795 14.18053 14.1795 32.90186 c 1.59576,0 2.87993,-2.18994 2.87993,-4.91081 v -75.7468 c 0,-2.72085 -1.28417,-4.91184 -2.87993,-4.91184 h -32.90186 -14.1795 -14.18053 -14.1795 -29.69844 -3.20291 H 97.420927 83.240914 69.060901 54.880888 Z" />
+      <rect
+         style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.6;stroke-dasharray:1.2, 2.40001;stroke-dashoffset:0"
+         id="rect261"
+         width="46.682709"
+         height="74.327133"
+         x="186.65865"
+         y="155.14159"
+         ry="4.2660456" />
+      <text
+         xml:space="preserve"
+         style="font-size:3.68782px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#ff0000;stroke-width:0.460975"
+         x="187.96486"
+         y="159.74123"
+         id="text261"><tspan
+           sodipodi:role="line"
+           id="tspan261"
+           style="text-align:start;text-anchor:start;fill:#ff0000;stroke-width:0.460975"
+           x="187.96486"
+           y="159.74123">ReaderInterfaces.hpp</tspan></text>
+      <g
+         id="g268"
+         transform="translate(66.933127,89.449209)">
+        <rect
+           style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-dashoffset:0"
+           id="rect262"
+           width="43.51416"
+           height="20.952309"
+           x="121.30637"
+           y="72.395454"
+           ry="1.2025689" />
+        <text
+           xml:space="preserve"
+           style="font-size:2.43795px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.304742"
+           x="122.09093"
+           y="75.052513"
+           id="text262"><tspan
+             sodipodi:role="line"
+             id="tspan262"
+             style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.304742"
+             x="122.09093"
+             y="75.052513">TopolInfo (struct)</tspan></text>
+        <path
+           style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+           d="m 121.33022,76.125498 h 43.4665"
+           id="path262" />
+        <text
+           xml:space="preserve"
+           style="font-size:1.35714px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.22549"
+           x="122.16607"
+           y="78.143646"
+           id="text265"><tspan
+             sodipodi:role="line"
+             style="font-size:1.35714px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.22549"
+             x="122.16607"
+             y="78.143646"
+             id="tspan271">int num_molecules, num_solutes, num_solvents</tspan><tspan
+             sodipodi:role="line"
+             style="font-size:1.35714px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.22549"
+             x="122.16607"
+             y="79.840073"
+             id="tspan272">map&lt;string,int&gt; number_of_each_different_molecule</tspan><tspan
+             sodipodi:role="line"
+             style="font-size:1.35714px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.22549"
+             x="122.16607"
+             y="81.536499"
+             id="tspan273">map&lt;string,int&gt; number_of_atoms_per_different_molecule;</tspan><tspan
+             sodipodi:role="line"
+             style="font-size:1.35714px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.22549"
+             x="122.16607"
+             y="83.232918"
+             id="tspan274"><tspan
+   style="font-size:1.01785px;stroke-width:0.22549"
+   id="tspan281">vector&lt;map&lt;int,tuple&lt;string,string,float,float&gt;&gt;&gt;</tspan> atom_type_name_charge_mass;</tspan><tspan
+             sodipodi:role="line"
+             style="font-size:1.35714px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.22549"
+             x="122.16607"
+             y="84.929344"
+             id="tspan275">map&lt;string,string&gt; name_type;</tspan><tspan
+             sodipodi:role="line"
+             style="font-size:1.35714px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.22549"
+             x="122.16607"
+             y="86.625771"
+             id="tspan276">map&lt;string,pair&lt;float,float&gt;&gt; type_LJparam</tspan><tspan
+             sodipodi:role="line"
+             style="font-size:1.35714px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.22549"
+             x="122.16607"
+             y="88.322197"
+             id="tspan277">map&lt;pair&lt;string,string&gt;,pair&lt;float,float&gt;&gt; special_interaction</tspan><tspan
+             sodipodi:role="line"
+             style="font-size:1.35714px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.22549"
+             x="122.16607"
+             y="90.018623"
+             id="tspan278" /><tspan
+             sodipodi:role="line"
+             style="font-size:1.35714px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.22549"
+             x="122.16607"
+             y="91.715042"
+             id="tspan280">TopolInfo()</tspan></text>
+      </g>
+      <g
+         id="g292"
+         transform="translate(66.933127,115.74358)">
+        <rect
+           style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-dashoffset:0"
+           id="rect282"
+           width="43.640636"
+           height="9.7686749"
+           x="121.24313"
+           y="72.332214"
+           ry="0.56067824" />
+        <text
+           xml:space="preserve"
+           style="font-size:2.43795px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.304742"
+           x="122.09093"
+           y="75.052513"
+           id="text282"><tspan
+             sodipodi:role="line"
+             id="tspan282"
+             style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.304742"
+             x="122.09093"
+             y="75.052513">CoordinateReader</tspan></text>
+        <path
+           style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+           d="m 121.33022,76.125498 h 43.4665"
+           id="path282" />
+        <text
+           xml:space="preserve"
+           style="font-size:1.35714px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.22549"
+           x="122.16607"
+           y="78.632599"
+           id="text292"><tspan
+             sodipodi:role="line"
+             style="font-size:1.35714px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.22549"
+             x="122.16607"
+             y="78.632599"
+             id="tspan292">CoordinateReader()</tspan><tspan
+             sodipodi:role="line"
+             style="font-size:1.35714px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.22549"
+             x="122.16607"
+             y="80.329025"
+             id="tspan300">readCoordinates(string,TopolInfo): bool</tspan></text>
+      </g>
+      <g
+         id="g303"
+         transform="translate(66.933127,130.79107)">
+        <rect
+           style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-dashoffset:0"
+           id="rect300"
+           width="43.640636"
+           height="9.7686749"
+           x="121.24313"
+           y="72.332214"
+           ry="0.56067824" />
+        <text
+           xml:space="preserve"
+           style="font-size:2.43795px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.304742"
+           x="122.09093"
+           y="75.052513"
+           id="text301"><tspan
+             sodipodi:role="line"
+             id="tspan301"
+             style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.304742"
+             x="122.09093"
+             y="75.052513">TopologyReader</tspan></text>
+        <path
+           style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+           d="m 121.33022,76.125498 h 43.4665"
+           id="path301" />
+        <text
+           xml:space="preserve"
+           style="font-size:1.35714px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.22549"
+           x="122.16607"
+           y="78.632599"
+           id="text303"><tspan
+             sodipodi:role="line"
+             style="font-size:1.35714px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.22549"
+             x="122.16607"
+             y="78.632599"
+             id="tspan302">TopologyReader()</tspan><tspan
+             sodipodi:role="line"
+             style="font-size:1.35714px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.22549"
+             x="122.16607"
+             y="80.329025"
+             id="tspan303">readTopology(string): bool</tspan></text>
+      </g>
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DartArrow)"
+         d="M 104.89555,8.299931 V 5.619008 H 240.84752 V 169.69623 h -6.03993"
+         id="path303"
+         sodipodi:nodetypes="ccccc" />
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DartArrow)"
+         d="m 210.73375,134.13852 v 19.43292"
+         id="path269"
+         sodipodi:nodetypes="cc" />
+      <g
+         id="g318"
+         transform="translate(12.277565)">
+        <path
+           id="rect174"
+           style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.6;stroke-dasharray:1.2, 2.40001;stroke-dashoffset:0"
+           d="m 113.79677,155.12824 c -0.0818,0 -0.16215,0.005 -0.24089,0.0151 H 67.685549 c -0.965522,0 -1.743029,0.70885 -1.743029,1.58971 v 24.52227 c 0,0.88086 0.777507,1.59018 1.743029,1.59018 h 45.870331 c 0.0787,0.01 0.1591,0.0146 0.24089,0.0146 h 43.54318 c 0.96657,0 1.74511,-0.70979 1.74511,-1.59159 v -24.54869 c 0,-0.8818 -0.77854,-1.59159 -1.74511,-1.59159 z" />
+        <g
+           id="g181"
+           transform="translate(-7.5049768,89.162643)">
+          <rect
+             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-dashoffset:0"
+             id="rect175"
+             width="43.620605"
+             height="10.989576"
+             x="121.25316"
+             y="72.342239"
+             ry="0.63075256" />
+          <text
+             xml:space="preserve"
+             style="font-size:2.43795px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.304742"
+             x="122.09093"
+             y="75.052513"
+             id="text175"><tspan
+               sodipodi:role="line"
+               id="tspan175"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.304742"
+               x="122.09093"
+               y="75.052513">GromacsCoordinateReader</tspan></text>
+          <path
+             style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="m 121.33022,76.125498 h 43.4665"
+             id="path175" />
+          <text
+             xml:space="preserve"
+             style="font-size:1.92586px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.415908"
+             x="122.14436"
+             y="79.16571"
+             id="text181"><tspan
+               sodipodi:role="line"
+               style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+               x="122.14436"
+               y="79.16571"
+               id="tspan181">GromacsCoordinateReader()</tspan><tspan
+               sodipodi:role="line"
+               style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+               x="122.14436"
+               y="81.573036"
+               id="tspan314">readCoordinates(string,TopolInfo): bool</tspan></text>
+        </g>
+        <text
+           xml:space="preserve"
+           style="font-size:3.68782px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#ff0000;stroke-width:0.460975"
+           x="67.414421"
+           y="159.45465"
+           id="text304"><tspan
+             sodipodi:role="line"
+             id="tspan304"
+             style="text-align:start;text-anchor:start;fill:#ff0000;stroke-width:0.460975"
+             x="67.414421"
+             y="159.45465">GromacsReaders.hpp</tspan></text>
+        <g
+           id="g311"
+           transform="translate(-53.617312,89.162643)">
+          <rect
+             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-dashoffset:0"
+             id="rect304"
+             width="43.539936"
+             height="18.24523"
+             x="121.29349"
+             y="72.382568"
+             ry="1.0471947" />
+          <text
+             xml:space="preserve"
+             style="font-size:2.43795px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.304742"
+             x="122.09093"
+             y="75.052513"
+             id="text305"><tspan
+               sodipodi:role="line"
+               id="tspan305"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.304742"
+               x="122.09093"
+               y="75.052513">GromacsTopologyReader</tspan></text>
+          <path
+             style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="m 121.33022,76.125498 h 43.4665"
+             id="path305" />
+          <path
+             style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="m 121.33022,83.456621 h 43.4665"
+             id="path306" />
+          <text
+             xml:space="preserve"
+             style="font-size:1.87567px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.234458"
+             x="122.16566"
+             y="79.129196"
+             id="text308"><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="122.16566"
+               y="79.129196"
+               id="tspan308">flag_position(ifstream): map&lt;string,int&gt;</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="122.16566"
+               y="81.473785"
+               id="tspan316">...</tspan></text>
+          <text
+             xml:space="preserve"
+             style="font-size:1.92586px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.415908"
+             x="122.14436"
+             y="86.096176"
+             id="text311"><tspan
+               sodipodi:role="line"
+               style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+               x="122.14436"
+               y="86.096176"
+               id="tspan311">GromacsTopologyReader()</tspan><tspan
+               sodipodi:role="line"
+               style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+               x="122.14436"
+               y="88.503502"
+               id="tspan318">readTopology(string): TopolInfo</tspan></text>
+        </g>
+      </g>
+      <g
+         id="g328"
+         transform="translate(12.277565,46.608619)">
+        <path
+           id="path318"
+           style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.6;stroke-dasharray:1.2, 2.40001;stroke-dashoffset:0"
+           d="m 113.79677,155.12824 c -0.0818,0 -0.16215,0.005 -0.24089,0.0151 H 67.685549 c -0.965522,0 -1.743029,0.70885 -1.743029,1.58971 v 24.52227 c 0,0.88086 0.777507,1.59018 1.743029,1.59018 h 45.870331 c 0.0787,0.01 0.1591,0.0146 0.24089,0.0146 h 43.54318 c 0.96657,0 1.74511,-0.70979 1.74511,-1.59159 v -24.54869 c 0,-0.8818 -0.77854,-1.59159 -1.74511,-1.59159 z" />
+        <g
+           id="g321"
+           transform="translate(-7.5049768,89.162643)">
+          <rect
+             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-dashoffset:0"
+             id="rect318"
+             width="43.620605"
+             height="10.989576"
+             x="121.25316"
+             y="72.342239"
+             ry="0.63075256" />
+          <text
+             xml:space="preserve"
+             style="font-size:2.43795px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.304742"
+             x="122.09093"
+             y="75.052513"
+             id="text319"><tspan
+               sodipodi:role="line"
+               id="tspan319"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.304742"
+               x="122.09093"
+               y="75.052513">GromacsCoordinateReader</tspan></text>
+          <path
+             style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="m 121.33022,76.125498 h 43.4665"
+             id="path319" />
+          <text
+             xml:space="preserve"
+             style="font-size:1.92586px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.415908"
+             x="122.14436"
+             y="79.16571"
+             id="text321"><tspan
+               sodipodi:role="line"
+               style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+               x="122.14436"
+               y="79.16571"
+               id="tspan320">GromacsCoordinateReader()</tspan><tspan
+               sodipodi:role="line"
+               style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+               x="122.14436"
+               y="81.573036"
+               id="tspan321">readCoordinates(string,TopolInfo): bool</tspan></text>
+        </g>
+        <text
+           xml:space="preserve"
+           style="font-size:3.68782px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#ff0000;stroke-width:0.460975"
+           x="67.414421"
+           y="159.45465"
+           id="text322"><tspan
+             sodipodi:role="line"
+             id="tspan322"
+             style="text-align:start;text-anchor:start;fill:#ff0000;stroke-width:0.460975"
+             x="67.414421"
+             y="159.45465">GromacsReaders.hpp</tspan></text>
+        <g
+           id="g327"
+           transform="translate(-53.617312,89.162643)">
+          <rect
+             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-dashoffset:0"
+             id="rect322"
+             width="43.539936"
+             height="18.24523"
+             x="121.29349"
+             y="72.382568"
+             ry="1.0471947" />
+          <text
+             xml:space="preserve"
+             style="font-size:2.43795px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.304742"
+             x="122.09093"
+             y="75.052513"
+             id="text323"><tspan
+               sodipodi:role="line"
+               id="tspan323"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.304742"
+               x="122.09093"
+               y="75.052513">GromacsTopologyReader</tspan></text>
+          <path
+             style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="m 121.33022,76.125498 h 43.4665"
+             id="path323" />
+          <path
+             style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+             d="m 121.33022,83.456621 h 43.4665"
+             id="path324" />
+          <text
+             xml:space="preserve"
+             style="font-size:1.87567px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.234458"
+             x="122.16566"
+             y="79.129196"
+             id="text325"><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="122.16566"
+               y="79.129196"
+               id="tspan324">flag_position(ifstream): map&lt;string,int&gt;</tspan><tspan
+               sodipodi:role="line"
+               style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.234458"
+               x="122.16566"
+               y="81.473785"
+               id="tspan325">...</tspan></text>
+          <text
+             xml:space="preserve"
+             style="font-size:1.92586px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.415908"
+             x="122.14436"
+             y="86.096176"
+             id="text327"><tspan
+               sodipodi:role="line"
+               style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+               x="122.14436"
+               y="86.096176"
+               id="tspan326">GromacsTopologyReader()</tspan><tspan
+               sodipodi:role="line"
+               style="font-size:1.92586px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.415908"
+               x="122.14436"
+               y="88.503502"
+               id="tspan327">readTopology(string): TopolInfo</tspan></text>
+        </g>
+      </g>
+      <path
+         style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#DartArrow)"
+         d="m 126.13951,224.17274 h 55.44629 v -13.34659 h 6.59046"
+         id="path328"
+         sodipodi:nodetypes="cccc" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#DartArrow)"
+         d="m 126.13951,177.37107 h 55.4463 v 30.42188 h 6.59046"
+         id="path329"
+         sodipodi:nodetypes="cccc" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#DartArrow)"
+         d="m 172.31677,167.4518 h 11.38571 v 25.13021 h 4.47379"
+         id="path330"
+         sodipodi:nodetypes="cccc" />
+      <g
+         id="g332">
+        <path
+           style="fill:none;stroke:#ffffff;stroke-width:0.8;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+           d="m 177.74503,215.25128 h 5.95744 V 196.0387"
+           id="path332"
+           sodipodi:nodetypes="ccc" />
+        <path
+           style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#DartArrow)"
+           d="m 172.31676,215.25128 h 11.38571 V 196.0387 h 4.47379"
+           id="path331"
+           sodipodi:nodetypes="cccc" />
+      </g>
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DartArrow)"
+         d="M 186.3581,160.28543 H 173.10187"
+         id="path333"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DartArrow)"
+         d="M 186.3581,221.43019 H 173.10187"
+         id="path334"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#DartArrow)"
+         d="m 87.945415,107.50649 -0.13854,42.96308 103.776155,0.0107 0.0398,4.66132"
+         id="path335"
+         sodipodi:nodetypes="cccc" />
+      <rect
+         style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.6;stroke-dasharray:1.2, 2.40001;stroke-dashoffset:0"
+         id="rect335"
+         width="46.895298"
+         height="30.862009"
+         x="24.747162"
+         y="155.03537"
+         ry="1.7713414" />
+      <text
+         xml:space="preserve"
+         style="font-size:3.68782px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#ff0000;stroke-width:0.460975"
+         x="26.15967"
+         y="159.74123"
+         id="text335"><tspan
+           sodipodi:role="line"
+           id="tspan335"
+           style="text-align:start;text-anchor:start;fill:#ff0000;stroke-width:0.460975"
+           x="26.15967"
+           y="159.74123">ReaderFactory.hpp</tspan></text>
+      <g
+         id="g346"
+         transform="translate(-94.872062,89.449209)">
+        <rect
+           style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.4;stroke-dasharray:none;stroke-dashoffset:0"
+           id="rect336"
+           width="43.51416"
+           height="20.952309"
+           x="121.30637"
+           y="72.395454"
+           ry="1.2025689" />
+        <text
+           xml:space="preserve"
+           style="font-size:2.43795px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.304742"
+           x="122.09093"
+           y="75.052513"
+           id="text336"><tspan
+             sodipodi:role="line"
+             id="tspan336"
+             style="text-align:start;text-anchor:start;fill:#000000;stroke-width:0.304742"
+             x="122.09093"
+             y="75.052513">ReaderFactory</tspan></text>
+        <path
+           style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+           d="m 121.33022,76.125498 h 43.4665"
+           id="path336" />
+        <text
+           xml:space="preserve"
+           style="font-size:1.35714px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#000000;stroke-width:0.22549"
+           x="122.16607"
+           y="78.143646"
+           id="text346"><tspan
+             sodipodi:role="line"
+             style="font-size:1.35714px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.22549"
+             x="122.16607"
+             y="78.143646"
+             id="tspan346">enum class ProgramFormat { AMBER,GROMACS,LAMMPS }</tspan><tspan
+             sodipodi:role="line"
+             style="font-size:1.35714px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.22549"
+             x="122.16607"
+             y="79.840073"
+             id="tspan354" /><tspan
+             sodipodi:role="line"
+             style="font-size:1.35714px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.22549"
+             x="122.16607"
+             y="81.536499"
+             id="tspan355">createCoordinateReader(ProgramFormat,string):</tspan><tspan
+             sodipodi:role="line"
+             style="font-size:1.35714px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.22549"
+             x="122.16607"
+             y="83.232918"
+             id="tspan357">                                                              unique_ptr&lt;CoordinateReader&gt;</tspan><tspan
+             sodipodi:role="line"
+             style="font-size:1.35714px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.22549"
+             x="122.16607"
+             y="84.929344"
+             id="tspan358">createTopologyReader(ProgramFormat):</tspan><tspan
+             sodipodi:role="line"
+             style="font-size:1.35714px;text-align:start;text-anchor:start;fill:#000000;stroke-width:0.22549"
+             x="122.16607"
+             y="86.625771"
+             id="tspan359">                                                                 unique_ptr&lt;TopologyReader&gt;</tspan></text>
+      </g>
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DartArrow)"
+         d="m 77.920085,160.28543 h -5.31873"
+         id="path359"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DartArrow)"
+         d="M 78.220085,206.0787 H 55.503143 v -18.59382"
+         id="path360"
+         sodipodi:nodetypes="ccc" />
+    </g>
+  </g>
+</svg>
