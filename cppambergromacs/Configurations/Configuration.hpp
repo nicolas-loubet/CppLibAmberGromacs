@@ -6,10 +6,11 @@
  * Author: Nicolás Loubet
  */
 
-#include "Water.hpp"
-#include "ToolKit.hpp"
-#include "Sorter.hpp"
-#include "Geometrics.hpp"
+#include "../Molecules/Water.hpp"
+#include "../General/ToolKit.hpp"
+#include "../General/Sorter.hpp"
+#include "../General/Geometrics.hpp"
+#include "../ReaderFactory.hpp"
 #include <map>
 
 using namespace std;
@@ -53,20 +54,11 @@ class Configuration {
 		};
 
 		/**
-		 * This class is an adapter to read the coordinates file
-		 */
-		class CoordinateReader {
-			public:
-				virtual ~CoordinateReader()= default;
-				virtual bool readCoordinates(Molecule** molecules, const int num_molecules, const TopolInfo& topol_info) const= 0;
-		};
-
-		/**
 		 * Constructor. It reads the topology and coordinates files
 		 * @param coord_reader Object that reads the coordinates file
 		 * @param topol_info Object that reads the topology file
 		 */
-		Configuration(const CoordinateReader& coord_reader, const TopolInfo& topol_info) {
+		Configuration(const ReaderFactory::CoordinateReader& coord_reader, const TopolInfo& topol_info) {
 			N_MOLEC= topol_info.num_molecules;
 			molecs= new Molecule*[N_MOLEC];
 	

@@ -7,14 +7,31 @@
  */
 
 #include "Configuration.hpp"
-#include "CoordinateReaders.hpp"
-#include "TopologyReaders.hpp"
+#include "AmberReaders.hpp"
+#include "GromacsReaders.hpp"
+//#include "LammpsReaders.hpp"
 
 class ReaderFactory {
 	public:
-		static constexpr int AMBER= 0;
-		static constexpr int GROMACS= 1;
-		static constexpr int LAMMPS= 2;
+		enum class ProgramFormat { AMBER, GROMACS, LAMMPS	};
+
+		/**
+		 * Abstract class to create a CoordinateReader object (adapter)
+		 */
+		class CoordinateReader {
+			public:
+				virtual ~CoordinateReader() = default;
+				virtual bool readCoordinates(Molecule** molecules, int num_molecules, const Configuration::TopolInfo& topol_info) const= 0;
+		};
+
+		/**
+		 * Abstract class to create a TopologyReader object (adapter)
+		 */
+		class TopologyReader {
+			public:
+				virtual ~TopologyReader() = default;
+				virtual Configuration::TopolInfo readTopology(const std::string& filename) const= 0;
+		};
 
 		/**
 		 * Factory method to create a CoordinateReader object
@@ -22,11 +39,17 @@ class ReaderFactory {
 		 * @param filename The name of the file to read
 		 * @return A CoordinateReader object
 		 */
-		static Configuration::CoordinateReader* createCoordinateReader(const int format, const std::string& filename) {
-			if(format == AMBER) return new AmberCoordinateReader(filename);
-			if(format == GROMACS) return new GromacsCoordinateReader(filename);
-			//if(format == LAMMPS) return new LammpsCoordinateReader(filename);
-			throw std::runtime_error("Unsupported coordinate format");
+		static std::unique_ptr<CoordinateReader> createCoordinateReader(ProgramFormat format, const std::string& filename) {
+			switch(format) {
+				case ProgramFormat::AMBER:
+					return std::make_unique<AmberCoordinateReader>(filename);
+				case ProgramFormat::GROMACS:
+					return std::make_unique<GromacsCoordinateReader>(filename);
+				//case ProgramFormat::LAMMPS:
+				//	return std::make_unique<LammpsCoordinateReader>(filename);
+				default:
+					throw std::runtime_error("Unsupported coordinate format");
+			}
 		}
 	
 		/**
@@ -35,11 +58,17 @@ class ReaderFactory {
 		 * @param filename The name of the file to read
 		 * @return A TopolInfo struct
 		 */
-		static Configuration::TopolInfo createTopologyInfo(const int format, const std::string& filename) {
-			if(format == AMBER) return TopolReader::readTopolInfoOfAmber(filename);
-			if(format == GROMACS) return TopolReader::readTopolInfoOfGromacs(filename);
-			//if(format == LAMMPS) return TopolReader::readTopolInfoOfLammps(filename);
-			throw std::runtime_error("Unsupported topology format");
+		static std::unique_ptr<TopologyReader> createTopologyReader(ProgramFormat format) {
+			switch(format) {
+				case ProgramFormat::AMBER:
+					return std::make_unique<AmberTopologyReader>();
+				case ProgramFormat::GROMACS:
+					return std::make_unique<GromacsTopologyReader>();
+				//case ProgramFormat::LAMMPS:
+				//	return std::make_unique<LammpsTopologyReader>();
+				default:
+					throw std::runtime_error("Unsupported topology format");
+			}
 		}
 };
 
