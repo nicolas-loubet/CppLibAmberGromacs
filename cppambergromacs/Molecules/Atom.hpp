@@ -7,7 +7,7 @@
  */
 
 #include "Particle.hpp"
-#include "Vector.hpp"
+#include "../General/Vector.hpp"
 
 class Atom : public Particle{
 	private:

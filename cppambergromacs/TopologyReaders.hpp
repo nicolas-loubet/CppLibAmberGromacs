@@ -10,7 +10,7 @@
 #include <fstream>
 #include <sstream>
 
-namespace TopolReader {
+namespace TopologyReader {
 	/**
 	 * Removes all spaces from the string
 	 * @param _s The string to strip
@@ -29,7 +29,7 @@ namespace TopolReader {
 	 * @param file The file to search
 	 * @return A map with the position of the flag.
 	 */
-	map<string, int> flag_position_AMBER(ifstream &file)
+	map<string,int> flag_position_AMBER(ifstream &file)
 	{
 		string line= "";
 		map<string,int> flag;
