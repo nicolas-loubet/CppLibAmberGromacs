@@ -10,8 +10,7 @@
 #include "../General/ToolKit.hpp"
 #include "../General/Sorter.hpp"
 #include "../General/Geometrics.hpp"
-#include "../ReaderFactory.hpp"
-#include <map>
+#include "../ReaderInterfaces.hpp"
 
 using namespace std;
 
@@ -36,29 +35,11 @@ class Configuration {
 		Vector getBounds() const { return bounds; }
 
 		/**
-		 * This struct is an adapter to read the topology file
-		 */
-		struct TopolInfo {
-			int num_molecules;
-			int num_solutes;
-			int num_solvents;
-			map<string,int> number_of_each_different_molecule;
-			map<string,int> number_of_atoms_per_different_molecule;
-			vector<map<int,tuple<string,string,float,float>>> atom_type_name_charge_mass;
-			map<string,string> name_type;
-            map<string,pair<float,float>> type_LJparam; //0=epsilon 1=sigma
-            map<pair<string,string>,pair<float,float>> special_interaction;//keep ij and ji
-
-			TopolInfo(): num_molecules(0), num_solutes(0), num_solvents(0) {}
-			~TopolInfo()= default;
-		};
-
-		/**
 		 * Constructor. It reads the topology and coordinates files
 		 * @param coord_reader Object that reads the coordinates file
 		 * @param topol_info Object that reads the topology file
 		 */
-		Configuration(const ReaderFactory::CoordinateReader& coord_reader, const TopolInfo& topol_info) {
+		Configuration(CoordinateReader& coord_reader, TopolInfo& topol_info) {
 			N_MOLEC= topol_info.num_molecules;
 			molecs= new Molecule*[N_MOLEC];
 	
