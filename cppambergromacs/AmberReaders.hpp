@@ -7,7 +7,7 @@
 class AmberTopologyReader : public ReaderFactory::TopologyReader {
     public:
         Configuration::TopolInfo readTopology(const std::string& filename) const override {
-            // Implementación para leer prmtop de AMBER
+            // Implementación para leer prmtop de AMBER-EZEQUIEL
             return Configuration::TopolInfo();
         }
 };
