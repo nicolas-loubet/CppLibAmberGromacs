@@ -1,11 +1,6 @@
 #ifndef AMBER_READERS_HPP
 #define AMBER_READERS_HPP
 
-<<<<<<< HEAD
-#include "ReaderFactory.hpp"
-#include <string>
-#include "amber_parser.hpp"
-=======
 /**
  * Version: June 2025
  * Author: Ezequiel Cuenca
@@ -18,41 +13,12 @@
 #include <sstream>
 
 class AmberTopologyReader : public TopologyReader {
-<<<<<<< HEAD
-    private:
-        /**
-         * Given a file, find the position of the flag in the file.
-         * The returned map contains the flag name as the key and the position as the value.
-         * The position is the byte position of the first character after the flag.
-         * @param file The file to search
-         * @return A map with the position of the flag.
-         */
-        static map<string,int> flag_position(ifstream &file)
-        {
-            string line= "";
-            map<string,int> flag;
-            while(getline(file, line)) {
-                if(line.find("%FLAG") != string::npos) {
-                    line= ToolKit::strip(line.substr(5, 80));
-                    flag[line]= file.tellg();
-                    flag[line]-= 81;
-                }
-            }
-            return(flag);
-        }
->>>>>>> dc090141428076cd79faa90f1ba2aae65eea5592
 
-=======
->>>>>>> 35c453ea2949aac240848303693894b063eedd42
     public:
-        TopolInfo readTopology(const std::string& filename) const override {
+        TopolInfo readTopology(const string& filename) const override {
             // Implementación para leer prmtop de AMBER-EZEQUIEL
-<<<<<<< HEAD
-<<<<<<< HEAD
-            Configuration::TopolInfo topology;
-=======
+
             TopolInfo topology= TopolInfo();
->>>>>>> 35c453ea2949aac240848303693894b063eedd42
 
             ifstream file(filename);
             map<string, int> positions_of_flags=flag_position(file);
@@ -73,7 +39,7 @@ class AmberTopologyReader : public TopologyReader {
 			topology.num_solvents==number_solute_solvent[1]-number_solute_solvent[0];
             
             for (const auto& par : atoms_per_diff_molecule) {
-                 //std::cout << "Clave: " << par.first << ", Atomos: " << std::get<0>(par.second) << " numero de moleculas: " << std::get<1>(par.second)<<std::endl;
+                 //cout << "Clave: " << par.first << ", Atomos: " << get<0>(par.second) << " numero de moleculas: " << get<1>(par.second)<<endl;
                  topology.number_of_atoms_per_different_molecule[par.first]=get<0>(par.second);
                  topology.number_of_each_different_molecule[par.first]=get<1>(par.second);
             }
@@ -95,12 +61,6 @@ class AmberTopologyReader : public TopologyReader {
             map<pair<string,string>,pair<float,float>> special_interaction;//keep ij and ji
             //return Configuration::TopolInfo();
             return topology;
-<<<<<<< HEAD
-=======
-            return TopolInfo();
->>>>>>> dc090141428076cd79faa90f1ba2aae65eea5592
-=======
->>>>>>> 35c453ea2949aac240848303693894b063eedd42
         }
 };
 
