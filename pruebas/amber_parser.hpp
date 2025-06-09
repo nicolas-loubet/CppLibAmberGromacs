@@ -566,7 +566,7 @@ inline std::map<std::tuple<int,int>,std::tuple<float,float>> read_lj(std::ifstre
         }
     return(lj_coefficient);
 }
-
+//test
 inline std::map<std::string, int> flag_position(std::ifstream &file)
 {
     std::string line="";
