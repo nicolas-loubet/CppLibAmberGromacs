@@ -8,9 +8,10 @@
 #include <algorithm>
 #include <ctime>
 #include <cmath>
+#include "amber_parser.hpp"
 
 using namespace std;
-
+/*
 string strip(string _s)
 {
     _s.erase(remove(_s.begin(), _s.end(), ' '), _s.end());
@@ -66,9 +67,9 @@ map<string,int> read_pointers(ifstream& file_prmtop,int position)
             }
         }
     }
-    /*for (size_t i = 0; i < list_of_names.size(); ++i) {
-        cout << "Variable " << list_of_names[i] << ": " << dict_pointers[list_of_names[i]] << endl; 
-    }*/
+    //for (size_t i = 0; i < list_of_names.size(); ++i) {
+    //    cout << "Variable " << list_of_names[i] << ": " << dict_pointers[list_of_names[i]] << endl; 
+    //}
     return dict_pointers;
 }
 
@@ -245,11 +246,11 @@ vector<int> read_ati(ifstream &file, map<string,int>& dict_pointers,int position
         }
     }
     //DESCOMENTAR ESTA
-    /*
-    for (size_t i = 0; i < dict_pointers["NATOM"]; ++i) {
-        int _number = ati[i];
-        cout << "Atom " << i << ": " << "atom_type_index" <<":"<< _number << endl; 
-    }*/
+    
+    //for (size_t i = 0; i < dict_pointers["NATOM"]; ++i) {
+    //    int _number = ati[i];
+    //    cout << "Atom " << i << ": " << "atom_type_index" <<":"<< _number << endl; 
+    //}
     return(ati);
 }
 
@@ -287,13 +288,11 @@ vector<float> read_mass(ifstream &file, map<string,int>& dict_pointers,int posit
         }
     }
     //DESCOMENTAR ESTA
-    /*
-    for (size_t i = 0; i < dict_pointers["NATOM"]; ++i) {
-        float _number = mass[i];
-        cout << "Atom " << i << ": " << "atom mass" <<":"<< _number << endl; 
-    }
-    */
     
+    //for (size_t i = 0; i < dict_pointers["NATOM"]; ++i) {
+    //    float _number = mass[i];
+    //    cout << "Atom " << i << ": " << "atom mass" <<":"<< _number << endl; 
+    //  
     return(mass);
 }
 
@@ -380,15 +379,15 @@ map<tuple<int,int>,tuple<float,float>> read_lj(ifstream &file, map<string,int>& 
             }
         }
     }
-    /*
-    for(int _i=1;_i<=4;++_i)
-        {
-        for(int _k=1;_k<=_i;++_k)
-            {
-                
-                cout << "pair: " << _i << ": " << _k << "--" << get<0>(lj_coefficient[{_i,_k}])  <<":"<< get<1>(lj_coefficient[{_i,_k}]) << endl; 
-            }
-        }*/
+    //
+    //for(int _i=1;_i<=4;++_i)
+    //    {
+    //    for(int _k=1;_k<=_i;++_k)
+    //        {
+    //            
+    //            cout << "pair: " << _i << ": " << _k << "--" << get<0>(lj_coefficient[{_i,_k}])  <<":"<< get<1>(lj_coefficient[{_i,_k}]) << endl; 
+    //        }
+    //    }
     float sigma=0;
     float epsilon=0;
     float a=0;
@@ -401,8 +400,10 @@ map<tuple<int,int>,tuple<float,float>> read_lj(ifstream &file, map<string,int>& 
                 b=get<1>(lj_coefficient[{_i,_k}]);
                 sigma=pow(a / b, 1.0 / 6.0);
                 epsilon=pow(b,2)/(4*a);
-                get<0>(lj_coefficient[{_i,_k}])=sigma; 
-                get<1>(lj_coefficient[{_i,_k}])=epsilon;
+                // get<0>(lj_coefficient[{_i,_k}])=sigma; 
+                // get<1>(lj_coefficient[{_i,_k}])=epsilon;
+                get<0>(lj_coefficient[{_i,_k}])=epsilon; 
+                get<1>(lj_coefficient[{_i,_k}])=sigma;
             }
         }
     return(lj_coefficient);
@@ -426,15 +427,19 @@ map<string, int> flag_position(ifstream &file)
     }
     return(flag);
 }
-
+*/
 int main() {
     clock_t start = clock();
 
-    for(int i= 0; i < 1000; i++) {
+    for(int i= 0; i < 1; i++) {
         ifstream file("archivos/jj.prmtop");
         map<string, int> positions_of_flags=flag_position(file);
         map<string,int> dict_pointers = read_pointers(file,positions_of_flags["POINTERS"]);
         vector<tuple<string,float>> map_atoms = read_charge(file, dict_pointers, read_atom_name(file, dict_pointers,positions_of_flags["ATOM_NAME"]),positions_of_flags["CHARGE"]);
+        vector<int> number_solute_solvent =read_solvent_pointers(file, dict_pointers,positions_of_flags["SOLVENT_POINTERS"]);
+
+        map<string,tuple<int,int>> atoms_per_diff_molecule=read_atoms_per_different_molecule(file, positions_of_flags);
+
         vector<int> atoms_per_molecule = read_atoms_per_molecule(file, dict_pointers,positions_of_flags["SOLVENT_POINTERS"]); 
         vector<int> atom_type_index=read_ati(file,dict_pointers,positions_of_flags["ATOM_TYPE_INDEX"]); 
         vector<float> mass=read_mass(file,dict_pointers,positions_of_flags["MASS"]);
