@@ -23,10 +23,12 @@ struct TopolInfo {
     int num_molecules;
     int num_solutes;
     int num_solvents;
+    int total_number_of_atoms;
     map<string,int> number_of_each_different_molecule;
     map<string,int> number_of_atoms_per_different_molecule;
     vector<map<int,tuple<string,string,float,float>>> atom_type_name_charge_mass;
     map<string,string> name_type;
+    map<string,int> type_Z;
     map<string,pair<float,float>> type_LJparam; //0=epsilon 1=sigma
     map<pair<string,string>,pair<float,float>> special_interaction;//keep ij and ji
 
