@@ -11,12 +11,14 @@
  * Author: Ezequiel Cuenca
  */
 
-#include "ReaderInterfaces.hpp"
+#include "ReaderFactory.hpp"
+#include "amber_parser.hpp"
 #include <string>
 #include <fstream>
 #include <sstream>
 
 class AmberTopologyReader : public TopologyReader {
+<<<<<<< HEAD
     private:
         /**
          * Given a file, find the position of the flag in the file.
@@ -40,12 +42,17 @@ class AmberTopologyReader : public TopologyReader {
         }
 >>>>>>> dc090141428076cd79faa90f1ba2aae65eea5592
 
+=======
+>>>>>>> 35c453ea2949aac240848303693894b063eedd42
     public:
-        AmberTopologyReader()= default;
         TopolInfo readTopology(const std::string& filename) const override {
             // Implementación para leer prmtop de AMBER-EZEQUIEL
 <<<<<<< HEAD
+<<<<<<< HEAD
             Configuration::TopolInfo topology;
+=======
+            TopolInfo topology= TopolInfo();
+>>>>>>> 35c453ea2949aac240848303693894b063eedd42
 
             ifstream file(filename);
             map<string, int> positions_of_flags=flag_position(file);
@@ -88,9 +95,12 @@ class AmberTopologyReader : public TopologyReader {
             map<pair<string,string>,pair<float,float>> special_interaction;//keep ij and ji
             //return Configuration::TopolInfo();
             return topology;
+<<<<<<< HEAD
 =======
             return TopolInfo();
 >>>>>>> dc090141428076cd79faa90f1ba2aae65eea5592
+=======
+>>>>>>> 35c453ea2949aac240848303693894b063eedd42
         }
 };
 
