@@ -22,7 +22,7 @@ inline std::string strip(std::string _s)
 
 inline std::map<std::string,int> read_pointers(std::ifstream& file_prmtop,int position)
 {
-    std::ifstream file_pointer_names("cppambergromacs/amber_pointers.dat");
+    std::ifstream file_pointer_names("amber_pointers.txt");
     
     std::string line;
     std::vector<std::string> list_of_names;
@@ -75,6 +75,15 @@ inline std::map<std::string,int> read_pointers(std::ifstream& file_prmtop,int po
 }
 
 
+inline std::map<std::string,std::string> read_name_type(std::map<std::string,int>& dict_pointers, std::vector<std::string> atom_names, std::vector<int> atom_type_index, std::vector<std::string> ati_to_amber_type)
+{
+    std::map<std::string,std::string> name_type;
+    for (int i=0;i<dict_pointers["NATOM"];++i)
+    {
+        name_type[atom_names[i]]=ati_to_amber_type[atom_type_index[i]];
+    }
+    return(name_type);
+}
 
 inline std::vector<std::string> read_atom_name(std::ifstream &file, std::map<std::string,int>& dict_pointers,int position)
 {
@@ -149,7 +158,6 @@ inline std::vector<std::tuple<std::string,float>> read_charge(std::ifstream &fil
     
     return(charges);
 }
-
 inline std::vector<int> read_solvent_pointers(std::ifstream &file, std::map<std::string,int>& dict_pointers,int position)
 {
     std::string line = "";
@@ -305,7 +313,8 @@ inline std::map<std::string,std::tuple<int,int>> read_atoms_per_different_molecu
     return(label_and_number_atom);
 }
 
-inline std::vector<int> read_atoms_per_molecule(std::ifstream &file, std::map<std::string,int>& dict_pointers, int position)
+
+inline std::vector<int> read_atoms_per_molecule(std::ifstream &file, std::map<std::string,int>& dict_pointers,int position)
 {
     std::string line = "";
     int nspm= 0;
@@ -323,7 +332,8 @@ inline std::vector<int> read_atoms_per_molecule(std::ifstream &file, std::map<st
             break;
         }
     }
-    
+    //std::cout << "NSPM:" << nspm << std::endl; 
+
     int _j=0;
     std::vector<int> atoms_per_molecule(nspm);
     bool inFlag = false;
@@ -342,6 +352,7 @@ inline std::vector<int> read_atoms_per_molecule(std::ifstream &file, std::map<st
 
             for (size_t i = 0; i + 7 < line.length(); i += 8) {
                 atoms_per_molecule[_j]=stoi(line.substr(i, 8));
+                //std::cout<<"atoms_per_molecule[_j]: "<< atoms_per_molecule[_j] <<std::endl;
                 ++_j;
             }
             if (_j>=nspm) {
@@ -350,7 +361,7 @@ inline std::vector<int> read_atoms_per_molecule(std::ifstream &file, std::map<st
             }
         }
     }
-
+    /*
     int atom_index=0;
     std::vector<int> atom_number_in_molec(dict_pointers["NATOM"]);
     
@@ -362,7 +373,128 @@ inline std::vector<int> read_atoms_per_molecule(std::ifstream &file, std::map<st
             ++atom_index;
         }
     }
-    return(atom_number_in_molec);
+    return(atom_number_in_molec);*/
+    return(atoms_per_molecule);
+}
+
+inline std::vector<int> read_atomic_number(std::ifstream &file, std::map<std::string,int>& dict_pointers,int position)
+{
+    std::string line="";
+    bool inFlag = false;
+    std::vector<int> atomic_number(dict_pointers["NATOM"]);
+    int _j=0;
+    file.clear();
+    file.seekg(position);
+    while (getline(file, line)) {
+        
+        if (line.find("%FLAG ATOMIC_NUMBER") != std::string::npos) {
+            inFlag = true;
+            break;
+            //continue;
+        }
+    }
+
+    if (inFlag) {
+        while (getline(file, line)) {
+            if (line.find("%FORMAT") != std::string::npos) {
+                // Saltamos la línea del formato
+                continue;
+            }
+            std::stringstream ss(line);
+            
+            
+            for (size_t i = 0; i + 7 < line.length(); i += 8) {
+                atomic_number[_j]=stoi(strip(line.substr(i, 8)));
+                ++_j;
+            }
+            if (_j>=dict_pointers["NATOM"]) {
+                // Terminó la sección de ATOMIC_NUMBER
+                break;
+            }
+        }
+    }
+    //DESCOMENTAR ESTA
+    /*
+    for (size_t i = 0; i < dict_pointers["NATOM"]; ++i) {
+        int _number = ati[i];
+        std::cout << "Atom " << i << ": " << "atom_type_index" <<":"<< _number << std::endl; 
+    }*/
+
+    return(atomic_number);
+}
+
+inline std::vector<std::string> atom_type_index_to_amber_type(std::ifstream &file, std::map<std::string,int>& dict_pointers , std::map<std::string, int> position)
+{
+    std::vector<std::string> ati_to_amber_type(dict_pointers["NTYPES"]+1);
+
+    std::string line="";
+    bool inFlag = false;
+    std::vector<int> ati(dict_pointers["NATOM"]);
+    std::vector<std::string> atype(dict_pointers["NATOM"]);
+
+    int _j=0;
+    file.clear();
+    file.seekg(position["AMBER_ATOM_TYPE"]);
+    while (getline(file, line)) {
+        
+        if (line.find("%FLAG AMBER_ATOM_TYPE") != std::string::npos) {
+            inFlag = true;
+            break;
+            //continue;
+        }
+    }
+
+    if (inFlag) {
+        while (getline(file, line)) {
+            if (line.find("%FORMAT") != std::string::npos) {
+                // Saltamos la línea del formato
+                continue;
+            }
+            std::stringstream ss(line);
+            
+            
+            for (size_t i = 0; i + 3 < line.length(); i += 4) {
+                atype[_j]=strip(line.substr(i, 4));
+                ++_j;
+            }
+            if (_j>=dict_pointers["NATOM"]) {
+                // Terminó la sección de ATOM_TYPE_INDEX
+                break;
+            }
+        }
+    }
+    _j=0;
+    file.clear();
+    file.seekg(position["ATOM_TYPE_INDEX"]);
+    while (getline(file, line)) {
+        
+        if (line.find("%FLAG ATOM_TYPE_INDEX") != std::string::npos) {
+            inFlag = true;
+            break;
+            //continue;
+        }
+    }
+
+    if (inFlag) {
+        while (getline(file, line)) {
+            if (line.find("%FORMAT") != std::string::npos) {
+                // Saltamos la línea del formato
+                continue;
+            }
+            std::stringstream ss(line);
+            
+            
+            for (size_t i = 0; i + 7 < line.length(); i += 8) {
+                ati_to_amber_type[stoi(strip(line.substr(i, 8)))]=atype[_j];
+                ++_j;
+            }
+            if (_j>=dict_pointers["NATOM"]) {
+                // Terminó la sección de ATOM_TYPE_INDEX
+                break;
+            }
+        }
+    }
+    return(ati_to_amber_type);
 }
 
 inline std::vector<int> read_ati(std::ifstream &file, std::map<std::string,int>& dict_pointers,int position)
@@ -405,8 +537,9 @@ inline std::vector<int> read_ati(std::ifstream &file, std::map<std::string,int>&
     /*
     for (size_t i = 0; i < dict_pointers["NATOM"]; ++i) {
         int _number = ati[i];
-        cout << "Atom " << i << ": " << "atom_type_index" <<":"<< _number << endl; 
+        std::cout << "Atom " << i << ": " << "atom_type_index" <<":"<< _number << std::endl; 
     }*/
+
     return(ati);
 }
 
@@ -454,7 +587,7 @@ inline std::vector<float> read_mass(std::ifstream &file, std::map<std::string,in
     return(mass);
 }
 
-inline std::map<std::tuple<int,int>,std::tuple<float,float>> read_lj(std::ifstream &file, std::map<std::string,int>& dict_pointers,int position)
+inline std::map<std::pair<std::string,std::string>,std::pair<float,float>> read_lj(std::ifstream &file, std::map<std::string,int>& dict_pointers,int position,std::vector<std::string> amber_type)
 {
     std::string line="";
     bool inFlag = false;
@@ -564,9 +697,42 @@ inline std::map<std::tuple<int,int>,std::tuple<float,float>> read_lj(std::ifstre
                 std::get<1>(lj_coefficient[{_i,_k}])=sigma;
             }
         }
+    std::map<std::pair<std::string,std::string>,std::pair<float,float>> lj_coefficient_in_amber_type;
+    for(int _i=1;_i<=dict_pointers["NTYPES"];++_i)
+        {
+        for(int _k=1;_k<=dict_pointers["NTYPES"];++_k)
+            {
+                std::pair<std::string,std::string> lj_type=std::make_pair(amber_type[_i],amber_type[_k]);
+                std::pair<float,float> lj_coef=std::make_pair(std::get<0>(lj_coefficient[{_i,_k}]),std::get<1>(lj_coefficient[{_i,_k}]));
+                lj_coefficient_in_amber_type[lj_type]=lj_coef;
+            }
+        }
+    return(lj_coefficient_in_amber_type);
+}
+
+inline std::map<std::string,std::pair<float,float>> read_lj_diagonal(std::map<std::pair<std::string,std::string>,std::pair<float,float>> lj_map)
+{
+    std::map<std::string,std::pair<float,float>> lj_coefficient;
+    for (const auto& par : lj_map) 
+    {
+        if(std::get<0>(par.first)==std::get<1>(par.first))
+        {
+            lj_coefficient[std::get<0>(par.first)]=par.second;
+        }
+    }
     return(lj_coefficient);
 }
 
+inline std::map<std::string,int> type_atomic_number(std::map<std::string,int>& dict_pointers,std::vector<int> atom_type_index, std::vector<int> atomic_number, std::vector<std::string> ati_to_amber_type)
+{
+    std::map<std::string,int> type_atomic_number_index;
+    for (int i=0;i<dict_pointers["NATOM"];++i)
+    {
+        type_atomic_number_index[ati_to_amber_type[atom_type_index[i]]]=atomic_number[i];
+    }
+    return(type_atomic_number_index);
+}
+    
 inline std::map<std::string, int> flag_position(std::ifstream &file)
 {
     std::string line="";
@@ -578,7 +744,7 @@ inline std::map<std::string, int> flag_position(std::ifstream &file)
             line=strip(line.substr(5, 80));
             inFlag = true;
             flag[line]=file.tellg();
-            flag[line]-=100;
+            flag[line]-=91;
             //cout<<line<<":"<<flag[line]<<endl;
             continue;
         }
