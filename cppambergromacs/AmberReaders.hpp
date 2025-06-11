@@ -140,16 +140,23 @@ class AmberCoordinateReader : public CoordinateReader {
 
             while(getline(f,line)) {
                 if(line.rfind("ATOM  ",0) == 0 || line.rfind("HETATM",0) == 0) {
-                    stringstream ss(line);
+                    //stringstream ss(line);
                     string record, atom_name, res_name;
                     int atom_id, res_id;
                     float x, y, z;
-
-                    ss >> record >> atom_id >> atom_name >> res_name >> res_id >> x >> y >> z;//usar substring para leer frame1.pdb
-                    if(ss.fail()) {
-                        f.close();
-                        return false;
-                    }
+                    record=strip(line.substr(0, 6));
+                    atom_id=stoi(strip(line.substr(6, 5)));
+                    atom_name=strip(line.substr(11, 5));
+                    res_name=strip(line.substr(16, 4));
+                    res_id=stoi(strip(line.substr(20, 6)));
+                    x=stof(strip(line.substr(26, 12)));
+                    y=stof(strip(line.substr(38, 8)));
+                    z=stof(strip(line.substr(46, 8)));
+                    //ss >> record >> atom_id >> atom_name >> res_name >> res_id >> x >> y >> z;//usar substring para leer frame1.pdb
+                    //if(ss.fail()) {
+                    //    f.close();
+                    //    return false;
+                    //}
                     
                     atoms_each_order_molecule[res_id].push_back(atom_id);
 
@@ -161,23 +168,23 @@ class AmberCoordinateReader : public CoordinateReader {
 
             int atom_idx= 0;
             int molec_idx= 0;
-
+            
             for(int i= 0; i < topol_info.num_molecules; i++,molec_idx++)
             {
                 const auto& atom_data= topol_info.atom_type_name_charge_mass[molec_idx];
                 int num_atoms_per_molecule=0;
                 for (const auto& pair : atom_data) { num_atoms_per_molecule = pair.first; }
-                
+
                 Atom* atoms= new Atom[num_atoms_per_molecule];
 
                 for(int j= 0; j < num_atoms_per_molecule; j++,atom_idx++) {
                     
-                    const auto& [type,name,charge,mass]= atom_data.at(atom_idx);
+                    const auto& [type,name,charge,mass]= atom_data.at(j);
                     const auto& [epsilon,sigma]= topol_info.type_LJparam.at(type);
 
                     //int Z= getAtomicNumber(atom_names[atom_idx],type);//z cambiar por topolinfo data z
                     int Z=topol_info.type_Z.at(type);
-                    atoms[j]= Atom(coords[atoms_each_order_molecule[molec_idx][atom_idx]], atom_idx+1, mass, charge, epsilon, sigma, Z);
+                    atoms[j]= Atom(coords[atoms_each_order_molecule[molec_idx][j]], atom_idx+1, mass, charge, epsilon, sigma, Z);
                 }
 
                 molecs[molec_idx]= new Molecule(molec_idx+1, atoms, num_atoms_per_molecule);

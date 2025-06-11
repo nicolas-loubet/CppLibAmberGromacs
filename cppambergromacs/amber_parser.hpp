@@ -11,14 +11,7 @@
 #include <algorithm>
 #include <ctime>
 #include <cmath>
-
-// Usamos std en vez de `using namespace std;`
-inline std::string strip(std::string _s)
-{
-    _s.erase(remove(_s.begin(), _s.end(), ' '), _s.end());
-    return(_s);
-}
-
+#include "general/ToolKit.hpp"
 
 inline std::map<std::string,int> read_pointers(std::ifstream& file_prmtop,int position)
 {
