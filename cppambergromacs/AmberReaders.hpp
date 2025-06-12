@@ -5,8 +5,8 @@
  * Version: June 2025
  * Author: Ezequiel Cuenca
  */
-#include "General/ToolKit.hpp"
-#include "ReaderFactory.hpp"
+
+#include "ReaderInterfaces.hpp"
 #include "amber_parser.hpp"
 #include <string>
 #include <fstream>
@@ -143,14 +143,14 @@ class AmberCoordinateReader : public CoordinateReader {
                     string record, atom_name, res_name;
                     int atom_id, res_id;
                     float x, y, z;
-                    record=strip(line.substr(0, 6));
-                    atom_id=stoi(strip(line.substr(6, 5)));
-                    atom_name=strip(line.substr(11, 5));
-                    res_name=strip(line.substr(16, 4));
-                    res_id=stoi(strip(line.substr(20, 6)));
-                    x=stof(strip(line.substr(26, 12)));
-                    y=stof(strip(line.substr(38, 8)));
-                    z=stof(strip(line.substr(46, 8)));
+                    record=ToolKit::strip(line.substr(0, 6));
+                    atom_id=stoi(ToolKit::strip(line.substr(6, 5)));
+                    atom_name=ToolKit::strip(line.substr(11, 5));
+                    res_name=ToolKit::strip(line.substr(16, 4));
+                    res_id=stoi(ToolKit::strip(line.substr(20, 6)));
+                    x=stof(ToolKit::strip(line.substr(26, 12)));
+                    y=stof(ToolKit::strip(line.substr(38, 8)));
+                    z=stof(ToolKit::strip(line.substr(46, 8)));
                     //ss >> record >> atom_id >> atom_name >> res_name >> res_id >> x >> y >> z;//usar substring para leer frame1.pdb
                     //if(ss.fail()) {
                     //    f.close();

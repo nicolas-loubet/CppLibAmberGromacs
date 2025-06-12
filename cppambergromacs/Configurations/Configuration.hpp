@@ -39,11 +39,11 @@ class Configuration {
 		 * @param coord_reader Object that reads the coordinates file
 		 * @param topol_info Object that reads the topology file
 		 */
-		Configuration(CoordinateReader& coord_reader, string& filename, TopolInfo& topol_info) {
+		Configuration(unique_ptr<CoordinateReader> coord_reader, string& filename, TopolInfo& topol_info) {
 			N_MOLEC= topol_info.num_molecules;
 			molecs= new Molecule*[N_MOLEC];
 	
-			if(!coord_reader.readCoordinates(filename, topol_info, molecs))
+			if(!coord_reader->readCoordinates(filename, topol_info, molecs))
 				throw runtime_error("Failed to read coordinates");
 		}
 	
