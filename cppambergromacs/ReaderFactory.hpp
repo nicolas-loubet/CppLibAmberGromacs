@@ -20,14 +20,14 @@ class ReaderFactory {
 		 * @param filename The name of the file to read
 		 * @return A CoordinateReader object
 		 */
-		static std::unique_ptr<CoordinateReader> createCoordinateReader(ProgramFormat format, const std::string& filename) {
+		static std::unique_ptr<CoordinateReader> createCoordinateReader(ProgramFormat format) {
 			switch(format) {
 				case ProgramFormat::AMBER:
-					return std::make_unique<AmberCoordinateReader>(filename);
+					return std::make_unique<AmberCoordinateReader>();
 				case ProgramFormat::GROMACS:
-					return std::make_unique<GromacsCoordinateReader>(filename);
+					return std::make_unique<GromacsCoordinateReader>();
 				// TODO: case ProgramFormat::LAMMPS:
-				// TODO: 	return std::make_unique<LammpsCoordinateReader>(filename);
+				// TODO: 	return std::make_unique<LammpsCoordinateReader>();
 				default:
 					throw std::runtime_error("Unsupported coordinate format");
 			}

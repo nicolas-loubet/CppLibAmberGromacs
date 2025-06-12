@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <ctime>
 #include <cmath>
-#include "general/ToolKit.hpp"
+#include "General/ToolKit.hpp"
 
 inline std::map<std::string,int> read_pointers(std::ifstream& file_prmtop,int position)
 {
@@ -103,7 +103,7 @@ inline std::vector<std::string> read_atom_name(std::ifstream &file, std::map<std
             std::stringstream ss(line);
 
             for (size_t i = 0; i + 3 < line.length(); i += 4) {
-                atoms[_j]=strip(line.substr(i, 4));
+                atoms[_j]=ToolKit::strip(line.substr(i, 4));
                 ++_j;
             }
             if (_j>=dict_pointers["NATOM"]) {
@@ -249,7 +249,7 @@ inline std::map<std::string,std::tuple<int,int>> read_atoms_per_different_molecu
             }
 
             for (size_t i = 0; i + 3 < line.length(); i += 4) {
-                label_per_molecule[_k]=strip(line.substr(i, 4));
+                label_per_molecule[_k]=ToolKit::strip(line.substr(i, 4));
                 std::stringstream ss;
                 ss << atoms_per_molecule[_k];
                 std::string number = ss.str();
@@ -285,7 +285,7 @@ inline std::map<std::string,std::tuple<int,int>> read_atoms_per_different_molecu
             }
 
             for (size_t i = 0; i + 3 < line.length(); i += 4) {
-                label_per_molecule[_l]=strip(line.substr(i, 4));
+                label_per_molecule[_l]=ToolKit::strip(line.substr(i, 4));
                 std::stringstream ss;
                 ss << atoms_per_molecule[_l];
                 std::string number = ss.str();
@@ -397,7 +397,7 @@ inline std::vector<int> read_atomic_number(std::ifstream &file, std::map<std::st
             
             
             for (size_t i = 0; i + 7 < line.length(); i += 8) {
-                atomic_number[_j]=stoi(strip(line.substr(i, 8)));
+                atomic_number[_j]=stoi(ToolKit::strip(line.substr(i, 8)));
                 ++_j;
             }
             if (_j>=dict_pointers["NATOM"]) {
@@ -447,7 +447,7 @@ inline std::vector<std::string> atom_type_index_to_amber_type(std::ifstream &fil
             
             
             for (size_t i = 0; i + 3 < line.length(); i += 4) {
-                atype[_j]=strip(line.substr(i, 4));
+                atype[_j]=ToolKit::strip(line.substr(i, 4));
                 ++_j;
             }
             if (_j>=dict_pointers["NATOM"]) {
@@ -478,7 +478,7 @@ inline std::vector<std::string> atom_type_index_to_amber_type(std::ifstream &fil
             
             
             for (size_t i = 0; i + 7 < line.length(); i += 8) {
-                ati_to_amber_type[stoi(strip(line.substr(i, 8)))]=atype[_j];
+                ati_to_amber_type[stoi(ToolKit::strip(line.substr(i, 8)))]=atype[_j];
                 ++_j;
             }
             if (_j>=dict_pointers["NATOM"]) {
@@ -517,7 +517,7 @@ inline std::vector<int> read_ati(std::ifstream &file, std::map<std::string,int>&
             
             
             for (size_t i = 0; i + 7 < line.length(); i += 8) {
-                ati[_j]=stoi(strip(line.substr(i, 8)));
+                ati[_j]=stoi(ToolKit::strip(line.substr(i, 8)));
                 ++_j;
             }
             if (_j>=dict_pointers["NATOM"]) {
@@ -560,7 +560,7 @@ inline std::vector<float> read_mass(std::ifstream &file, std::map<std::string,in
             
             
             for (size_t i = 0; i + 15 < line.length(); i += 16) {
-                mass[_j]=stof(strip(line.substr(i, 16)));
+                mass[_j]=stof(ToolKit::strip(line.substr(i, 16)));
                 ++_j;
             }
             if (_j>=dict_pointers["NATOM"]) {
@@ -610,7 +610,7 @@ inline std::map<std::pair<std::string,std::string>,std::pair<float,float>> read_
             std::stringstream ss(line);
                
             for (size_t i = 0; i + 15< line.length(); i += 16) {
-                float coef_a=stof(strip(line.substr(i, 16)));
+                float coef_a=stof(ToolKit::strip(line.substr(i, 16)));
                 
                 //lj_coefficient[{_i,_k}]={coef_a,0.0};
                 std::get<0>(lj_coefficient[{_i,_k}])=coef_a;
@@ -645,7 +645,7 @@ inline std::map<std::pair<std::string,std::string>,std::pair<float,float>> read_
             std::stringstream ss(line);
                
             for (size_t i = 0; i + 15< line.length(); i += 16) {
-                float coef_b=stof(strip(line.substr(i, 16)));
+                float coef_b=stof(ToolKit::strip(line.substr(i, 16)));
 
                 std::get<1>(lj_coefficient[{_i,_k}])=coef_b;
                 std::get<1>(lj_coefficient[{_k,_i}])=coef_b;
@@ -734,7 +734,7 @@ inline std::map<std::string, int> flag_position(std::ifstream &file)
     while (getline(file, line)) {
         
         if (line.find("%FLAG") != std::string::npos) {
-            line=strip(line.substr(5, 80));
+            line=ToolKit::strip(line.substr(5, 80));
             inFlag = true;
             flag[line]=file.tellg();
             flag[line]-=91;
