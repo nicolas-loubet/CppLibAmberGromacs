@@ -5,7 +5,7 @@
  * Version: June 2025
  * Author: Ezequiel Cuenca
  */
-
+#include "General/ToolKit.hpp"
 #include "ReaderFactory.hpp"
 #include "amber_parser.hpp"
 #include <string>
@@ -62,7 +62,7 @@ class AmberTopologyReader : public TopologyReader {
                 }
                 topology.atom_type_name_charge_mass.push_back(molecule_atoms); //molecula numero atomo iniciando en 1 cada molecula
             }
-
+            topology.type_Z=type_atomic_z;
 			topology.name_type=name_types; //atom name string  // type es un int
             topology.type_LJparam=lj_diagonal; //0=epsilon 1=sigma //string de numero valor1 valor 2
             topology.special_interaction=lj_coefficient;//keep ij and ji
@@ -124,7 +124,7 @@ class AmberCoordinateReader : public CoordinateReader {
                 return false;
             }
 
-            int total_atoms= topol_info.total_number_of_atoms; //traer de topolinfo total atoms
+            //int total_atoms= topol_info.total_number_of_atoms; //traer de topolinfo total atoms
             /*
             for(const auto& pair: topol_info.number_of_each_different_molecule) {
                 const string& mol_name= pair.first;
@@ -135,7 +135,6 @@ class AmberCoordinateReader : public CoordinateReader {
 
             string line;
             vector<Vector> coords;
-            vector<string> atom_names;
             map<int,vector<int>> atoms_each_order_molecule;
 
             while(getline(f,line)) {
@@ -161,7 +160,6 @@ class AmberCoordinateReader : public CoordinateReader {
                     atoms_each_order_molecule[res_id].push_back(atom_id);
 
                     coords.emplace_back(Vector(x,y,z));
-                    atom_names.push_back(atom_name);
                 }
             }
             f.close();
@@ -169,7 +167,7 @@ class AmberCoordinateReader : public CoordinateReader {
             int atom_idx= 0;
             int molec_idx= 0;
             
-            for(int i= 0; i < topol_info.num_molecules; i++,molec_idx++)
+            for(int i= 1; i < topol_info.num_molecules; i++,molec_idx++)
             {
                 const auto& atom_data= topol_info.atom_type_name_charge_mass[molec_idx];
                 int num_atoms_per_molecule=0;
@@ -182,7 +180,6 @@ class AmberCoordinateReader : public CoordinateReader {
                     const auto& [type,name,charge,mass]= atom_data.at(j);
                     const auto& [epsilon,sigma]= topol_info.type_LJparam.at(type);
 
-                    //int Z= getAtomicNumber(atom_names[atom_idx],type);//z cambiar por topolinfo data z
                     int Z=topol_info.type_Z.at(type);
                     atoms[j]= Atom(coords[atoms_each_order_molecule[molec_idx][j]], atom_idx+1, mass, charge, epsilon, sigma, Z);
                 }

@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <ctime>
 #include <cmath>
-#include "general/ToolKit.hpp"
+#include "General/ToolKit.hpp"
 
 inline std::map<std::string,int> read_pointers(std::ifstream& file_prmtop,int position)
 {
