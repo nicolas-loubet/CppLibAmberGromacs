@@ -166,7 +166,27 @@ class AmberCoordinateReader : public CoordinateReader {
 
             int atom_idx= 0;
             int molec_idx= 0;
-            
+            for (const auto& mol_pair : atoms_each_order_molecule)
+            {
+                const auto& atom_data= topol_info.atom_type_name_charge_mass[mol_pair.first];
+                int num_atoms_per_molecule=mol_pair.second.size();
+                //for (const auto& pair : atom_data) { num_atoms_per_molecule = pair.first; }
+
+                Atom* atoms= new Atom[num_atoms_per_molecule];
+
+                for(int j= 0; j < num_atoms_per_molecule; j++,atom_idx++) {
+                    
+                    const auto& [type,name,charge,mass]= atom_data.at(j);
+                    const auto& [epsilon,sigma]= topol_info.type_LJparam.at(type);
+
+                    int Z=topol_info.type_Z.at(type);
+                    atoms[j]= Atom(coords[atoms_each_order_molecule[mol_pair.first][j]], atom_idx+1, mass, charge, epsilon, sigma, Z);
+                }
+
+                molecs[molec_idx]= new Molecule(mol_pair.first, atoms, num_atoms_per_molecule);
+                molec_idx+=1;
+            }
+            /*
             for(int i= 1; i < topol_info.num_molecules; i++,molec_idx++)
             {
                 const auto& atom_data= topol_info.atom_type_name_charge_mass[molec_idx];
@@ -186,6 +206,7 @@ class AmberCoordinateReader : public CoordinateReader {
 
                 molecs[molec_idx]= new Molecule(molec_idx+1, atoms, num_atoms_per_molecule);
             }
+                */
 /*
             for(const auto& pair: topol_info.number_of_each_different_molecule) {
                 const string& mol_name= pair.first;
