@@ -117,21 +117,12 @@ class AmberCoordinateReader : public CoordinateReader {
          * @param molecs An empty array of molecule pointers
          * @return True if the coordinates were read successfully
          */
-        bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs) const override {
+        bool readCoordinates_slow(const string& filename, const TopolInfo& topol_info, Molecule** molecs) const {
             ifstream f(filename);
             if(!f.is_open()) {
                 cout << "Failed to open file " << filename << endl;
                 return false;
             }
-
-            //int total_atoms= topol_info.total_number_of_atoms; //traer de topolinfo total atoms
-            /*
-            for(const auto& pair: topol_info.number_of_each_different_molecule) {
-                const string& mol_name= pair.first;
-                int num_molecules= pair.second;
-                int atoms_per_molecule= topol_info.number_of_atoms_per_different_molecule.at(mol_name);
-                total_atoms+= num_molecules * atoms_per_molecule;
-            }*/
 
             string line;
             vector<Vector> coords;
@@ -139,7 +130,6 @@ class AmberCoordinateReader : public CoordinateReader {
 
             while(getline(f,line)) {
                 if(line.rfind("ATOM  ",0) == 0 || line.rfind("HETATM",0) == 0) {
-                    //stringstream ss(line);
                     string record, atom_name, res_name;
                     int atom_id, res_id;
                     float x, y, z;
@@ -151,14 +141,8 @@ class AmberCoordinateReader : public CoordinateReader {
                     x=stof(ToolKit::strip(line.substr(26, 12)));
                     y=stof(ToolKit::strip(line.substr(38, 8)));
                     z=stof(ToolKit::strip(line.substr(46, 8)));
-                    //ss >> record >> atom_id >> atom_name >> res_name >> res_id >> x >> y >> z;//usar substring para leer frame1.pdb
-                    //if(ss.fail()) {
-                    //    f.close();
-                    //    return false;
-                    //}
-                    
+                 
                     atoms_each_order_molecule[res_id].push_back(atom_id);
-
                     coords.emplace_back(Vector(x,y,z));
                 }
             }
@@ -170,8 +154,6 @@ class AmberCoordinateReader : public CoordinateReader {
             {
                 const auto& atom_data= topol_info.atom_type_name_charge_mass[mol_pair.first];
                 int num_atoms_per_molecule=mol_pair.second.size();
-                //for (const auto& pair : atom_data) { num_atoms_per_molecule = pair.first; }
-
                 Atom* atoms= new Atom[num_atoms_per_molecule];
 
                 for(int j= 0; j < num_atoms_per_molecule; j++,atom_idx++) {
@@ -186,49 +168,43 @@ class AmberCoordinateReader : public CoordinateReader {
                 molecs[molec_idx]= new Molecule(mol_pair.first, atoms, num_atoms_per_molecule);
                 molec_idx+=1;
             }
-            /*
-            for(int i= 1; i < topol_info.num_molecules; i++,molec_idx++)
-            {
-                const auto& atom_data= topol_info.atom_type_name_charge_mass[molec_idx];
-                int num_atoms_per_molecule=0;
-                for (const auto& pair : atom_data) { num_atoms_per_molecule = pair.first; }
+            return true;
+        }
 
-                Atom* atoms= new Atom[num_atoms_per_molecule];
-
-                for(int j= 0; j < num_atoms_per_molecule; j++,atom_idx++) {
-                    
-                    const auto& [type,name,charge,mass]= atom_data.at(j);
-                    const auto& [epsilon,sigma]= topol_info.type_LJparam.at(type);
-
-                    int Z=topol_info.type_Z.at(type);
-                    atoms[j]= Atom(coords[atoms_each_order_molecule[molec_idx][j]], atom_idx+1, mass, charge, epsilon, sigma, Z);
-                }
-
-                molecs[molec_idx]= new Molecule(molec_idx+1, atoms, num_atoms_per_molecule);
+        bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs) const override{
+            ifstream f(filename);
+            if(!f.is_open()) {
+                cout << "Failed to open file " << filename << endl;
+                return false;
             }
-                */
-/*
-            for(const auto& pair: topol_info.number_of_each_different_molecule) {
-                const string& mol_name= pair.first;
-                int num_molecules= pair.second;
-                int num_atoms_per_molecule= topol_info.number_of_atoms_per_different_molecule.at(mol_name);
 
-                for(int i= 0; i < num_molecules; i++,molec_idx++) {
-                    Atom* atoms= new Atom[num_atoms_per_molecule];
+            string line;
+            int number_of_atoms=0;
+            for(int i= 0; i < topol_info.num_molecules; i++)
+            {
+                const auto& atom_data= topol_info.atom_type_name_charge_mass[i];
+                Atom* atoms= new Atom[atom_data.size()];
 
-                    for(int j= 0; j < num_atoms_per_molecule; j++,atom_idx++) {
-                        const auto& atom_data= topol_info.atom_type_name_charge_mass[atom_idx];//mol index no atom index
-                        const auto& [type,name,charge,mass]= atom_data.at(atom_idx);
+                number_of_atoms=0;
+                while(getline(f,line)) {
+                    if(line.rfind("TER  ",0) == 0) {break;}
+                    if(line.rfind("ATOM  ",0) == 0 || line.rfind("HETATM",0) == 0) {
+
+                        float x=stof(ToolKit::strip(line.substr(26, 12)));
+                        float y=stof(ToolKit::strip(line.substr(38, 8)));
+                        float z=stof(ToolKit::strip(line.substr(46, 8)));
+                        
+                        const auto& [type,name,charge,mass]= atom_data.at(number_of_atoms);
                         const auto& [epsilon,sigma]= topol_info.type_LJparam.at(type);
-
-                        //int Z= getAtomicNumber(atom_names[atom_idx],type);//z cambiar por topolinfo data z
                         int Z=topol_info.type_Z.at(type);
-                        atoms[j]= Atom(coords[atom_idx], atom_idx+1, mass, charge, epsilon, sigma, Z);
-                    }
 
-                    molecs[molec_idx]= new Molecule(molec_idx+1, atoms, num_atoms_per_molecule);
+                        atoms[number_of_atoms]= Atom(Vector(x,y,z), number_of_atoms+1, mass, charge, epsilon, sigma, Z);
+                        number_of_atoms+=1;
+                    }
                 }
-            }*/
+                molecs[i]= new Molecule(i+1, atoms, number_of_atoms);
+            }
+            f.close();
 
             return true;
         }
