@@ -15,21 +15,14 @@
 
 inline std::map<std::string,int> read_pointers(std::ifstream& file_prmtop,int position)
 {
-    std::ifstream file_pointer_names("amber_pointers.txt");
-    
+    std::string list_of_names[32]= {
+        "NATOM","NTYPES","NBONH","MBONA","NTHETH","MTHETA","NPHIH","MPHIA","NHPARM","NPARM",
+        "NNB","NRES","NBONA","NTHETA","NPHIA","NUMBND","NUMANG","NPTRA","NATYP","NPHB",
+        "IFPERT","NBPER","NGPER","NDPER","MBPER","MGPER","MDPER","IFBOX","NMXRS","IFCAP",
+        "NUMEXTRA","NCOPY"
+    };
+
     std::string line;
-    std::vector<std::string> list_of_names;
-
-    while (getline(file_pointer_names, line)) {
-        // Read and split variable names
-        std::stringstream ss(line);
-        std::string this_name;
-        while (ss >> this_name) {
-            list_of_names.push_back(this_name);
-        }
-    }
-    file_pointer_names.close();
-
     std::map<std::string,int> dict_pointers;
     bool inPointers = false;
     int _i = 0;
@@ -61,9 +54,6 @@ inline std::map<std::string,int> read_pointers(std::ifstream& file_prmtop,int po
             }
         }
     }
-    /*for (size_t i = 0; i < list_of_names.size(); ++i) {
-        cout << "Variable " << list_of_names[i] << ": " << dict_pointers[list_of_names[i]] << endl; 
-    }*/
     return dict_pointers;
 }
 
@@ -298,10 +288,6 @@ inline std::map<std::string,std::tuple<int,int>> read_atoms_per_different_molecu
                 break;
             }
         }
-    }
-
-    for (const auto& par : label_and_number_atom) {
-        std::cout << "Clave: " << par.first << ", Atomos: " << std::get<0>(par.second) << " numero de moleculas: " << std::get<1>(par.second)<<std::endl;
     }
     return(label_and_number_atom);
 }

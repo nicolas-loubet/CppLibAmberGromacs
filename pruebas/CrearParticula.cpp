@@ -4,15 +4,12 @@
 using namespace std;
 
 int main() {
-    ToolKit::takeTime([]() {
-        for(int i= 0; i < 1; i++) {
-            TopolInfo ti= ReaderFactory::createTopologyReader(ReaderFactory::ProgramFormat::AMBER)->readTopology("../archivos/jj.prmtop");
-            vector<pair<int,string>> files= CoordinateReader::getFileIterator("../archivos/", "frame_*.pdb");
-            for(auto& f: files)
-                cout << f.first << " " << f.second << endl;
-            string f= files[0].second;
+    TopolInfo ti= ReaderFactory::createTopologyReader(ReaderFactory::ProgramFormat::AMBER)->readTopology("../archivos/jj.prmtop");
+    vector<pair<int,string>> files= CoordinateReader::getFileIterator("../archivos/", "frame_*.pdb");
+    string f= "../archivos/"+files[0].second;
+    ToolKit::takeTime([&ti,&f]() {
+        for(int i= 0; i < 1000; i++) {
             Configuration conf= Configuration(ReaderFactory::createCoordinateReader(ReaderFactory::ProgramFormat::AMBER), f, ti);
-            cout << conf.getNMolec() << endl;
         }
     });
 
