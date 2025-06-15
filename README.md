@@ -1,14 +1,18 @@
 # CppLibAmberGromacs
-Librería para manejar archivos de dinámicas de AMBER y GROMACS.
+Library for handling AMBER and GROMACS molecular dynamics files.
 
-## Autores
+### Version: 1.0.0
+
+## Authors
+
 - Ezequiel Cuenca
 - Nicolás Loubet
 
-## Organización de carpetas
+## Folder Structure
 
-- `archivos`: Contiene ejemplos de AMBER, puede ser que a futuro se incluyan de GROMACS.
+- `files`: Contains example files for AMBER and GROMACS. In the future, LAMMPS examples may be included.
 
-- `cppambergromacs`: Contiene los archivos .hpp y relacionados que permiten el estudio de las dinámicas.
+- `cppambergromacs`: Contains the .hpp files and related components for studying molecular dynamics. Refer to the figure in the `files` folder to understand the class hierarchy and relationships.
 
-- `pruebas`: Contiene archivos .cpp con los que vayamos probando cosas puntuales.
+- `tests`: Contains .cpp files used for testing specific functionalities.
+

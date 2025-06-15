@@ -6,7 +6,7 @@
  * Author: Ezequiel Cuenca
  */
 
-#include "Vector.hpp"
+#include "../General/Vector.hpp"
 
 class Particle{
 	private:
