@@ -25,7 +25,6 @@ class AmberTopologyReader : public TopologyReader {
                     inFlag = true;
                     flag[line]=file.tellg();
                     flag[line]-=91;
-                    //cout<<line<<":"<<flag[line]<<endl;
                     continue;
                 }
             }
@@ -169,8 +168,6 @@ class AmberTopologyReader : public TopologyReader {
                     break;
                 }
             }
-            //cout << "IPTRES: "<< number_solute_solvent[0] << " NSPM: "<< number_solute_solvent[1] <<" NSPSOL: "<< number_solute_solvent[2] << endl; 
-            //cout << "NSPM:" << nspm << endl; 
             return(number_solute_solvent);
         }
 
@@ -191,7 +188,6 @@ class AmberTopologyReader : public TopologyReader {
                 if (line.find("%FLAG AMBER_ATOM_TYPE") != string::npos) {
                     inFlag = true;
                     break;
-                    //continue;
                 }
             }
 
@@ -222,7 +218,6 @@ class AmberTopologyReader : public TopologyReader {
                 if (line.find("%FLAG ATOM_TYPE_INDEX") != string::npos) {
                     inFlag = true;
                     break;
-                    //continue;
                 }
             }
 
@@ -310,9 +305,6 @@ class AmberTopologyReader : public TopologyReader {
             int _k=0;
             vector<string> label_per_molecule(nspm);
             map<string,tuple<int,int>> label_and_number_atom;
-            //map<string,int> label_and_number_atom;
-
-            //cout << position["RESIDUE_LABEL"] << endl;    
 
             inFlag = false;
             
@@ -320,8 +312,6 @@ class AmberTopologyReader : public TopologyReader {
             while (getline(file, line)) {
                 if (line.find("%FLAG RESIDUE_LABEL") != string::npos) {
                     inFlag = true;
-                    //cout << "hola" << endl;
-
                     continue;
                 }
 
@@ -333,12 +323,7 @@ class AmberTopologyReader : public TopologyReader {
 
                     for (size_t i = 0; i + 3 < line.length(); i += 4) {
                         label_per_molecule[_k]=ToolKit::strip(line.substr(i, 4));
-                        stringstream ss;
-                        ss << atoms_per_molecule[_k];
-                        string number = ss.str();
-                        string name = label_per_molecule[_k] + number;
-                        //cout << name<< endl;
-                        //label_and_number_atom[name]=atoms_per_molecule[_k];
+                        string name = label_per_molecule[_k] + to_string(atoms_per_molecule[_k]);
                         label_and_number_atom[name]=make_tuple(atoms_per_molecule[_k], 0);
                         ++_k;
                     } 
@@ -404,7 +389,6 @@ class AmberTopologyReader : public TopologyReader {
                     break;
                 }
             }
-            //cout << "NSPM:" << nspm << endl; 
 
             int _j=0;
             vector<int> atoms_per_molecule(nspm);
@@ -424,7 +408,6 @@ class AmberTopologyReader : public TopologyReader {
 
                     for (size_t i = 0; i + 7 < line.length(); i += 8) {
                         atoms_per_molecule[_j]=stoi(line.substr(i, 8));
-                        //cout<<"atoms_per_molecule[_j]: "<< atoms_per_molecule[_j] <<endl;
                         ++_j;
                     }
                     if (_j>=nspm) {
@@ -433,19 +416,6 @@ class AmberTopologyReader : public TopologyReader {
                     }
                 }
             }
-            /*
-            int atom_index=0;
-            vector<int> atom_number_in_molec(dict_pointers["NATOM"]);
-            
-            for(int molecule_index=0; molecule_index<nspm;++molecule_index)
-            {
-                for(int _k=0; _k<atoms_per_molecule[molecule_index]; ++_k)
-                {
-                    atom_number_in_molec[atom_index]= molecule_index;
-                    ++atom_index;
-                }
-            }
-            return(atom_number_in_molec);*/
             return(atoms_per_molecule);
         }
 
@@ -462,7 +432,6 @@ class AmberTopologyReader : public TopologyReader {
                 if (line.find("%FLAG ATOMIC_NUMBER") != string::npos) {
                     inFlag = true;
                     break;
-                    //continue;
                 }
             }
 
@@ -485,12 +454,6 @@ class AmberTopologyReader : public TopologyReader {
                     }
                 }
             }
-            //DESCOMENTAR ESTA
-            /*
-            for (size_t i = 0; i < dict_pointers["NATOM"]; ++i) {
-                int _number = ati[i];
-                cout << "Atom " << i << ": " << "atom_type_index" <<":"<< _number << endl; 
-            }*/
 
             return(atomic_number);
         }
@@ -508,7 +471,6 @@ class AmberTopologyReader : public TopologyReader {
                 if (line.find("%FLAG ATOM_TYPE_INDEX") != string::npos) {
                     inFlag = true;
                     break;
-                    //continue;
                 }
             }
 
@@ -520,7 +482,6 @@ class AmberTopologyReader : public TopologyReader {
                     }
                     stringstream ss(line);
                     
-                    
                     for (size_t i = 0; i + 7 < line.length(); i += 8) {
                         ati[_j]=stoi(ToolKit::strip(line.substr(i, 8)));
                         ++_j;
@@ -531,12 +492,6 @@ class AmberTopologyReader : public TopologyReader {
                     }
                 }
             }
-            //DESCOMENTAR ESTA
-            /*
-            for (size_t i = 0; i < dict_pointers["NATOM"]; ++i) {
-                int _number = ati[i];
-                cout << "Atom " << i << ": " << "atom_type_index" <<":"<< _number << endl; 
-            }*/
 
             return(ati);
         }
@@ -574,13 +529,6 @@ class AmberTopologyReader : public TopologyReader {
                     }
                 }
             }
-            //DESCOMENTAR ESTA
-            /*
-            for (size_t i = 0; i < dict_pointers["NATOM"]; ++i) {
-                float _number = mass[i];
-                cout << "Atom " << i << ": " << "atom mass" <<":"<< _number << endl; 
-            }
-            */
             
             return(mass);
         }
@@ -655,8 +603,6 @@ class AmberTopologyReader : public TopologyReader {
                         get<1>(lj_coefficient[{_i,_k}])=coef_b;
                         get<1>(lj_coefficient[{_k,_i}])=coef_b;
 
-                        //cout << get<1>(lj_coefficient[{_i,_k}]) << endl;
-
                         _k+=1;
                         if(_k>_i){_k=1; _i+=1;}
                         
@@ -668,15 +614,7 @@ class AmberTopologyReader : public TopologyReader {
                     }
                 }
             }
-            /*
-            for(int _i=1;_i<=4;++_i)
-                {
-                for(int _k=1;_k<=_i;++_k)
-                    {
-                        
-                        cout << "pair: " << _i << ": " << _k << "--" << get<0>(lj_coefficient[{_i,_k}])  <<":"<< get<1>(lj_coefficient[{_i,_k}]) << endl; 
-                    }
-                }*/
+
             float sigma=0;
             float epsilon=0;
             float a=0;
@@ -689,8 +627,6 @@ class AmberTopologyReader : public TopologyReader {
                         b=get<1>(lj_coefficient[{_i,_k}]);
                         sigma=pow(a / b, 1.0 / 6.0);
                         epsilon=pow(b,2)/(4*a);
-                        // get<0>(lj_coefficient[{_i,_k}])=sigma; 
-                        // get<1>(lj_coefficient[{_i,_k}])=epsilon;
                         get<0>(lj_coefficient[{_i,_k}])=epsilon; 
                         get<1>(lj_coefficient[{_i,_k}])=sigma;
                     }
@@ -733,8 +669,6 @@ class AmberTopologyReader : public TopologyReader {
 
     public:
         TopolInfo readTopology(const string& filename) const override {
-            // Implementación para leer prmtop de AMBER-EZEQUIEL
-
             TopolInfo topology= TopolInfo();
 
             ifstream file(filename);
@@ -759,10 +693,9 @@ class AmberTopologyReader : public TopologyReader {
 			topology.num_solutes=number_solute_solvent[0];
 			topology.num_solvents=number_solute_solvent[1]-number_solute_solvent[0];
             
-            for (const auto& par : atoms_per_diff_molecule) {
-                 //cout << "Clave: " << par.first << ", Atomos: " << get<0>(par.second) << " numero de moleculas: " << get<1>(par.second)<<endl;
-                 topology.number_of_atoms_per_different_molecule[par.first]=get<0>(par.second);
-                 topology.number_of_each_different_molecule[par.first]=get<1>(par.second);
+            for (const auto& pair : atoms_per_diff_molecule) {
+                topology.number_of_atoms_per_different_molecule[pair.first]=get<0>(pair.second);
+                topology.number_of_each_different_molecule[pair.first]=get<1>(pair.second);
             }
 			
             topology.total_number_of_atoms=dict_pointers["NATOM"];
@@ -773,7 +706,6 @@ class AmberTopologyReader : public TopologyReader {
             for(size_t _j=0; _j<number_solute_solvent[1];_j++)
             {
                 for (size_t i = 0; i < atoms_per_molecule[_j]; i+=1) {
-
                     molecule_atoms[i] = make_tuple(ati_to_amber_type[atom_type_index[_k]], get<0>(map_atoms[_k]), get<1>(map_atoms[_k]), mass[_k]);
                     _k++;
                 }
@@ -783,49 +715,11 @@ class AmberTopologyReader : public TopologyReader {
 			topology.name_type=name_types; //atom name string  // type es un int
             topology.type_LJparam=lj_diagonal; //0=epsilon 1=sigma //string de numero valor1 valor 2
             topology.special_interaction=lj_coefficient;//keep ij and ji
-            //return Configuration::TopolInfo();
             return topology;
-            //agregar z agregar el numero de atomos totales
         }
 };
 
 class AmberCoordinateReader : public CoordinateReader {
-    private:
-        /**
-         * Given an atom name, return its atomic number
-         * @param atom_name The name of the atom
-         * @return The atomic number
-         */
-        /*
-        static int getAtomicNumber(const string& atom_name, const string& atom_type) {
-            static const map<string,int> atomic_numbers= {
-                {"H",1},{"B",5},{"C",6},{"N",7},{"O",8},
-                {"F",9},{"Na",11},{"Mg",12},{"Al",13},
-                {"Si",14},{"P",15},{"S",16},{"Cl",17},
-                {"K",19},{"Br",35},{"I",53}
-            };
-            if(atom_name.length() >= 2) {
-                string symbol= atom_name.substr(0,2);
-                auto it= atomic_numbers.find(symbol);
-                if(it != atomic_numbers.end())
-                    return it->second;
-            }
-
-            string symbol= atom_name.substr(0,1);
-            auto it= atomic_numbers.find(symbol);
-            if(it != atomic_numbers.end())
-                return it->second;
-
-            if(!atom_type.empty()) {
-                auto type_it= atomic_numbers.find(atom_type);
-                if(type_it != atomic_numbers.end())
-                    return type_it->second;
-            }
-
-            return 0; //Default value
-        }*/
-
-
     public:
         AmberCoordinateReader()= default;
 
@@ -921,7 +815,14 @@ class AmberCoordinateReader : public CoordinateReader {
                         number_of_atoms+=1;
                     }
                 }
-                molecs[i]= new Molecule(i+1, atoms, number_of_atoms);
+                if(i < topol_info.num_solutes) {
+                    molecs[i]= new Molecule(i+1, atoms, number_of_atoms);
+                } else {
+                    molecs[i]= new TIP3PWater(i+1, atoms);
+                    /// TODO: La detección es un poco bruta, se podría usar el RESIDUE_LABEL = WAT para
+                    /// saber que es agua, y asignarle el tipo de agua correspondiente.
+                    /// Eso último no tengo idea como definirlo, para pensar
+                }
             }
             f.close();
 

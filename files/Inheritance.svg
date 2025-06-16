@@ -8,7 +8,7 @@
    version="1.1"
    id="svg1"
    inkscape:version="1.4.2 (1:1.4.2+202505120738+ebf0e940d0)"
-   sodipodi:docname="Herencia.svg"
+   sodipodi:docname="Inheritance.svg"
    inkscape:export-filename="Inheritance.png"
    inkscape:export-xdpi="800.53998"
    inkscape:export-ydpi="800.53998"
@@ -26,15 +26,15 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="0.47324511"
-     inkscape:cx="678.29543"
-     inkscape:cy="414.1617"
-     inkscape:window-width="1920"
-     inkscape:window-height="1044"
-     inkscape:window-x="1366"
+     inkscape:zoom="0.30283939"
+     inkscape:cx="247.65603"
+     inkscape:cy="797.45242"
+     inkscape:window-width="1366"
+     inkscape:window-height="703"
+     inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
+     inkscape:current-layer="g360" />
   <defs
      id="defs1">
     <marker
@@ -72,7 +72,7 @@
          id="tspan115"
          style="stroke-width:0.264583"
          x="177.96516"
-         y="76.125496"></tspan></text>
+         y="76.125496" /></text>
     <g
        id="g360"
        transform="matrix(0.96704886,0,0,0.96704886,4.2835936,3.9316646)">
@@ -1398,9 +1398,9 @@
          sodipodi:nodetypes="ccccc" />
       <path
          style="fill:none;stroke:#ff0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DartArrow)"
-         d="m 210.73375,134.13852 v 19.43292"
+         d="m 179.6864,139.50653 31.04698,0.0331 3.7e-4,14.03185"
          id="path269"
-         sodipodi:nodetypes="cc" />
+         sodipodi:nodetypes="ccc" />
       <g
          id="g318"
          transform="translate(12.277565)">
@@ -1786,6 +1786,43 @@
          d="M 78.220085,206.0787 H 55.503143 v -18.59382"
          id="path360"
          sodipodi:nodetypes="ccc" />
+      <g
+         id="g13"
+         transform="translate(7.686036,-4.7324864)">
+        <rect
+           style="fill:none;fill-rule:evenodd;stroke:#ff0000;stroke-width:0.6;stroke-dasharray:1.2, 2.4;stroke-dashoffset:0"
+           id="rect4"
+           width="49.343342"
+           height="13.225871"
+           x="23.100378"
+           y="128.45776"
+           ry="2.2717736" />
+        <text
+           xml:space="preserve"
+           style="font-size:3.68782px;line-height:1.25;font-family:'Book Antiqua';-inkscape-font-specification:'Book Antiqua';text-align:center;word-spacing:0px;text-anchor:middle;fill:#ff0000;stroke-width:0.460975"
+           x="24.824913"
+           y="135.91702"
+           id="text13"><tspan
+             sodipodi:role="line"
+             id="tspan13"
+             style="text-align:start;text-anchor:start;fill:#ff0000;stroke-width:0.460975"
+             x="24.824913"
+             y="135.91702">CppLibAmberGromacs.hpp</tspan></text>
+      </g>
+      <path
+         style="fill:none;stroke:#000000;stroke-width:1.03407;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DartArrow)"
+         d="m 16.185224,130.33821 h 7.666423"
+         id="path13" />
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DartArrow)"
+         d="M 55.458084,155.03537 V 138.55565"
+         id="path14"
+         sodipodi:nodetypes="cc" />
+      <path
+         style="fill:none;stroke:#ff0000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#DartArrow)"
+         d="m 55.458084,105.64169 v 16.47972"
+         id="path15"
+         sodipodi:nodetypes="cc" />
     </g>
   </g>
 </svg>
