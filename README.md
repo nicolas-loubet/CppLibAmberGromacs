@@ -1,7 +1,7 @@
 # CppLibAmberGromacs
 Library for handling AMBER and GROMACS molecular dynamics files.
 
-### Version: 1.0.0
+### Version: 1.0.1
 
 ## Authors
 
