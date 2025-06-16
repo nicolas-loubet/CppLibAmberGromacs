@@ -793,8 +793,10 @@ class AmberCoordinateReader : public CoordinateReader {
 
             string line;
             int number_of_atoms=0;
+            string is_water="";
             for(int i= 0; i < topol_info.num_molecules; i++)
             {
+                
                 const auto& atom_data= topol_info.atom_type_name_charge_mass[i];
                 Atom* atoms= new Atom[atom_data.size()];
 
@@ -806,7 +808,7 @@ class AmberCoordinateReader : public CoordinateReader {
                         float x=stof(ToolKit::strip(line.substr(26, 12)));
                         float y=stof(ToolKit::strip(line.substr(38, 8)));
                         float z=stof(ToolKit::strip(line.substr(46, 8)));
-                        
+                        is_water = ToolKit::strip(line.substr(16, 4));
                         const auto& [type,name,charge,mass]= atom_data.at(number_of_atoms);
                         const auto& [epsilon,sigma]= topol_info.type_LJparam.at(type);
                         int Z=topol_info.type_Z.at(type);
@@ -815,14 +817,20 @@ class AmberCoordinateReader : public CoordinateReader {
                         number_of_atoms+=1;
                     }
                 }
-                if(i < topol_info.num_solutes) {
-                    molecs[i]= new Molecule(i+1, atoms, number_of_atoms);
-                } else {
+                if(is_water=="WAT")
+                {
                     molecs[i]= new TIP3PWater(i+1, atoms);
+                }
+                else
+                {
+                    molecs[i]= new Molecule(i+1, atoms, number_of_atoms);
+                }
+                is_water="";
+                                   
                     /// TODO: La detección es un poco bruta, se podría usar el RESIDUE_LABEL = WAT para
                     /// saber que es agua, y asignarle el tipo de agua correspondiente.
                     /// Eso último no tengo idea como definirlo, para pensar
-                }
+
             }
             f.close();
 
