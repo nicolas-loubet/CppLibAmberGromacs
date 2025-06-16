@@ -543,6 +543,8 @@ class AmberTopologyReader : public TopologyReader {
             int _j=0;
             int _i=1;//atomo 1
             int _k=1;//atomo 2
+
+            const int cut_value= (dict_pointers["NTYPES"]*(dict_pointers["NTYPES"]+1))/2;
             
             while (getline(file, line)) {
                 
@@ -573,7 +575,7 @@ class AmberTopologyReader : public TopologyReader {
                         
                         _j+=1;
                     }
-                    if (_j>=(dict_pointers["NTYPES"]*(dict_pointers["NTYPES"]+1))/2) {
+                    if (_j>=cut_value) {
                         // Finished reading the ATOM_NAME section
                         break;
                     }
@@ -627,7 +629,7 @@ class AmberTopologyReader : public TopologyReader {
                         b=get<1>(lj_coefficient[{_i,_k}]);
                         sigma=pow(a / b, 1.0 / 6.0);
                         epsilon=pow(b,2)/(4*a);
-                        get<0>(lj_coefficient[{_i,_k}])=epsilon; 
+                        get<0>(lj_coefficient[{_i,_k}])=epsilon*4.184; // kcal -> kJ
                         get<1>(lj_coefficient[{_i,_k}])=sigma;
                     }
                 }
@@ -804,20 +806,23 @@ class AmberCoordinateReader : public CoordinateReader {
                     int epsilon_value = static_cast<int>(epsilon_water*1000); //switch only accepts int or enum so epsilon is converted to int
                     switch(epsilon_value) //switch is faster thas nested ifs
                     {
+                        case 635:
                         case 636: //TIP3P
                             water_type=1;
                         break;
-                        case 774: //TIP4P
+                        case 774: //TIP4P/2005
                             water_type=2;
                         break;
-                        case 650: //SPC
+                        case 650: //SPC/E
                             water_type=3;
                         break;
                         case 790: //TIP5P-2018
                             water_type=4;
                         break;
-
-                    }  
+                        default:
+                            throw std::runtime_error("Unsupported water model");
+                    }
+                    break;
                 }
             }
             
@@ -846,36 +851,27 @@ class AmberCoordinateReader : public CoordinateReader {
                         number_of_atoms+=1;
                     }
                 }
-                if(is_water=="WAT")
-                {
-                    molecs[i]= new TIP3PWater(i+1, atoms);
-                    switch(water_type)
-                        {
-                            case 1: //TIP3P
-                                molecs[i]= new TIP3PWater(i+1, atoms);
-                            break;
-                            case 2: //TIP4P
-                                molecs[i]= new TIP4PWater(i+1, atoms);
-                            break;
-                            case 3: //SPC
-                                molecs[i]= new SPCEWater(i+1, atoms);
-                            break;
-                            case 4: //TIP5P-2018
-                                molecs[i]= new TIP5PWater(i+1, atoms);
-                            break;
-
-                        }
-                }
-                else
+                if(is_water != "WAT")
                 {
                     molecs[i]= new Molecule(i+1, atoms, number_of_atoms);
+                    continue;
                 }
-                is_water="";
-                                   
-                    /// TODO: La detección es un poco bruta, se podría usar el RESIDUE_LABEL = WAT para
-                    /// saber que es agua, y asignarle el tipo de agua correspondiente.
-                    /// Eso último no tengo idea como definirlo, para pensar
 
+                switch(water_type)
+                {
+                    case 1: //TIP3P
+                        molecs[i]= new TIP3PWater(i+1, atoms);
+                    break;
+                    case 2: //TIP4P/2005
+                        molecs[i]= new TIP4PWater(i+1, atoms);
+                    break;
+                    case 3: //SPC/E
+                        molecs[i]= new SPCEWater(i+1, atoms);
+                    break;
+                    case 4: //TIP5P-2018
+                        molecs[i]= new TIP5PWater(i+1, atoms);
+                    break;
+                }
             }
             f.close();
 
