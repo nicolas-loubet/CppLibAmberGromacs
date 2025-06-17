@@ -20,14 +20,14 @@ class ReaderFactory {
 		 * @param filename The name of the file to read
 		 * @return A CoordinateReader object
 		 */
-		static std::unique_ptr<CoordinateReader> createCoordinateReader(ProgramFormat format) {
+		static CoordinateReader* createCoordinateReader(ProgramFormat format) {
 			switch(format) {
 				case ProgramFormat::AMBER:
-					return std::make_unique<AmberCoordinateReader>();
+					return new AmberCoordinateReader();
 				case ProgramFormat::GROMACS:
-					return std::make_unique<GromacsCoordinateReader>();
+					return new GromacsCoordinateReader();
 				// TODO: case ProgramFormat::LAMMPS:
-				// TODO: 	return std::make_unique<LammpsCoordinateReader>();
+				// TODO: 	new LammpsCoordinateReader();
 				default:
 					throw std::runtime_error("Unsupported coordinate format");
 			}
@@ -39,14 +39,14 @@ class ReaderFactory {
 		 * @param filename The name of the file to read
 		 * @return A TopolInfo struct
 		 */
-		static std::unique_ptr<TopologyReader> createTopologyReader(ProgramFormat format) {
+		static TopologyReader* createTopologyReader(ProgramFormat format) {
 			switch(format) {
 				case ProgramFormat::AMBER:
-					return std::make_unique<AmberTopologyReader>();
+					return new AmberTopologyReader();
 				case ProgramFormat::GROMACS:
-					return std::make_unique<GromacsTopologyReader>();
+					return new GromacsTopologyReader();
 				// TODO: case ProgramFormat::LAMMPS:
-				// TODO: 	return std::make_unique<LammpsTopologyReader>();
+				// TODO: 	return new LammpsTopologyReader();
 				default:
 					throw std::runtime_error("Unsupported topology format");
 			}
