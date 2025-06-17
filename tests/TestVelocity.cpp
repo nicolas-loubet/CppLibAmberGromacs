@@ -6,9 +6,11 @@ int main() {
     TopolInfo ti= ReaderFactory::createTopologyReader(ReaderFactory::ProgramFormat::AMBER)->readTopology("../files/amber.prmtop");
     vector<pair<int,string>> files= CoordinateReader::getFileIterator("../files/", "amber_frame_*.pdb");
     string f= "../files/"+files[0].second;
-    ToolKit::takeTime([&ti,&f]() {
+
+    CoordinateReader* cr= ReaderFactory::createCoordinateReader(ReaderFactory::ProgramFormat::AMBER);
+    ToolKit::takeTime([&ti,&f,&cr]() {
         for(int i= 0; i < 100; i++) {
-            Configuration conf= Configuration(ReaderFactory::createCoordinateReader(ReaderFactory::ProgramFormat::AMBER), f, ti);
+            Configuration conf= Configuration(cr, f, ti);
         }
     });
 

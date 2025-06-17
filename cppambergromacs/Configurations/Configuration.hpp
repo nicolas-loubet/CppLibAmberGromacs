@@ -36,10 +36,10 @@ class Configuration {
 
 		/**
 		 * Constructor. It reads the topology and coordinates files
-		 * @param coord_reader Object that reads the coordinates file
+		 * @param coord_reader Object that reads the coordinates file, given as pointer
 		 * @param topol_info Object that reads the topology file
 		 */
-		Configuration(unique_ptr<CoordinateReader> coord_reader, const string& filename, TopolInfo& topol_info) {
+		Configuration(CoordinateReader* coord_reader, const string& filename, TopolInfo& topol_info) {
 			N_MOLEC= topol_info.num_molecules;
 			molecs= new Molecule*[N_MOLEC];
 	
