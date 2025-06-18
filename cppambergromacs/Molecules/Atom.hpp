@@ -12,15 +12,13 @@ class Atom : public Particle{
 	private:
 		static constexpr float K_COULOMB= 1389.35458; //kJ/mol to e-2
 		bool is_HAtom;
-		float charge;
 		float s_AO;
 		float e_AO;
 		int Z;
 	public:
 		void setis_Hatom(bool Hatom){is_HAtom=Hatom;}
 		bool getis_Hatom() const {return(is_HAtom);}
-		void setCharge(float Charge){charge=Charge;}
-		float getCharge() const {return(charge);}
+		
 		void setSigma_AO(float s_AOxigen){s_AO=s_AOxigen;}
 		float getSigma_AO() const {return(s_AO);}
 		void setEpsilon_AO(float e_AOxigen){e_AO=e_AOxigen;}
@@ -28,12 +26,12 @@ class Atom : public Particle{
 		void setZ(int atom_type){Z=atom_type;is_HAtom= Z==1;}
 		int getZ() const {return(Z);}
 
-		Atom(): Particle(), is_HAtom(false), Z(0), charge(0), e_AO(0), s_AO(0) {}
+		Atom(): Particle(), is_HAtom(false), Z(0), e_AO(0), s_AO(0) {}
 
 		Atom(Vector pos, int id): Particle(pos, id, 0) {}
 		
 		Atom(Vector pos, int id, float mass, float charge, float e_AO, float s_AO, int Z):
-			Particle(pos, id, mass), Z(Z), charge(charge), e_AO(e_AO), s_AO(s_AO) {
+			Particle(pos, id, mass, charge), Z(Z), e_AO(e_AO), s_AO(s_AO) { //charge ahora esta dentro de particle
 				is_HAtom= Z==1;
 			}
 		/**
@@ -43,7 +41,7 @@ class Atom : public Particle{
 		 * @return The potential energy in kJ/mol between the two atoms
 		 */
 		float getCoulombPotential(Atom a, Vector bounds) const {
-			return (K_COULOMB*charge*a.getCharge()) / distanceTo(a,bounds);
+			return (K_COULOMB*getCharge()*a.getCharge()) / distanceTo(a,bounds); //cambiado charge por getCharge()
 		}
 
 };

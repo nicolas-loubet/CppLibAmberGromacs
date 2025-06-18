@@ -13,6 +13,7 @@ class Particle{
 		Vector pos;
 		int ID;
 		float mass;
+		float charge;
 	public:
 		void setPosition(Vector position){pos=position;}
 		Vector getPosition() const {return(pos);}
@@ -22,12 +23,15 @@ class Particle{
 
 		void setMass(float mass_variable){mass=mass_variable;}
 		float getMass() const {return(mass);}
-		
-		Particle():pos({0.0f,0.0f,0.0f}), ID(0), mass(0){}
-		Particle (Vector position) : pos(position), ID(0), mass(0) {}
-		Particle (Vector position, int id) : pos(position), ID(id), mass(0) {}
-		Particle (Vector position, int id, float Mass) : pos(position), ID(id), mass(Mass) {}
 
+		void setCharge(float Charge){charge=Charge;}
+		float getCharge() const {return(charge);}
+		
+		Particle():pos({0.0f,0.0f,0.0f}), ID(0), mass(0),charge(0) {}
+		Particle (Vector position) : pos(position), ID(0), mass(0),charge(0) {}
+		Particle (Vector position, int id) : pos(position), ID(id), mass(0),charge(0) {}
+		Particle (Vector position, int id, float Mass) : pos(position), ID(id), mass(Mass),charge(0) {}
+		Particle (Vector position, int id, float Mass, float Charge) : pos(position), ID(id), mass(Mass), charge(Charge) {}
 		float distanceTo(Particle other, const Vector box) const 
 			{
 				return(distancePBC(pos,other.getPosition(),box));

@@ -284,10 +284,19 @@ class Configuration {
 
 			vector<float> sum_per_site(4,0.0f);
 			Vector sites[4]= {t.H1, t.H2, t.L1, t.L2};
-
+			
 			for(int j= 0; j < N_MOLEC; j++) {
 				if(j+1==ID) continue;
-				if(molecule->distanceTo(*molecs[j], bounds) > R_CUT_OFF+1.1) continue;
+				float cut_off=R_CUT_OFF; // Cutoff es diferente para iones
+				if(molecule->distanceTo(*molecs[j], bounds) > R_CUT_OFF+1.1) { // si está lejos
+					if(abs(molecs[j]->getCharge())<1){ //toma la molecula j y saca la carga y si es menor a 1 o mayor que -1
+						continue; // no considera la molecula porque está lejos y no cargada 
+					}
+					else
+					{
+						cut_off=10000000.0;// si tiene carga no hay cutoff
+					}
+				}
 				int i_close= 0;
 				float d_close= distancePBC(sites[0],molecs[j]->getPosition(),bounds);
 				for(int i= 1; i < 4; i++) {
@@ -297,7 +306,7 @@ class Configuration {
 						d_close= d_new;
 					}
 				}
-				if(d_close <= R_CUT_OFF) {
+				if(d_close <= cut_off) { //cutoff infinito para iones
 					if(potential_matrix != nullptr) {
 						int min= ID-1 < j  ?  ID-1 : j;
 						int max= ID-1 > j  ?  ID-1 : j;
