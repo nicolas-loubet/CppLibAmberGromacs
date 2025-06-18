@@ -9,7 +9,7 @@
 #include "../General/Vector.hpp"
 
 class Particle{
-	private:
+	protected:
 		Vector pos;
 		int ID;
 		float mass;

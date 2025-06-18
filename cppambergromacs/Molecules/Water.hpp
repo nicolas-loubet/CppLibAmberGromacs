@@ -111,7 +111,7 @@ class Water : public Molecule {
 class SPCEWater : public Water {
 	public:
 		static constexpr float CHARGE_O= -0.8476;
-		static constexpr float CHARGE_H= CHARGE_O/2;
+		static constexpr float CHARGE_H= -CHARGE_O/2;
 		static constexpr float EPSILON= 0.650;
 		static constexpr float SIGMA= 3.166;
 
@@ -168,7 +168,7 @@ class SPCEWater : public Water {
 class TIP3PWater : public Water {
 	public:
 		static constexpr float CHARGE_O= -0.834;
-		static constexpr float CHARGE_H= CHARGE_O/2;
+		static constexpr float CHARGE_H= -CHARGE_O/2;
 		static constexpr float EPSILON= 0.6364;
 		static constexpr float SIGMA= 3.15061;
 
@@ -225,7 +225,7 @@ class TIP3PWater : public Water {
 class TIP4PWater : public Water {
 	public:
 		static constexpr float CHARGE_MW= -1.1128;
-		static constexpr float CHARGE_H= CHARGE_MW/2;
+		static constexpr float CHARGE_H= -CHARGE_MW/2;
 		static constexpr float EPSILON= 0.7749;
 		static constexpr float SIGMA= 3.1589;
 

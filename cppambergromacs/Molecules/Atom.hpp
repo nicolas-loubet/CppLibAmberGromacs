@@ -9,7 +9,7 @@
 #include "Particle.hpp"
 
 class Atom : public Particle{
-	private:
+	protected:
 		static constexpr float K_COULOMB= 1389.35458; //kJ/mol to e-2
 		bool is_HAtom;
 		float s_AO;
@@ -31,9 +31,10 @@ class Atom : public Particle{
 		Atom(Vector pos, int id): Particle(pos, id, 0) {}
 		
 		Atom(Vector pos, int id, float mass, float charge, float e_AO, float s_AO, int Z):
-			Particle(pos, id, mass, charge), Z(Z), e_AO(e_AO), s_AO(s_AO) { //charge ahora esta dentro de particle
+			Particle(pos, id, mass, charge), Z(Z), e_AO(e_AO), s_AO(s_AO) {
 				is_HAtom= Z==1;
 			}
+
 		/**
 		 * Calculates the electrostatic potential energy between two atoms
 		 * @param a Atom the other atom
@@ -41,7 +42,7 @@ class Atom : public Particle{
 		 * @return The potential energy in kJ/mol between the two atoms
 		 */
 		float getCoulombPotential(Atom a, Vector bounds) const {
-			return (K_COULOMB*getCharge()*a.getCharge()) / distanceTo(a,bounds); //cambiado charge por getCharge()
+			return (K_COULOMB*charge*a.getCharge()) / distanceTo(a,bounds);
 		}
 
 };

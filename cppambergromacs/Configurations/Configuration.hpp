@@ -315,7 +315,7 @@ class Configuration {
 				}
 			}
 
-			Sorter::sort(sum_per_site,true);
+			Sorter::sort(sum_per_site,false);
 			return sum_per_site;
 		}
 
