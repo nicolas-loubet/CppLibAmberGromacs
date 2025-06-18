@@ -167,7 +167,7 @@ class GromacsTopologyReader : public TopologyReader {
 class GromacsCoordinateReader : public CoordinateReader {
     public:
         GromacsCoordinateReader()= default;
-        bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs) const override {
+        bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs, Vector& bounds) const override {
             // Implementación para leer .gro o .trr de GROMACS
             // Los datos se guardan en el Molecule**
             return true;

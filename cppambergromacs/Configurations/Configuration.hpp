@@ -43,7 +43,7 @@ class Configuration {
 			N_MOLEC= topol_info.num_molecules;
 			molecs= new Molecule*[N_MOLEC];
 	
-			if(!coord_reader->readCoordinates(filename, topol_info, molecs))
+			if(!coord_reader->readCoordinates(filename, topol_info, molecs, bounds))
 				throw runtime_error("Failed to read coordinates");
 		}
 	

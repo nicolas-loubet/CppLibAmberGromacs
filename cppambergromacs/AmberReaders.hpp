@@ -786,7 +786,7 @@ class AmberCoordinateReader : public CoordinateReader {
             return true;
         }
 
-        bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs) const override{
+        bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs, Vector& bounds) const override{
             ifstream f(filename);
             if(!f.is_open()) {
                 cout << "Failed to open file " << filename << endl;
@@ -836,6 +836,10 @@ class AmberCoordinateReader : public CoordinateReader {
 
                 number_of_atoms=0;
                 while(getline(f,line)) {
+                    if(line.rfind("CRYST1",0) == 0) {
+                        bounds= Vector( stof(line.substr(6,9)) , stof(line.substr(15,9)) , stof(line.substr(24,9)) );
+                        break;
+                    }
                     if(line.rfind("TER  ",0) == 0) {break;}
                     if(line.rfind("ATOM  ",0) == 0 || line.rfind("HETATM",0) == 0) {
 
