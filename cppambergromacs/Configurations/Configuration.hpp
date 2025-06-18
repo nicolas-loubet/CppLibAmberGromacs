@@ -276,7 +276,7 @@ class Configuration {
 		 */
 		vector<float> getInteractionsPerSite(const int ID, float** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr, const float R_CUT_OFF= 5.) {
 			Water* molecule= dynamic_cast<Water*>(molecs[ID-1]);
-			if(molecule==nullptr) throw runtime_error("Error: getInteractionsPerSite(ID, float**, ToolKit::ArrInt*, const float R_CUT_OFF= 5.) -> molecule is not a water");
+			if(molecule == nullptr) throw runtime_error("Error: getInteractionsPerSite(ID, float**, ToolKit::ArrInt*, const float R_CUT_OFF) -> molecule is not a water");
 			Vector o= molecule->getOxygen().getPosition();
 			Vector h1= molecule->getHydrogen_1().getPosition();
 			Vector h2= molecule->getHydrogen_2().getPosition();
@@ -287,15 +287,10 @@ class Configuration {
 			
 			for(int j= 0; j < N_MOLEC; j++) {
 				if(j+1==ID) continue;
-				float cut_off=R_CUT_OFF; // Cutoff es diferente para iones
-				if(molecule->distanceTo(*molecs[j], bounds) > R_CUT_OFF+1.1) { // si está lejos
-					if(abs(molecs[j]->getCharge())<1){ //toma la molecula j y saca la carga y si es menor a 1 o mayor que -1
-						continue; // no considera la molecula porque está lejos y no cargada 
-					}
-					else
-					{
-						cut_off=10000000.0;// si tiene carga no hay cutoff
-					}
+				bool consider_ion= false;
+				if(molecule->distanceTo(*molecs[j], bounds) > R_CUT_OFF+1.1) {
+					if(-1 < molecs[j]->getCharge() && molecs[j]->getCharge() < 1) continue;
+					consider_ion= true;
 				}
 				int i_close= 0;
 				float d_close= distancePBC(sites[0],molecs[j]->getPosition(),bounds);
@@ -306,7 +301,7 @@ class Configuration {
 						d_close= d_new;
 					}
 				}
-				if(d_close <= cut_off) { //cutoff infinito para iones
+				if(d_close <= R_CUT_OFF || consider_ion) {
 					if(potential_matrix != nullptr) {
 						int min= ID-1 < j  ?  ID-1 : j;
 						int max= ID-1 > j  ?  ID-1 : j;
