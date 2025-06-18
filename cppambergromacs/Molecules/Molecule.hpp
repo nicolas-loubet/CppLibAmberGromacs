@@ -44,6 +44,7 @@ class Molecule : public Particle{
 			delete[] atoms;
 		}
 		Atom* getAtoms() const {return(atoms);}
+		const Atom& getAtom(int id) const { return(atoms[id - 1]); }
 		int getNAtoms() const {return(n_atoms);}
 };
 
