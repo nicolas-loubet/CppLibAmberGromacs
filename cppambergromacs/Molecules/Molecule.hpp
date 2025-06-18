@@ -14,15 +14,22 @@ class Molecule : public Particle{
 	int n_atoms;
 	static float totalMass(Atom* Atoms, int nAtoms){
 		float total_mass=0.0f;
+		float total_charge=0.0f;
 		for(int _i=0;_i<nAtoms;++_i){
 			total_mass+=Atoms[_i].getMass();
-
 		}
 		return(total_mass);
 	}
+	static float totalCharge(Atom* Atoms, int nAtoms){
+		float total_charge=0.0f;
+		for(int _i=0;_i<nAtoms;++_i){
+			total_charge+=Atoms[_i].getCharge();
+		}
+		return(total_charge);
+	}
 	public:
 
-	Molecule(int id, Atom* Atoms, int nAtoms) : Particle(centerOfMass(Atoms,nAtoms), id, totalMass(Atoms, nAtoms)), atoms(Atoms),n_atoms(nAtoms){}
+	Molecule(int id, Atom* Atoms, int nAtoms) : Particle(centerOfMass(Atoms,nAtoms), id, totalMass(Atoms, nAtoms),totalCharge(Atoms, nAtoms)), atoms(Atoms),n_atoms(nAtoms){}
 
 	static Vector centerOfMass(Atom* Atoms, int nAtoms){
 		Vector com ={0.0f,0.0f,0.0f};
