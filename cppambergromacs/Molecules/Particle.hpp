@@ -32,9 +32,10 @@ class Particle{
 		Particle (Vector position, int id) : pos(position), ID(id), mass(0),charge(0) {}
 		Particle (Vector position, int id, float Mass) : pos(position), ID(id), mass(Mass),charge(0) {}
 		Particle (Vector position, int id, float Mass, float Charge) : pos(position), ID(id), mass(Mass), charge(Charge) {}
-		float distanceTo(Particle other, const Vector box) const 
+
+		float distanceTo(const Particle& other, const Vector box) const 
 			{
-				return(distancePBC(pos,other.getPosition(),box));
+			return distancePBC(pos, other.getPosition(), box);
 			}
 };
 

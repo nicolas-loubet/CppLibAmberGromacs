@@ -732,7 +732,7 @@ class AmberCoordinateReader : public CoordinateReader {
          * @param molecs An empty array of molecule pointers
          * @return True if the coordinates were read successfully
          */
-        bool readCoordinates_slow(const string& filename, const TopolInfo& topol_info, Molecule** molecs) const {
+        bool readCoordinates_slow(const string& filename, const TopolInfo& topol_info, Molecule* molecs) const {
             ifstream f(filename);
             if(!f.is_open()) {
                 cout << "Failed to open file " << filename << endl;
@@ -780,13 +780,13 @@ class AmberCoordinateReader : public CoordinateReader {
                     atoms[j]= Atom(coords[atoms_each_order_molecule[mol_pair.first][j]], atom_idx+1, mass, charge, epsilon, sigma, Z);
                 }
 
-                molecs[molec_idx]= new Molecule(mol_pair.first, atoms, num_atoms_per_molecule);
+                molecs[molec_idx]= Molecule(mol_pair.first, atoms, num_atoms_per_molecule);
                 molec_idx+=1;
             }
             return true;
         }
 
-        bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs, Vector& bounds) const override{
+        bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule* molecs, Vector& bounds) const override{
             ifstream f(filename);
             if(!f.is_open()) {
                 cout << "Failed to open file " << filename << endl;
@@ -857,23 +857,23 @@ class AmberCoordinateReader : public CoordinateReader {
                 }
                 if(is_water != "WAT")
                 {
-                    molecs[i]= new Molecule(i+1, atoms, number_of_atoms);
+                    molecs[i] = Molecule(i+1, atoms, number_of_atoms);
                     continue;
                 }
 
                 switch(water_type)
                 {
                     case 1: //TIP3P
-                        molecs[i]= new TIP3PWater(i+1, atoms);
+                        molecs[i] = TIP3PWater(i+1, atoms);
                     break;
                     case 2: //TIP4P/2005
-                        molecs[i]= new TIP4PWater(i+1, atoms);
+                        molecs[i] = TIP4PWater(i+1, atoms);
                     break;
                     case 3: //SPC/E
-                        molecs[i]= new SPCEWater(i+1, atoms);
+                        molecs[i] = SPCEWater(i+1, atoms);
                     break;
                     case 4: //TIP5P-2018
-                        molecs[i]= new TIP5PWater(i+1, atoms);
+                        molecs[i] = TIP5PWater(i+1, atoms);
                     break;
                 }
             }

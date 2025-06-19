@@ -30,6 +30,7 @@ class Molecule : public Particle{
 		}
 
 	public:
+		Molecule() : Particle(), atoms(nullptr), n_atoms(0) {}
 		Molecule(int id, Atom* Atoms, int nAtoms) : Particle(centerOfMass(Atoms,nAtoms), id, totalMass(Atoms, nAtoms),totalCharge(Atoms, nAtoms)), atoms(Atoms),n_atoms(nAtoms){}
 
 		static Vector centerOfMass(Atom* Atoms, int nAtoms){
@@ -41,7 +42,10 @@ class Molecule : public Particle{
 		}
 
 		virtual ~Molecule() { //I need to set it virtual so I can use dynamic_cast with Water
-			delete[] atoms;
+			if (atoms)
+			{
+        	delete[] atoms;
+			}
 		}
 		Atom* getAtoms() const {return(atoms);}
 		const Atom& getAtom(int id) const { return(atoms[id - 1]); }
