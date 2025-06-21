@@ -24,7 +24,7 @@ class AmberTopologyReader : public TopologyReader {
                     line=ToolKit::strip(line.substr(5, 80));
                     inFlag = true;
                     flag[line]=file.tellg();
-                    flag[line]-=91;
+                    flag[line]-=200;
                     continue;
                 }
             }
@@ -162,6 +162,7 @@ class AmberTopologyReader : public TopologyReader {
                         // Skipping format line
                         getline(file, line);
                     }
+                    
                     number_solute_solvent[0]=stoi(line.substr(0, 8));
                     number_solute_solvent[1]=stoi(line.substr(8, 8));
                     number_solute_solvent[2]=stoi(line.substr(16, 8));
@@ -272,7 +273,6 @@ class AmberTopologyReader : public TopologyReader {
                     break;
                 }
             }
-
             int _j=0;
             vector<int> atoms_per_molecule(nspm);
             bool inFlag = false;
@@ -691,6 +691,8 @@ class AmberTopologyReader : public TopologyReader {
             map<string,int> type_atomic_z = type_atomic_number(dict_pointers, atom_type_index,atomic_number,ati_to_amber_type);
             map<string,string> name_types = read_name_type(dict_pointers, atom_names,atom_type_index,ati_to_amber_type);
 
+            cout << "File read correctly: " << filename << endl;
+            
             topology.num_molecules=number_solute_solvent[1];
 			topology.num_solutes=number_solute_solvent[0];
 			topology.num_solvents=number_solute_solvent[1]-number_solute_solvent[0];
@@ -708,6 +710,7 @@ class AmberTopologyReader : public TopologyReader {
             for(size_t _j=0; _j<number_solute_solvent[1];_j++)
             {
                 for (size_t i = 0; i < atoms_per_molecule[_j]; i+=1) {
+                    
                     molecule_atoms[i] = make_tuple(ati_to_amber_type[atom_type_index[_k]], get<0>(map_atoms[_k]), get<1>(map_atoms[_k]), mass[_k]);
                     _k++;
                 }
@@ -738,6 +741,7 @@ class AmberCoordinateReader : public CoordinateReader {
                 cout << "Failed to open file " << filename << endl;
                 return false;
             }
+            
 
             string line;
             vector<Vector> coords;
@@ -792,7 +796,6 @@ class AmberCoordinateReader : public CoordinateReader {
                 cout << "Failed to open file " << filename << endl;
                 return false;
             }
-
             string line;
             int number_of_atoms=0;
             string is_water="";
