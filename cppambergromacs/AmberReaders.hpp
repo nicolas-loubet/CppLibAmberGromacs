@@ -786,7 +786,7 @@ class AmberCoordinateReader : public CoordinateReader {
             return true;
         }
 
-        bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule* molecs, Vector& bounds) const override{
+        bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs, Vector& bounds) const override {
             ifstream f(filename);
             if(!f.is_open()) {
                 cout << "Failed to open file " << filename << endl;
@@ -826,23 +826,19 @@ class AmberCoordinateReader : public CoordinateReader {
                 }
             }
             
-            
+            getline(f,line);
+            if(line.rfind("CRYST1",0) == 0)
+                bounds= Vector( stof(line.substr(6,9)) , stof(line.substr(15,9)) , stof(line.substr(24,9)) );
                 
             for(int i= 0; i < topol_info.num_molecules; i++)
             {
-                
                 const auto& atom_data= topol_info.atom_type_name_charge_mass[i];
                 Atom* atoms= new Atom[atom_data.size()];
 
                 number_of_atoms=0;
                 while(getline(f,line)) {
-                    if(line.rfind("CRYST1",0) == 0) {
-                        bounds= Vector( stof(line.substr(6,9)) , stof(line.substr(15,9)) , stof(line.substr(24,9)) );
-                        break;
-                    }
                     if(line.rfind("TER  ",0) == 0) {break;}
                     if(line.rfind("ATOM  ",0) == 0 || line.rfind("HETATM",0) == 0) {
-
                         float x=stof(ToolKit::strip(line.substr(26, 12)));
                         float y=stof(ToolKit::strip(line.substr(38, 8)));
                         float z=stof(ToolKit::strip(line.substr(46, 8)));
@@ -857,23 +853,23 @@ class AmberCoordinateReader : public CoordinateReader {
                 }
                 if(is_water != "WAT")
                 {
-                    molecs[i] = Molecule(i+1, atoms, number_of_atoms);
+                    molecs[i] = new Molecule(i+1, atoms, number_of_atoms);
                     continue;
                 }
 
                 switch(water_type)
                 {
                     case 1: //TIP3P
-                        molecs[i] = TIP3PWater(i+1, atoms);
+                        molecs[i] = new TIP3PWater(i+1, atoms);
                     break;
                     case 2: //TIP4P/2005
-                        molecs[i] = TIP4PWater(i+1, atoms);
+                        molecs[i] = new TIP4PWater(i+1, atoms);
                     break;
                     case 3: //SPC/E
-                        molecs[i] = SPCEWater(i+1, atoms);
+                        molecs[i] = new SPCEWater(i+1, atoms);
                     break;
                     case 4: //TIP5P-2018
-                        molecs[i] = TIP5PWater(i+1, atoms);
+                        molecs[i] = new TIP5PWater(i+1, atoms);
                     break;
                 }
             }

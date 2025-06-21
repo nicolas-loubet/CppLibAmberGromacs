@@ -54,7 +54,7 @@ public:
      * @param bounds The system bounds to be modified (Vector object still not created)
      * @return True if the coordinates were read successfully
      */
-    virtual bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule* molecs, Vector& bounds) const= 0;
+    virtual bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs, Vector& bounds) const= 0;
 
     static vector<pair<int,string>> getFileIterator(const string& directory, const string& pattern) {
         string regex_pattern= regex_replace(pattern, regex("\\*"), "(\\d+)");

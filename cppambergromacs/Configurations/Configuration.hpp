@@ -19,9 +19,48 @@ using namespace std;
  */
 class Configuration {
 	protected:
-		Molecule* molecs; //Array of molecule pointers
+		Molecule** molecs; //Array of molecule pointers
 		int N_MOLEC; //The number of Molecule objects in the array
 		Vector bounds; //The bounds of the system
+
+		void addToSumVector(vector<Vector>& sites, vector<float>& sum_per_site, Water& center_water, Atom& atom, const float R_CUT_OFF) {
+			int i_close= 0;
+			float d_close= distancePBC(sites[0],atom.getPosition(),bounds);
+			for(int i= 1; i < 4; i++) {
+				float d_new= distancePBC(sites[i],atom.getPosition(),bounds);
+				if(d_close > d_new) {
+					i_close= i;
+					d_close= d_new;
+				}
+			}
+			if(d_close <= R_CUT_OFF) {
+				sum_per_site[i_close]+= center_water.potentialWith(atom,bounds);
+			}
+		}
+
+		void addToSumVector(vector<Vector>& sites, vector<float>& sum_per_site, Water& center_water, Water& other, float** potential_matrix, ToolKit::ArrInt* neighbours, const float R_CUT_OFF) {
+			int i_close= 0;
+			float d_close= distancePBC(sites[0],other.getPosition(),bounds);
+			for(int i= 1; i < 4; i++) {
+				float d_new= distancePBC(sites[i],other.getPosition(),bounds);
+				if(d_close > d_new) {
+					i_close= i;
+					d_close= d_new;
+				}
+			}
+			if(d_close <= R_CUT_OFF) {
+				if(potential_matrix != nullptr) {
+					int min= (center_water.getID() < other.getID()  ?  center_water.getID() : other.getID()) - 1;
+					int max= (center_water.getID() > other.getID()  ?  center_water.getID() : other.getID()) - 1;
+					if(potential_matrix[max][min] == NOT_CLASSIFIED)
+						potential_matrix[max][min]= center_water.potentialWith(other,bounds);
+					sum_per_site[i_close]+= potential_matrix[max][min];
+					if(neighbours != nullptr)
+						neighbours[center_water.getID()-1].arr[neighbours[center_water.getID()-1].size++]= other.getID();
+				} else
+					sum_per_site[i_close]+= center_water.potentialWith(other,bounds);
+			}
+		}
 
 	public:
 		static constexpr int CLASSIFICATION_D_MOLECULE= 0;
@@ -31,7 +70,7 @@ class Configuration {
 
 		//Getters
 		int getNMolec() const { return N_MOLEC; }
-		const Molecule& getMolec(int id) const { return (molecs[id-1]); }
+		const Molecule& getMolec(int id) const { return (*molecs[id-1]); }
 		Vector getBounds() const { return bounds; }
 
 		/**
@@ -41,7 +80,7 @@ class Configuration {
 		 */
 		Configuration(CoordinateReader* coord_reader, const string& filename, TopolInfo& topol_info) {
 			N_MOLEC= topol_info.num_molecules;
-			molecs= new Molecule[N_MOLEC];
+			molecs= new Molecule*[N_MOLEC];
 	
 			if(!coord_reader->readCoordinates(filename, topol_info, molecs, bounds))
 				throw runtime_error("Failed to read coordinates");
@@ -51,7 +90,9 @@ class Configuration {
 		 * Destructor. It destroys the molecule array
 		 */
 		~Configuration() {
-			delete(molecs);
+			for(int i= 0; i < N_MOLEC; i++)
+				delete molecs[i];
+			delete[] molecs;
 		}
 
 		/**
@@ -66,7 +107,7 @@ class Configuration {
 
 			for(int i= 1; i <= N_MOLEC; i++) {
 				if(i == ID_CENTER) continue; //If it is the same molecule
-				if(molecs[ID_CENTER-1].distanceTo(molecs[i-1], bounds) <= D_MAX_NEI)
+				if(getMolec(ID_CENTER).distanceTo(getMolec(i), bounds) <= D_MAX_NEI)
 					i_nearby[counter++]= i;
 			}
 
@@ -88,9 +129,9 @@ class Configuration {
 
 			for(int j= 0; j < N_MOLEC; j++) {
 				if(j+1 == ID_CENTER) continue; //If they are the same molecule
-				if(molecs[ID_CENTER-1].distanceTo(molecs[j], bounds) > MAX_V4) continue; //Cutoff use
-				Water* w= dynamic_cast<Water*>(&molecs[ID_CENTER-1]);
-				Water* w2= dynamic_cast<Water*>(&molecs[j]);
+				if(getMolec(ID_CENTER).distanceTo(getMolec(j+1), bounds) > MAX_V4) continue; //Cutoff use
+				Water* w= dynamic_cast<Water*>(molecs[ID_CENTER-1]);
+				Water* w2= dynamic_cast<Water*>(molecs[j]);
 				if(w==nullptr || w2==nullptr) continue;
 				ls_V[ls_V_i++]= w->potentialWith(*w2, bounds);
 			}
@@ -121,7 +162,7 @@ class Configuration {
 		 */
 		bool isD(const int ID_CENTER, const int V_index=4, const float threshold=-12.0) {
 			//If it has been classified, it returns that value
-			Water* m= dynamic_cast<Water*>(&molecs[ID_CENTER-1]);
+			Water* m= dynamic_cast<Water*>(molecs[ID_CENTER-1]);
 			if(m==nullptr) return false; //If it is not a Water
 			if(m->getClassification() != NOT_CLASSIFIED) return m->getClassification()==CLASSIFICATION_D_MOLECULE;
 
@@ -141,10 +182,10 @@ class Configuration {
 		void expandClassification(const int ID_CENTER) {
 			ToolKit::ArrInt neighbours= findNearby(ID_CENTER,3.2);
 
-			Water* molec= dynamic_cast<Water*>(&molecs[ID_CENTER-1]);
+			Water* molec= dynamic_cast<Water*>(molecs[ID_CENTER-1]);
 			if(molec==nullptr) return;
 			for(int i= 0; i < neighbours.size; i++) {
-				Water* molec2= dynamic_cast<Water*>(&molecs[neighbours.arr[i]-1]);
+				Water* molec2= dynamic_cast<Water*>(molecs[neighbours.arr[i]-1]);
 				if(molec2==nullptr) continue;
 				if(molec2->getClassification() <= molec->getClassification()+1) continue;
 
@@ -166,8 +207,8 @@ class Configuration {
 
 			for(int i= 0; i < N_MOLEC; i++) {
 				if(i+1 == m->getID()) continue; //If they are the same molecule
-				if(m->distanceTo(molecs[i], bounds) > MAX_V4) continue; //Cutoff use
-				Water* w2= dynamic_cast<Water*>(&molecs[i]);
+				if(m->distanceTo(getMolec(i+1), bounds) > MAX_V4) continue; //Cutoff use
+				Water* w2= dynamic_cast<Water*>(molecs[i]);
 				if(w2==nullptr) continue;
 				int min= i<m->getID()-1?i:m->getID()-1;
 				int max= i>m->getID()-1?i:m->getID()-1;
@@ -224,7 +265,7 @@ class Configuration {
 				vector<float> pots_neighs_vector;
 				vector<int> neighs_vector;
 
-				Water* w= dynamic_cast<Water*>(&molecs[i]);
+				Water* w= dynamic_cast<Water*>(molecs[i]);
 				if(w==nullptr) continue;
 
 				getNeighboursByPotential(w, pots_neighs_vector, neighs_vector, potential_matrix);
@@ -241,7 +282,7 @@ class Configuration {
 			//The same for T1, searching T0 neighbours
 			for(int t_order= CLASSIFICATION_T0_MOLECULE; t_order <= CLASSIFICATION_T1_MOLECULE; t_order++)
 				for(int i= 0; i < N_MOLEC; i++) {
-					Water* w= dynamic_cast<Water*>(&molecs[i]);
+					Water* w= dynamic_cast<Water*>(molecs[i]);
 					if(w==nullptr) continue;
 					if(w->getClassification() != CLASSIFICATION_T2_MOLECULE) continue;
 
@@ -252,7 +293,7 @@ class Configuration {
 					Sorter::cosort(pots_neighs_vector, neighs_vector, true);
 
 					for(int i_v= 0; i_v < V_index; i_v++) {
-						Water* neigh= dynamic_cast<Water*>(&molecs[neighs_vector[i_v]-1]);
+						Water* neigh= dynamic_cast<Water*>(molecs[neighs_vector[i_v]-1]);
 						
 						if(neigh->getClassification() == t_order-1) {
 							w->setClassification(t_order);
@@ -272,44 +313,34 @@ class Configuration {
 		 * @param R_CUT_OFF The cutoff radius, default is 5.
 		 * @return The interactions per site, sorted in descending order
 		 */
-		vector<float> getInteractionsPerSite(const int ID, float** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr, const float R_CUT_OFF= 5.) {
-			Water* molecule= dynamic_cast<Water*>(&molecs[ID-1]);
-			if(molecule == nullptr) throw runtime_error("Error: getInteractionsPerSite(ID, float**, ToolKit::ArrInt*, const float R_CUT_OFF) -> molecule is not a water");
-			Vector o= molecule->getOxygen().getPosition();
-			Vector h1= molecule->getHydrogen_1().getPosition();
-			Vector h2= molecule->getHydrogen_2().getPosition();
+		vector<float> getInteractionsPerSite(const int ID, const float R_CUT_OFF= 5., float** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr) {
+			Water& molecule= *dynamic_cast<Water*>(molecs[ID-1]);
+			Vector o= molecule.getOxygen().getPosition();
+			Vector h1= molecule.getHydrogen_1().getPosition();
+			Vector h2= molecule.getHydrogen_2().getPosition();
 			Geometrics::TetrahedronVertices t= Geometrics::getPerfectTetrahedron(o, h1, h2, bounds);
-
+			
 			vector<float> sum_per_site(4,0.0f);
-			Vector sites[4]= {t.H1, t.H2, t.L1, t.L2};
+			vector<Vector> sites= {t.H1, t.H2, t.L1, t.L2};
 			
 			for(int j= 0; j < N_MOLEC; j++) {
-				if(j+1==ID) continue;
-				bool consider_ion= false;
-				if(molecule->distanceTo(molecs[j], bounds) > R_CUT_OFF+1.1) {
-					if(-1 < molecs[j].getCharge() && molecs[j].getCharge() < 1) continue;
-					consider_ion= true;
+				if(j+1 == ID) continue; // Same molecule, skip
+				
+				if((getMolec(j+1).getNAtoms() == 1) && (getMolec(j+1).getCharge() >= 1 || getMolec(j+1).getCharge() <= -1)) {
+					// We found a ion, consider it always
+					addToSumVector(sites, sum_per_site, molecule, getMolec(j+1).getAtom(1), R_CUT_OFF);
+					continue;
 				}
-				int i_close= 0;
-				float d_close= distancePBC(sites[0],molecs[j].getPosition(),bounds);
-				for(int i= 1; i < 4; i++) {
-					float d_new= distancePBC(sites[i],molecs[j].getPosition(),bounds);
-					if(d_close > d_new) {
-						i_close= i;
-						d_close= d_new;
-					}
-				}
-				if(d_close <= R_CUT_OFF || consider_ion) {
-					if(potential_matrix != nullptr) {
-						int min= ID-1 < j  ?  ID-1 : j;
-						int max= ID-1 > j  ?  ID-1 : j;
-						if(potential_matrix[max][min] == NOT_CLASSIFIED)
-							potential_matrix[max][min]= molecule->potentialWith(molecs[j],bounds);
-						sum_per_site[i_close]+= potential_matrix[max][min];
-						if(neighbours != nullptr)
-							neighbours[ID-1].arr[neighbours[ID-1].size++]= j+1;
-					} else
-						sum_per_site[i_close]+= molecule->potentialWith(molecs[j],bounds);
+				
+				Water* other= dynamic_cast<Water*>(molecs[j]);
+				if(other != nullptr) { // We found a water molecule
+					if(molecule.distanceTo(*other,bounds) > R_CUT_OFF+1.1) continue;
+					addToSumVector(sites, sum_per_site, molecule, *other, potential_matrix, neighbours, R_CUT_OFF);
+				} else { // We found another type of molecule, study atom by atom
+					for(int a= 1; a <= getMolec(j+1).getNAtoms(); a++)
+						if(molecule.distanceTo(getMolec(j+1).getAtom(a),bounds) < R_CUT_OFF+1.1) {
+							addToSumVector(sites, sum_per_site, molecule, getMolec(j+1).getAtom(a), R_CUT_OFF);
+						}
 				}
 			}
 
@@ -320,26 +351,27 @@ class Configuration {
 		/**
 		 * It returns the V_4S value of the molecule specified by its ID
 		 * @param ID The ID of the molecule
+		 * @param i_V The potential number V_index of a sorted list of all potentials, default is 4
 		 * @param R_CUT_OFF The cutoff radius, default is 5.
 		 * @return The V_4S value
 		 */
-		float v_4S(const int ID, const float R_CUT_OFF= 5.) {
-			vector<float> interactions= getInteractionsPerSite(ID, nullptr, nullptr, R_CUT_OFF);
-			float v4s= interactions[3];
-			return v4s;
+		float v_4S(const int ID, const int i_V= 4, const float R_CUT_OFF= 5.) {
+			return getInteractionsPerSite(ID, R_CUT_OFF, nullptr, nullptr)[i_V-1];
 		}
 
 		/**
 		 * It returns an array with the V_4S values of all molecules
+		 * @param inic_value The initial value of the array (first water molecule), default is 1
 		 * @param i_V The potential number V_index of a sorted list of all potentials, default is 4
+		 * @param R_CUT_OFF The cutoff radius, default is 5.
 		 * @param neighbours An array with the neighbours of each molecule, default is nullptr
 		 * @return An array with the V_4S values
 		 */
-		float* v_4S_arr(const int i_V= 4, ToolKit::ArrInt* neighbours= nullptr) {
+		float* v_4S_arr(const int inic_value= 1, const int i_V= 4, const float R_CUT_OFF= 5., ToolKit::ArrInt* neighbours= nullptr) {
 			float* output= new float[N_MOLEC];
 			float** pm= createPotentialMatrix();
-			for(int i= 0; i < N_MOLEC; i++)
-				output[i]= getInteractionsPerSite(i+1,pm,neighbours)[i_V-1];
+			for(int i= inic_value; i < N_MOLEC; i++)
+				output[i-inic_value]= getInteractionsPerSite(i,R_CUT_OFF,pm,neighbours)[i_V-1];
 			deletePotentialMatrix(pm);
 			return output;
 		}
@@ -358,11 +390,11 @@ class Configuration {
 
 			for(int i= 0; i < N_MOLEC; i++) {
 				if(i+1 == m->getID()) continue;
-				dist= m->distanceTo(molecs[i], bounds);
+				dist= m->distanceTo(getMolec(i+1), bounds);
 
 				if(dist > MAX_D_ANALYSIS) continue;
 
-				Water* w2= dynamic_cast<Water*>(&molecs[i]);
+				Water* w2= dynamic_cast<Water*>(molecs[i]);
 				if(w2==nullptr) continue;
 
 				if(m->isHB(*w2, bounds, MAX_D_HB, MAX_A_HB))
@@ -391,7 +423,7 @@ class Configuration {
 
 			for(int j= 1; j <= N_MOLEC; j++) {
 				if(j==id) continue;
-				float d= molecs[id-1].distanceTo(molecs[j-1], bounds);
+				float d= getMolec(id).distanceTo(getMolec(j), bounds);
 				if(d > R_MAX) {
 					if(d < dist_peripheral)
 						dist_peripheral= d;

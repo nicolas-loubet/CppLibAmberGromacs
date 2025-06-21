@@ -9,8 +9,10 @@ int main() {
 
     CoordinateReader* cr= ReaderFactory::createCoordinateReader(ReaderFactory::ProgramFormat::AMBER);
     ToolKit::takeTime([&ti,&f,&cr]() {
-        for(int i= 0; i < 100; i++) {
+        for(int i= 0; i < 1; i++) {
             Configuration conf= Configuration(cr, f, ti);
+            vector<float> vis= conf.getInteractionsPerSite(13722);
+            cout << vis[0] << "\t" << vis[1] << "\t" << vis[2] << "\t" << vis[3] << endl;
         }
     });
 

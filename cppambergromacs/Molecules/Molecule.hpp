@@ -30,9 +30,10 @@ class Molecule : public Particle{
 		}
 
 	public:
-		Molecule() : Particle(), atoms(nullptr), n_atoms(0) {}
-		Molecule(int id, Atom* Atoms, int nAtoms) : Particle(centerOfMass(Atoms,nAtoms), id, totalMass(Atoms, nAtoms),totalCharge(Atoms, nAtoms)), atoms(Atoms),n_atoms(nAtoms){}
-
+		Molecule(int id, Atom* Atoms, int nAtoms, Vector pos_molecule) : Particle(pos_molecule, id, totalMass(Atoms,nAtoms), totalCharge(Atoms,nAtoms)), atoms(Atoms), n_atoms(nAtoms){}
+		Molecule(int id, Atom* Atoms, int nAtoms) : Molecule(id, Atoms, nAtoms, centerOfMass(Atoms,nAtoms)) {}
+		Molecule() : Molecule(0,nullptr,0) {}
+		
 		static Vector centerOfMass(Atom* Atoms, int nAtoms){
 			Vector com ={0.0f,0.0f,0.0f};
 			for(int _i=0;_i<nAtoms;++_i){
@@ -42,13 +43,10 @@ class Molecule : public Particle{
 		}
 
 		virtual ~Molecule() { //I need to set it virtual so I can use dynamic_cast with Water
-			if (atoms)
-			{
-        	delete[] atoms;
-			}
+			if(atoms) delete[] atoms;
 		}
 		Atom* getAtoms() const {return(atoms);}
-		const Atom& getAtom(int id) const { return(atoms[id - 1]); }
+		Atom& getAtom(int id) const { return(atoms[id-1]); }
 		int getNAtoms() const {return(n_atoms);}
 };
 

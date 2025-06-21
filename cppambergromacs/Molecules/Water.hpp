@@ -33,7 +33,7 @@ class Water : public Molecule {
 		 * @param id Number of ID to identify the molecule in the configuration
 		 * @param atoms *Atom for the oxygen and the two hydrogens
 		 */
-		Water(const int id, Atom* atoms): Molecule(id, atoms, 3), classif(NOT_CLASSIFIED) {}
+		Water(const int id, Atom* atoms): Molecule(id, atoms, 3, atoms[0].getPosition()), classif(NOT_CLASSIFIED) {}
 
 		/**
 		 * Virtual destructor
@@ -102,6 +102,25 @@ class Water : public Molecule {
 					
 			return Vtot;
 		}
+
+		/**
+		 * Calculates the potential of this molecule with an atom
+		 * @param atom Atom interacting with this molecule
+		 * @param bounds The coordinate of the last point, so the components are the width, height and length
+		 * @return the potential energy in kJ/mol of the interaction between this two molecules
+		 */
+		float potentialWith(const Atom& atom, const Vector& bounds) {
+			float s= .5*(atoms[0].getSigma_AO() + atom.getSigma_AO());
+			float e= sqrt(atoms[0].getEpsilon_AO() * atom.getEpsilon_AO());
+
+			float Vtot= getLJPotential(atom, s, e, bounds);
+
+			for(int i= 0; i < n_atoms; i++)
+				Vtot+= atoms[i].getCoulombPotential(atom,bounds);
+					
+			return Vtot;
+		}
+
 };
 
 
