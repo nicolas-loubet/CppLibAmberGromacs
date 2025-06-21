@@ -18,6 +18,7 @@ class Water : public Molecule {
 		int classif;
 
 	public:
+		static constexpr float M_PI= 3.14159f;
 		//Setters and getters
 		void setClassification(const int c) { classif= c; }
 		void removeClassification() { classif= NOT_CLASSIFIED; }

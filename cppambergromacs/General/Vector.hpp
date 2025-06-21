@@ -15,6 +15,7 @@
  */
 class Vector {
 	public:
+		static constexpr float M_PI= 3.14159f;
 		static constexpr float EPSILON= 1e-5f;
 		static constexpr float RAD2DEG= 180.0f / static_cast<float>(M_PI);
 	
