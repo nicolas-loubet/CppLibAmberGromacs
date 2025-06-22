@@ -15,9 +15,9 @@
  */
 class Vector {
 	public:
-		static constexpr float M_PI= 3.14159f;
+		static constexpr double PI = 3.14159265358979323846;
 		static constexpr float EPSILON= 1e-5f;
-		static constexpr float RAD2DEG= 180.0f / static_cast<float>(M_PI);
+		static constexpr float RAD2DEG= 180.0f / static_cast<float>(PI);
 	
 		float x, y, z;
 
@@ -404,7 +404,7 @@ inline float squaredDistancePBC(const Vector& a, const Vector& b, const Vector& 
  * Compute the angle (in radians) between two vectors
  * @param a First vector
  * @param b Second vector
- * @return Angle between a and b in radians (0 <= angle <= M_PI)
+ * @return Angle between a and b in radians (0 <= angle <= PI)
  */
 inline float angleBetweenRadians(const Vector& a, const Vector& b) {
 	float dotProduct= a*b;

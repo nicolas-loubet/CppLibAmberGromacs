@@ -18,7 +18,6 @@ class Water : public Molecule {
 		int classif;
 
 	public:
-		static constexpr float M_PI= 3.14159f;
 		//Setters and getters
 		void setClassification(const int c) { classif= c; }
 		void removeClassification() { classif= NOT_CLASSIFIED; }
@@ -61,7 +60,7 @@ class Water : public Molecule {
 		bool isHB(const Water& m, const Vector& bounds, const float MAX_D_HB= 3.5, const float MAX_A_HB= 30) const {
 			if(distanceTo(m, bounds) > MAX_D_HB) return false;
 
-			const float MAX_A_HB_RAD= MAX_A_HB*M_PI/180.;
+			const float MAX_A_HB_RAD= MAX_A_HB*Vector::PI/180.;
 			Atom* atoms_other= m.getAtoms();
 			if(getAngle(atoms[0].getPosition(), atoms_other[0].getPosition(), atoms_other[1].getPosition(), bounds) < MAX_A_HB_RAD) return true;
 			if(getAngle(atoms[0].getPosition(), atoms_other[0].getPosition(), atoms_other[2].getPosition(), bounds) < MAX_A_HB_RAD) return true;

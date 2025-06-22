@@ -691,8 +691,6 @@ class AmberTopologyReader : public TopologyReader {
             map<string,int> type_atomic_z = type_atomic_number(dict_pointers, atom_type_index,atomic_number,ati_to_amber_type);
             map<string,string> name_types = read_name_type(dict_pointers, atom_names,atom_type_index,ati_to_amber_type);
 
-            cout << "File read correctly: " << filename << endl;
-            
             topology.num_molecules=number_solute_solvent[1];
 			topology.num_solutes=number_solute_solvent[0];
 			topology.num_solvents=number_solute_solvent[1]-number_solute_solvent[0];
