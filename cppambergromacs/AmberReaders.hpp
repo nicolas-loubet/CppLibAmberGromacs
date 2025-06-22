@@ -660,21 +660,21 @@ class AmberTopologyReader : public TopologyReader {
 
             ifstream file(filename);
 
-            cout << "!" << endl; map<string, int> positions_of_flags=flag_position(file);
-            cout << "!" << endl; map<string,int> dict_pointers = read_pointers(file,positions_of_flags["POINTERS"]);
-            cout << "!" << endl; vector<string> atom_names = read_atom_name(file, dict_pointers,positions_of_flags["ATOM_NAME"]);
-            cout << "!" << endl; vector<tuple<string,float>> map_atoms = read_charge(file, dict_pointers, atom_names ,positions_of_flags["CHARGE"]);
-            cout << "!" << endl; vector<int> number_solute_solvent =read_solvent_pointers(file, dict_pointers,positions_of_flags["SOLVENT_POINTERS"]);
-            cout << "!" << endl; vector<string> ati_to_amber_type=atom_type_index_to_amber_type(file,  dict_pointers , positions_of_flags);        
-            cout << "!" << endl; vector<int> atomic_number=read_atomic_number(file,dict_pointers,positions_of_flags["ATOMIC_NUMBER"]); 
-            cout << "!" << endl; map<string,tuple<int,int>> atoms_per_diff_molecule=read_atoms_per_different_molecule(file, positions_of_flags);
-            cout << "!" << endl; vector<int> atoms_per_molecule = read_atoms_per_molecule(file, dict_pointers,positions_of_flags["SOLVENT_POINTERS"]); 
-            cout << "!" << endl; vector<int> atom_type_index=read_ati(file,dict_pointers,positions_of_flags["ATOM_TYPE_INDEX"]); 
-            cout << "!" << endl; vector<float> mass=read_mass(file,dict_pointers,positions_of_flags["MASS"]);
-            cout << "!" << endl; map<pair<string,string>,pair<float,float>> lj_coefficient=read_lj(file,dict_pointers,positions_of_flags["LENNARD_JONES_ACOEF"],  ati_to_amber_type);
-            cout << "!" << endl; map<string,pair<float,float>> lj_diagonal= read_lj_diagonal(lj_coefficient);
-            cout << "!" << endl; map<string,int> type_atomic_z = type_atomic_number(dict_pointers, atom_type_index,atomic_number,ati_to_amber_type);
-            cout << "!" << endl; map<string,string> name_types = read_name_type(dict_pointers, atom_names,atom_type_index,ati_to_amber_type);
+            cout << "1" << endl; map<string, int> positions_of_flags=flag_position(file);
+            cout << "2" << endl; map<string,int> dict_pointers = read_pointers(file,positions_of_flags["POINTERS"]);
+            cout << "3" << endl; vector<string> atom_names = read_atom_name(file, dict_pointers,positions_of_flags["ATOM_NAME"]);
+            cout << "4" << endl; vector<tuple<string,float>> map_atoms = read_charge(file, dict_pointers, atom_names ,positions_of_flags["CHARGE"]);
+            cout << "5" << endl; vector<int> number_solute_solvent =read_solvent_pointers(file, dict_pointers,positions_of_flags["SOLVENT_POINTERS"]);
+            cout << "6" << endl; vector<string> ati_to_amber_type=atom_type_index_to_amber_type(file,  dict_pointers , positions_of_flags);        
+            cout << "7" << endl; vector<int> atomic_number=read_atomic_number(file,dict_pointers,positions_of_flags["ATOMIC_NUMBER"]); 
+            cout << "8" << endl; map<string,tuple<int,int>> atoms_per_diff_molecule=read_atoms_per_different_molecule(file, positions_of_flags);
+            cout << "9" << endl; vector<int> atoms_per_molecule = read_atoms_per_molecule(file, dict_pointers,positions_of_flags["SOLVENT_POINTERS"]); 
+            cout << "10" << endl; vector<int> atom_type_index=read_ati(file,dict_pointers,positions_of_flags["ATOM_TYPE_INDEX"]); 
+            cout << "11" << endl; vector<float> mass=read_mass(file,dict_pointers,positions_of_flags["MASS"]);
+            cout << "12" << endl; map<pair<string,string>,pair<float,float>> lj_coefficient=read_lj(file,dict_pointers,positions_of_flags["LENNARD_JONES_ACOEF"],  ati_to_amber_type);
+            cout << "13" << endl; map<string,pair<float,float>> lj_diagonal= read_lj_diagonal(lj_coefficient);
+            cout << "14" << endl; map<string,int> type_atomic_z = type_atomic_number(dict_pointers, atom_type_index,atomic_number,ati_to_amber_type);
+            cout << "15" << endl; map<string,string> name_types = read_name_type(dict_pointers, atom_names,atom_type_index,ati_to_amber_type);
             
             topology.num_molecules=number_solute_solvent[1];
 			topology.num_solutes=number_solute_solvent[0];
@@ -816,7 +816,7 @@ class AmberCoordinateReader : public CoordinateReader {
             getline(f,line);
             if(line.rfind("CRYST1",0) == 0)
                 bounds= Vector( stof(line.substr(6,9)) , stof(line.substr(15,9)) , stof(line.substr(24,9)) );
-            
+            cout<<topol_info.num_molecules<<endl;
             for(int i= 0; i < topol_info.num_molecules; i++)
             {
                 const auto& atom_data= topol_info.atom_type_name_charge_mass[i];
@@ -824,7 +824,10 @@ class AmberCoordinateReader : public CoordinateReader {
 
                 number_of_atoms=0;
                 while(getline(f,line)) {
-                    if(line.rfind("TER  ",0) == 0) {break;}
+                    if(line.rfind("TER",0) == 0) 
+                        {
+                            break;
+                        }
                     if(line.rfind("ATOM  ",0) == 0 || line.rfind("HETATM",0) == 0) {
                         float x=stof(ToolKit::strip(line.substr(26, 12)));
                         float y=stof(ToolKit::strip(line.substr(38, 8)));

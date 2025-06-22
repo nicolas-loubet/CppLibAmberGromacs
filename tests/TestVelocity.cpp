@@ -27,7 +27,7 @@ int main() {
             cout << "Leo conf" << endl;
             Configuration conf= Configuration(cr, f, ti);
             cout << "Leida" << endl;
-            vector<float> vis= conf.getInteractionsPerSite(13722);
+            vector<float> vis= conf.getInteractionsPerSite(1);
             cout << vis[0] << "\t" << vis[1] << "\t" << vis[2] << "\t" << vis[3] << endl;
         }
     });
