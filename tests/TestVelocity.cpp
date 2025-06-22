@@ -16,18 +16,14 @@ int main() {
         }
     });*/
 
-    cout << "Leo ti" << endl;
     TopolInfo ti= ReaderFactory::createTopologyReader(ReaderFactory::ProgramFormat::AMBER)->readTopology("../files/control_bulk_amber.prmtop");
-    cout << "Leido" << endl;
     string f= "../files/control_bulk_amber.pdb";
 
     CoordinateReader* cr= ReaderFactory::createCoordinateReader(ReaderFactory::ProgramFormat::AMBER);
     ToolKit::takeTime([&ti,&f,&cr]() {
         for(int i= 0; i < 1; i++) {
-            cout << "Leo conf" << endl;
             Configuration conf= Configuration(cr, f, ti);
-            cout << "Leida" << endl;
-            vector<float> vis= conf.getInteractionsPerSite(1);
+            vector<float> vis= conf.getInteractionsPerSite(4092);
             cout << vis[0] << "\t" << vis[1] << "\t" << vis[2] << "\t" << vis[3] << endl;
         }
     });

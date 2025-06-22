@@ -816,7 +816,7 @@ class AmberCoordinateReader : public CoordinateReader {
             getline(f,line);
             if(line.rfind("CRYST1",0) == 0)
                 bounds= Vector( stof(line.substr(6,9)) , stof(line.substr(15,9)) , stof(line.substr(24,9)) );
-            cout<<topol_info.num_molecules<<endl;
+            
             for(int i= 0; i < topol_info.num_molecules; i++)
             {
                 const auto& atom_data= topol_info.atom_type_name_charge_mass[i];
