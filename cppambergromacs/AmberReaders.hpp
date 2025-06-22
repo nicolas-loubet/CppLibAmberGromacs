@@ -783,36 +783,6 @@ class AmberCoordinateReader : public CoordinateReader {
             int number_of_atoms=0;
             string is_water="";
             
-            int water_type=1; // Default type is TIP3P water 
-            for (const auto& par : topol_info.type_LJparam)  // search OW in type_LJparam only once per PDB file
-            {
-                if(par.first=="OW")
-                {
-                    float epsilon_water=get<0>(topol_info.type_LJparam.at("OW")); //obtain epsilon of water
-                    int epsilon_value = static_cast<int>(epsilon_water*1000); //switch only accepts int or enum so epsilon is converted to int
-                    
-                    switch(epsilon_value) //switch is faster thas nested ifs
-                    {
-                        case 635:
-                        case 636: //TIP3P
-                            water_type=1;
-                        break;
-                        case 774: //TIP4P/2005
-                            water_type=2;
-                        break;
-                        case 650: //SPC/E
-                            water_type=3;
-                        break;
-                        case 790: //TIP5P-2018
-                            water_type=4;
-                        break;
-                        default:
-                            throw std::runtime_error("Unsupported water model");
-                    }
-                    break;
-                }
-            }
-            
             getline(f,line);
             if(line.rfind("CRYST1",0) == 0)
                 bounds= Vector( stof(line.substr(6,9)) , stof(line.substr(15,9)) , stof(line.substr(24,9)) );
@@ -846,21 +816,9 @@ class AmberCoordinateReader : public CoordinateReader {
                     molecs[i] = new Molecule(i+1, atoms, number_of_atoms);
                     continue;
                 }
-
-                switch(water_type)
+                else
                 {
-                    case 1: //TIP3P
-                        molecs[i] = new TIP3PWater(i+1, atoms);
-                    break;
-                    case 2: //TIP4P/2005
-                        molecs[i] = new TIP4PWater(i+1, atoms);
-                    break;
-                    case 3: //SPC/E
-                        molecs[i] = new SPCEWater(i+1, atoms);
-                    break;
-                    case 4: //TIP5P-2018
-                        molecs[i] = new TIP5PWater(i+1, atoms);
-                    break;
+                    molecs[i] = new Water(i+1, atoms, number_of_atoms);
                 }
             }
             f.close();
