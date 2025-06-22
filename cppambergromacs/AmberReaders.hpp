@@ -17,14 +17,12 @@ class AmberTopologyReader : public TopologyReader {
         {
             string line="";
             map<string, int> flag;
-            bool inFlag=false;
             while (getline(file, line)) {
                 
                 if (line.find("%FLAG") != string::npos) {
                     line=ToolKit::strip(line.substr(5, 80));
-                    inFlag = true;
                     flag[line]=file.tellg();
-                    flag[line]-=200;
+                    flag[line]-=120;
                     continue;
                 }
             }
@@ -46,7 +44,7 @@ class AmberTopologyReader : public TopologyReader {
             int _i = 0;
             file_prmtop.clear();
             file_prmtop.seekg(position);
-            
+            cout <<position<<endl;
 
             while (getline(file_prmtop, line)) {
                 if (line.find("%FLAG POINTERS") != string::npos) {
@@ -131,8 +129,6 @@ class AmberTopologyReader : public TopologyReader {
                         // Skipping format line
                         continue;
                     }
-                    stringstream ss(line);
-
                     for (size_t i = 0; i + 15 < line.length(); i += 16) {
                         charges.push_back(make_tuple(atom_names[_j], stof(line.substr(i, 16))/18.2223));
                         ++_j;
@@ -690,7 +686,7 @@ class AmberTopologyReader : public TopologyReader {
             map<string,pair<float,float>> lj_diagonal= read_lj_diagonal(lj_coefficient);
             map<string,int> type_atomic_z = type_atomic_number(dict_pointers, atom_type_index,atomic_number,ati_to_amber_type);
             map<string,string> name_types = read_name_type(dict_pointers, atom_names,atom_type_index,ati_to_amber_type);
-
+            
             topology.num_molecules=number_solute_solvent[1];
 			topology.num_solutes=number_solute_solvent[0];
 			topology.num_solvents=number_solute_solvent[1]-number_solute_solvent[0];
@@ -805,6 +801,7 @@ class AmberCoordinateReader : public CoordinateReader {
                 {
                     float epsilon_water=get<0>(topol_info.type_LJparam.at("OW")); //obtain epsilon of water
                     int epsilon_value = static_cast<int>(epsilon_water*1000); //switch only accepts int or enum so epsilon is converted to int
+                    
                     switch(epsilon_value) //switch is faster thas nested ifs
                     {
                         case 635:
@@ -830,7 +827,7 @@ class AmberCoordinateReader : public CoordinateReader {
             getline(f,line);
             if(line.rfind("CRYST1",0) == 0)
                 bounds= Vector( stof(line.substr(6,9)) , stof(line.substr(15,9)) , stof(line.substr(24,9)) );
-                
+            cout<<topol_info.num_molecules<<endl;
             for(int i= 0; i < topol_info.num_molecules; i++)
             {
                 const auto& atom_data= topol_info.atom_type_name_charge_mass[i];
