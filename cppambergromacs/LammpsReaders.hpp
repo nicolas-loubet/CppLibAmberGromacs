@@ -182,7 +182,7 @@ class LammpsTopologyReader : public TopologyReader {
                 // If I find a molecule that is not a water, I use the ID as a molecule type
                 topology.number_of_each_different_molecule[to_string(mol_id)]= 1;
                 topology.name_type["Mol"+to_string(mol_id)]= "mt"+to_string(mol_id);
-                topology.number_of_atoms_per_different_molecule["Mol"+to_string(mol_id)]= atom_in_molecule_counter;
+                topology.number_of_atoms_per_different_molecule["mt"+to_string(mol_id)]= atom_in_molecule_counter;
             }
         }
 
@@ -255,32 +255,26 @@ class LammpsTopologyReader : public TopologyReader {
             return atom_keys;
         }
 
-        inline static map<string,int> mapZValues(vector<string> atom_keys) {
+        inline static map<string,int> mapZValues(vector<string> atom_keys, map<string,string> map_name_type) {
             map<string,int> Z_values;
             const map<string,int> ref_values= {{"H",1},{"C",6},{"N",7},{"O",8},{"F",9},{"Na",11},{"Mg",12},{"Cl",17},{"K",19},{"Ca",20}};
             for(string& key: atom_keys) {
                 if(ref_values.count(key)) {
-                    Z_values[key]= ref_values.at(key);
+                    Z_values[map_name_type.at("Atom"+key)]= ref_values.at(key);
                     continue;
                 }
+
                 // Remove numeric digits
                 string key_without_digits= key;
                 key_without_digits.erase(remove_if(key_without_digits.begin(), key_without_digits.end(), ::isdigit), key_without_digits.end());
                 if(ref_values.count(key_without_digits)) {
-                    Z_values[key]= ref_values.at(key_without_digits);
+                    Z_values[map_name_type.at("Atom"+key)]= ref_values.at(key_without_digits);
                     continue;
                 }
+
                 Z_values[key]= -1;
             }
             return Z_values;
-        }
-
-        inline static map<string,string> invertMapNameType(map<string,string> map_name_type) {
-            map<string,string> map_type_name;
-            for(const auto& [name,type]: map_name_type)
-                if(name.length() >= 4 && name.substr(0,4) == "Atom")
-                    map_type_name[type]= name;
-            return map_type_name;
         }
 
         /**
@@ -289,7 +283,7 @@ class LammpsTopologyReader : public TopologyReader {
          * @param position The position of the 'Pair Coeffs' section in the file.
          * @return A map of atom type IDs to their epsilon and sigma values.
          */
-        inline map<string,pair<float,float>> readLJParameters(ifstream& file, streampos position, map<string,string> map_type_name) const {
+        inline map<string,pair<float,float>> readLJParameters(ifstream& file, streampos position) const {
             map<string,pair<float,float>> lj_params;
             file.clear();
             file.seekg(position);
@@ -307,7 +301,7 @@ class LammpsTopologyReader : public TopologyReader {
                     throw runtime_error("Error reading LJ parameters from LAMMPS data file.");
                 }
 
-                lj_params[map_type_name.at("at"+to_string(atom_type_id))]= make_pair(epsilon,sigma);
+                lj_params["at"+to_string(atom_type_id)]= make_pair(epsilon,sigma);
             }
             return lj_params;
         }
@@ -370,13 +364,16 @@ class LammpsTopologyReader : public TopologyReader {
             TopolInfo topology;
             if(positions_of_sections.count("Atoms")) {
                 topology= readAtoms(file, positions_of_sections["Atoms"], atomtype_mass_name);
-                topology.type_Z= mapZValues(getKeysStartingWith(topology.name_type,"Atom"));
+                topology.type_Z= mapZValues(getKeysStartingWith(topology.name_type,"Atom"),topology.name_type);
             }
 
             if(positions_of_sections.count("Pair Coeff"))
-                topology.type_LJparam= readLJParameters(file, positions_of_sections["Pair Coeff"], invertMapNameType(topology.name_type));
+                topology.type_LJparam= readLJParameters(file, positions_of_sections["Pair Coeff"]);
             
             // Special interactions pending, not used for the moment
+
+            if(positions_of_sections.count("BoxDimensions"))
+                topology.default_system_bounds= readBoxDimensions(file);
 
             file.close();
             return topology;
@@ -384,16 +381,9 @@ class LammpsTopologyReader : public TopologyReader {
 };
 
 class LammpsCoordinateReader : public CoordinateReader {
-    private:
-        int i_frame;
     public:
-        LammpsCoordinateReader() {
-            i_frame= 0;
-        }
-
+        LammpsCoordinateReader() {}
         ~LammpsCoordinateReader()= default;
-        int getFrame() const { return i_frame; }
-        void setFrame(int frame) { i_frame= frame; }
 
         /**
          * Reads the coordinates from a LAMMPS data file. Iteration over different frames is done automatically.
@@ -421,9 +411,8 @@ class LammpsCoordinateReader : public CoordinateReader {
                 return false;
             }
             
-            for(int i_read= 0; i_read <= i_frame*(num_atoms_in_frame+2); i_read++) {
+            for(int i_read= 0; i_read <= i_frame*(num_atoms_in_frame+2); i_read++)
                 getline(f,line); // Skip to frame wanted (also kipping comments)
-            }
 
             vector<Vector> coords(num_atoms_in_frame);
             vector<string> atom_symbols(num_atoms_in_frame);
@@ -431,13 +420,12 @@ class LammpsCoordinateReader : public CoordinateReader {
             for(int i= 0; i < num_atoms_in_frame; i++) {
                 if(getline(f,line)) {
                     stringstream ss(line);
-                    string symbol;
-                    float x, y, z;
+                    string symbol; float x, y, z;
                     ss >> symbol >> x >> y >> z;
                     atom_symbols[i]= symbol;
-                    coords[i]= Vector(x, y, z);
+                    coords[i]= Vector(x,y,z);
                 } else {
-                    cout << "Error: Filed to read coordinates for frame " << i_frame << "." << endl;
+                    cout << "Error: Failed to read coordinates for frame " << i_frame << "." << endl;
                     f.close();
                     return false;
                 }
@@ -445,37 +433,41 @@ class LammpsCoordinateReader : public CoordinateReader {
 
             int global_atom_idx= 0;
             for(int i= 0; i < topol_info.num_molecules; i++) {
-                const auto& atom_data_for_this_molecule= topol_info.atom_type_name_charge_mass[i];
-                int num_atoms_per_molecule= atom_data_for_this_molecule.size();
+                int num_atoms_per_molecule= topol_info.number_of_atoms_per_different_molecule.at(topol_info.name_type.at("Mol"+to_string(i+1)));
                 Atom* atoms_array_for_molecule= new Atom[num_atoms_per_molecule];
 
                 for(int j= 0; j < num_atoms_per_molecule; j++,global_atom_idx++) {
-                    const auto& [type_name, atom_name, charge, mass]= atom_data_for_this_molecule.at(j);
+                    const auto& [type,atom_name,q,mass]= topol_info.atom_type_name_charge_mass[0].at(global_atom_idx+1);
 
-                    float epsilon= 0.0f, sigma= 0.0f;
-                    if(topol_info.type_LJparam.count(type_name)) {
-                        epsilon= topol_info.type_LJparam.at(type_name).first;
-                        sigma= topol_info.type_LJparam.at(type_name).second;
+                    float e= 0.0f, s= 0.0f;
+                    if(topol_info.type_LJparam.count(type)) {
+                        e= topol_info.type_LJparam.at(type).first;
+                        s= topol_info.type_LJparam.at(type).second;
                     } else {
-                        cout << "Error: LJ parameters not found for type " << type_name << endl;
+                        cout << "Error: LJ parameters not found for type " << type << endl;
                         f.close();
                         return false;
                     }
 
                     int Z= 0;
-                    if(topol_info.type_Z.count(type_name)) {
-                        Z= topol_info.type_Z.at(type_name);
+                    if(topol_info.type_Z.count(type)) {
+                        Z= topol_info.type_Z.at(type);
                     } else {
-                        throw runtime_error("Error: Z value not found for type " + type_name);
+                        throw runtime_error("Error: Z value not found for type " + type);
                     }
 
-                    atoms_array_for_molecule[j]= Atom(coords[global_atom_idx], j+1, mass, charge, epsilon, sigma, Z);
+                    atoms_array_for_molecule[j]= Atom(coords[global_atom_idx], j+1, mass, q, e, s, Z);
                 }
                 
-                molecs[i]= new Molecule(i+1, atoms_array_for_molecule, num_atoms_per_molecule);
+                if(i < topol_info.num_solutes) {
+                    molecs[i]= new Molecule(i+1, atoms_array_for_molecule, num_atoms_per_molecule);
+                } else {
+                    molecs[i]= new Water(i+1, atoms_array_for_molecule, num_atoms_per_molecule);
+                }
             }
 
             f.close();
+            bounds= topol_info.default_system_bounds;
             return true;
         }
 };

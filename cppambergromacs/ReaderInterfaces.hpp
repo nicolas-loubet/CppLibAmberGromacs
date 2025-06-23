@@ -33,6 +33,7 @@ struct TopolInfo {
     map<string,int> type_Z;
     map<string,pair<float,float>> type_LJparam; //0=epsilon 1=sigma
     map<pair<string,string>,pair<float,float>> special_interaction;//keep ij and ji
+    Vector default_system_bounds;
 
     TopolInfo(): num_molecules(0), num_solutes(0), num_solvents(0) {}
     ~TopolInfo()= default;
@@ -42,51 +43,57 @@ struct TopolInfo {
  * Abstract class for coordinate readers
  */
 class CoordinateReader {
-public:
-    CoordinateReader()= default;
-	virtual ~CoordinateReader()= default;
+    protected:
+        int i_frame;
+    public:
+        CoordinateReader(): i_frame(0) {}
+        virtual ~CoordinateReader()= default;
 
-    /**
-     * Reads the coordinates file
-     * @param filename The name of the coordinates file
-     * @param topol_info The topology information
-     * @param molecs An empty array of molecule pointers
-     * @param bounds The system bounds to be modified (Vector object still not created)
-     * @return True if the coordinates were read successfully
-     */
-    virtual bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs, Vector& bounds) const= 0;
+        int getFrame() const { return i_frame; }
+        void setFrame(int frame) { i_frame= frame; }
+        int incFrame() { return ++i_frame; }
 
-    static vector<pair<int,string>> getFileIterator(const string& directory, const string& pattern) {
-        string regex_pattern= regex_replace(pattern, regex("\\*"), "(\\d+)");
-        regex file_regex(regex_pattern);
-        vector<pair<int,string>> list_files;
+        /**
+         * Reads the coordinates file
+         * @param filename The name of the coordinates file
+         * @param topol_info The topology information
+         * @param molecs An empty array of molecule pointers
+         * @param bounds The system bounds to be modified (Vector object still not created)
+         * @return True if the coordinates were read successfully
+         */
+        virtual bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs, Vector& bounds) const= 0;
 
-        for(const auto& entry: filesystem::directory_iterator(directory)) {
-            if(!entry.is_regular_file()) continue;
-            string filename= entry.path().filename().string();
-            smatch match;
-            if(regex_match(filename, match, file_regex))
-                list_files.emplace_back(stoi(match[1].str()),filename);
+        static vector<pair<int,string>> getFileIterator(const string& directory, const string& pattern) {
+            string regex_pattern= regex_replace(pattern, regex("\\*"), "(\\d+)");
+            regex file_regex(regex_pattern);
+            vector<pair<int,string>> list_files;
+
+            for(const auto& entry: filesystem::directory_iterator(directory)) {
+                if(!entry.is_regular_file()) continue;
+                string filename= entry.path().filename().string();
+                smatch match;
+                if(regex_match(filename, match, file_regex))
+                    list_files.emplace_back(stoi(match[1].str()),filename);
+            }
+
+            if(list_files.empty())
+                throw runtime_error("No files found matching pattern: " + pattern);
+
+            sort(list_files.begin(), list_files.end(),
+                [](const auto& a,const auto& b) { return a.first < b.first; });
+
+            return list_files;
         }
-
-        if(list_files.empty())
-            throw runtime_error("No files found matching pattern: " + pattern);
-
-        sort(list_files.begin(), list_files.end(),
-             [](const auto& a,const auto& b) { return a.first < b.first; });
-
-        return list_files;
-    }
 };
 
 /**
  * Interface for topology readers
  */
 class TopologyReader {
-public:
-    TopologyReader()= default;
-	virtual ~TopologyReader()= default;
-	virtual TopolInfo readTopology(const string& filename) const= 0;
+    public:
+        TopologyReader()= default;
+        virtual ~TopologyReader()= default;
+        virtual TopolInfo readTopology(const string& filename) const= 0;
 };
 
 /**
