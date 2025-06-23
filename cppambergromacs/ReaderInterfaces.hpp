@@ -89,4 +89,50 @@ public:
 	virtual TopolInfo readTopology(const string& filename) const= 0;
 };
 
+/**
+ * Output stream operator for TopolInfo
+ */
+std::ostream& operator<<(std::ostream& os, const TopolInfo& info) {
+    os << "TopolInfo:\n";
+    os << "  Number of molecules: " << info.num_molecules << "\n";
+    os << "  Number of solutes: " << info.num_solutes << "\n";
+    os << "  Number of solvents: " << info.num_solvents << "\n";
+    os << "  Total number of atoms: " << info.total_number_of_atoms << "\n";
+
+    os << "  Number of each different molecule:\n";
+    for(const auto& [molecule, count]: info.number_of_each_different_molecule)
+        os << "    " << molecule << ": " << count << "\n";
+
+    os << "  Number of atoms per different molecule:\n";
+    for(const auto& [molecule, count]: info.number_of_atoms_per_different_molecule)
+        os << "    " << molecule << ": " << count << "\n";
+
+    os << "  Atom type name charge mass:\n";
+    for(size_t i = 0; i < info.atom_type_name_charge_mass.size(); i++) {
+        os << "    Map " << i << ":\n";
+        for(const auto& [index, data]: info.atom_type_name_charge_mass[i]) {
+            os << "      " << index << ": (" << std::get<0>(data) << ", "
+               << std::get<1>(data) << ", "  << std::get<2>(data) << ", " << std::get<3>(data) << ")\n";
+        }
+    }
+
+    os << "  Name type:\n";
+    for(const auto& [name, type]: info.name_type)
+        os << "    " << name << ": " << type << "\n";
+
+    os << "  Type Z:\n";
+    for(const auto& [type, z]: info.type_Z)
+        os << "    " << type << ": " << z << "\n";
+
+    os << "  Type LJ parameters:\n";
+    for (const auto& [type, params]: info.type_LJparam)
+        os << "    " << type << ": (e=" << params.first << ", s=" << params.second << ")\n";
+
+    os << "  Special interactions:\n";
+    for(const auto& [pair, params]: info.special_interaction)
+        os << "    (" << pair.first << "," << pair.second << "): (" << params.first << "," << params.second << ")\n";
+
+    return os;
+}
+
 #endif

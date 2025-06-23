@@ -8,11 +8,11 @@
 
 #include "AmberReaders.hpp"
 #include "GromacsReaders.hpp"
-// TODO: #include "LammpsReaders.hpp"
+#include "LammpsReaders.hpp"
 
 class ReaderFactory {
 	public:
-		enum class ProgramFormat { AMBER, GROMACS, LAMMPS	};
+		enum class ProgramFormat { AMBER, GROMACS, LAMMPS };
 
 		/**
 		 * Factory method to create a CoordinateReader object
@@ -26,8 +26,8 @@ class ReaderFactory {
 					return new AmberCoordinateReader();
 				case ProgramFormat::GROMACS:
 					return new GromacsCoordinateReader();
-				// TODO: case ProgramFormat::LAMMPS:
-				// TODO: 	new LammpsCoordinateReader();
+				case ProgramFormat::LAMMPS:
+				 	return new LammpsCoordinateReader();
 				default:
 					throw std::runtime_error("Unsupported coordinate format");
 			}
@@ -45,8 +45,8 @@ class ReaderFactory {
 					return new AmberTopologyReader();
 				case ProgramFormat::GROMACS:
 					return new GromacsTopologyReader();
-				// TODO: case ProgramFormat::LAMMPS:
-				// TODO: 	return new LammpsTopologyReader();
+				case ProgramFormat::LAMMPS:
+				 	return new LammpsTopologyReader();
 				default:
 					throw std::runtime_error("Unsupported topology format");
 			}

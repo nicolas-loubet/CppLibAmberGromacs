@@ -57,8 +57,9 @@ class Configuration {
 					sum_per_site[i_close]+= potential_matrix[max][min];
 					if(neighbours != nullptr)
 						neighbours[center_water.getID()-1].arr[neighbours[center_water.getID()-1].size++]= other.getID();
-				} else
+				} else {
 					sum_per_site[i_close]+= center_water.potentialWith(other,bounds);
+				}
 			}
 		}
 
