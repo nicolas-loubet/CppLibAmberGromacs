@@ -149,6 +149,14 @@ class Vector {
 		}
 
 		/**
+		 * Compute the volume of the parallelepiped formed by the three vectors
+		 * @return The volume of the parallelepiped
+		 */
+		float volumeBox() const {
+			return x*y*z;
+		}
+
+		/**
 		 * OVERLOAD of operator += for two vectors
 		 * @param v Other vector to operate
 		 * @return The sum of each component, replacing the actual object
