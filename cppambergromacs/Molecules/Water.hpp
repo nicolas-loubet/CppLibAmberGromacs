@@ -77,7 +77,7 @@ class Water : public Molecule {
 		 * @return the potential energy in kJ/mol of the interaction between this two molecules
 		 */
 		float potentialWith(const Water& m, const Vector& bounds) const {
-			float Vtot= getLJPotential(m, atoms[0].getSigma_AO(), atoms[0].getEpsilon_AO(), bounds);
+			float Vtot= getLJPotential(m, atoms[0].getSigma(), atoms[0].getEpsilon(), bounds);
 
 			Atom* arr_other= m.getAtoms();
 			for(int i= 0; i < n_atoms; i++)
@@ -96,8 +96,8 @@ class Water : public Molecule {
 		float potentialWith(const Molecule& m, const Vector& bounds) const {
 			Atom* arr_other= m.getAtoms();
 			//Combination rules: Lorentz-Berthelot
-			float s= .5*(atoms[0].getSigma_AO() + arr_other[0].getSigma_AO());
-			float e= sqrt(atoms[0].getEpsilon_AO() * arr_other[0].getEpsilon_AO());
+			float s= .5*(atoms[0].getSigma() + arr_other[0].getSigma());
+			float e= sqrt(atoms[0].getEpsilon() * arr_other[0].getEpsilon());
 
 			float Vtot= getLJPotential(m, s, e, bounds);
 
@@ -115,8 +115,8 @@ class Water : public Molecule {
 		 * @return the potential energy in kJ/mol of the interaction between this two molecules
 		 */
 		float potentialWith(const Atom& atom, const Vector& bounds) {
-			float s= .5*(atoms[0].getSigma_AO() + atom.getSigma_AO());
-			float e= sqrt(atoms[0].getEpsilon_AO() * atom.getEpsilon_AO());
+			float s= .5*(atoms[0].getSigma() + atom.getSigma());
+			float e= sqrt(atoms[0].getEpsilon() * atom.getEpsilon());
 
 			float Vtot= getLJPotential(atom, s, e, bounds);
 

@@ -10,9 +10,19 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <unordered_map>
 
 class GromacsTopologyReader : public TopologyReader {
     private:
+        static inline const unordered_map<string,int> periodic_table= {
+            {"H" , 1},                                                                                                                                                                                 {"He", 2},
+            {"Li", 3}, {"Be", 4},                                                                                                               {"B" , 5}, {"C" , 6}, {"N" , 7}, {"O" , 8}, {"F" , 9}, {"Ne",10},
+            {"Na",11}, {"Mg",12},                                                                                                               {"Al",13}, {"Si",14}, {"P" ,15}, {"S" ,16}, {"Cl",17}, {"Ar",18},
+            {"K" ,19}, {"Ca",20}, {"Sc",21}, {"Ti",22}, {"V" ,23}, {"Cr",24}, {"Mn",25}, {"Fe",26}, {"Co",27}, {"Ni",28}, {"Cu",29}, {"Zn",30}, {"Ga",31}, {"Ge",32}, {"As",33}, {"Se",34}, {"Br",35}, {"Kr",36},
+            {"Rb",37}, {"Sr",38}, {"Y" ,39}, {"Zr",40}, {"Nb",41}, {"Mo",42}, {"Tc",43}, {"Ru",44}, {"Rh",45}, {"Pd",46}, {"Ag",47}, {"Cd",48}, {"In",49}, {"Sn",50}, {"Sb",51}, {"Te",52}, {"I" ,53}, {"Xe",54},
+            {"Cs",55}, {"Ba",56}, // ...
+        };
+
         /**
          * Given a file, read the molecule type in the next line.
          * @param file The file to read
@@ -33,7 +43,7 @@ class GromacsTopologyReader : public TopologyReader {
          * @param file The file to search
          * @return A map with the position of the flag.
          */
-        static map<string,int> flag_position(ifstream &file) {
+        static map<string,int> flagPositions(ifstream &file) {
             string line= "";
             map<string,int> flag;
             string molec_type= "";
@@ -128,6 +138,78 @@ class GromacsTopologyReader : public TopologyReader {
             return atoms;
         }
 
+        static int getZFromName(string name) {
+            if(name.length() >= 2) {
+                auto it= periodic_table.find(name.substr(0,2));
+                if(it != periodic_table.end())
+                    return it->second;
+            }
+            if(name.length() >= 1) {
+                auto it= periodic_table.find(name.substr(0,1));
+                if(it != periodic_table.end())
+                    return it->second;
+            }
+            return -1;
+        }
+
+        static map<string,pair<float,float>> readLJParameters(ifstream &file, int position) {
+            map<string,pair<float,float>> parameters;
+            string line= "";
+            file.clear();
+            file.seekg(position);
+
+            while(getline(file, line)) {
+                if(line[0] == ';') continue;
+                if(ToolKit::strip(line) == "") break;
+
+                stringstream ss(line.substr(0,line.find(";")));
+
+                string type1,type2;
+                char ptype;
+                float sigma,epsilon,mass,q;
+
+                ss >> type1 >> type2 >> mass >> q >> ptype >> sigma >> epsilon;
+                if(!ss.fail()) {
+                    parameters[type1]= make_pair(epsilon,sigma);
+                    continue;
+                }
+                
+                ss >> type1 >> mass >> q >> ptype >> sigma >> epsilon;
+                if(!ss.fail()) {
+                    parameters[type1]= make_pair(epsilon,sigma);
+                    continue;
+                }
+                throw runtime_error("Error reading LJ parameters from GROMACS topology file.");
+            }
+            return parameters;
+        }
+
+        static map<pair<string,string>,pair<float,float>> readSpecialInteractions(ifstream &file, int position) {
+            map<pair<string,string>,pair<float,float>> parameters;
+            string line= "";
+            file.clear();
+            file.seekg(position);
+
+            while(getline(file, line)) {
+                if(line[0] == ';') continue;
+                if(ToolKit::strip(line) == "") break;
+
+                stringstream ss(line.substr(0,line.find(";")));
+
+                string type1,type2;
+                int func;
+                float sigma,epsilon;
+
+                ss >> type1 >> type2 >> func >> sigma >> epsilon;
+                if(!ss.fail()) {
+                    parameters[make_pair(type1,type2)]= make_pair(epsilon,sigma);
+                    continue;
+                }
+                throw runtime_error("Error reading LJ special parameters from GROMACS topology file.");
+            }
+            return parameters;
+        }
+
 
     public:
         GromacsTopologyReader()= default;
@@ -143,7 +225,7 @@ class GromacsTopologyReader : public TopologyReader {
                 return ti;
             }
 
-            map<string,int> flags= flag_position(f);
+            map<string,int> flags= flagPositions(f);
             ti.number_of_each_different_molecule= readSystemFlag(f, flags["[ molecules ]"]);
             ti.num_molecules= sumMoleculesInMap(ti.number_of_each_different_molecule);
             ti.num_solvents= sumMoleculesConsideredSolvent(ti.number_of_each_different_molecule);
@@ -153,12 +235,19 @@ class GromacsTopologyReader : public TopologyReader {
                 map<int,tuple<string,string,float,float>> atoms= readAtomsFlags(f, flags["[ atoms ]_"+it_molec->first]);
                 ti.number_of_atoms_per_different_molecule[it_molec->first]= atoms.size();
                 ti.atom_type_name_charge_mass.push_back(atoms);
-                for(auto it_atom= atoms.begin(); it_atom != atoms.end(); it_atom++)
-                    ti.name_type[it_molec->first+":"+get<1>(it_atom->second)]= get<0>(it_atom->second);
+                for(auto it_atom= atoms.begin(); it_atom != atoms.end(); it_atom++) {
+                    string type= get<0>(it_atom->second);
+                    string name= it_molec->first+":"+get<1>(it_atom->second);
+                    ti.name_type[name]= type;
+                    ti.type_Z[type]= getZFromName(name);
+                }
             }
 
-            //Falta leer     map<string,pair<float,float>> type_LJparam
-            //y             map<pair<string,string>,pair<float,float>> special_interaction;
+            ti.type_LJparam= readLJParameters(f, flags["[ atomtypes ]"]);
+            if(flags.find("[ nonbond_params ]") == flags.end())
+                ti.special_interaction= map<pair<string,string>,pair<float,float>>();
+            else
+                ti.special_interaction= readSpecialInteractions(f, flags["[ nonbond_params ]"]);
 
             return ti;
         }

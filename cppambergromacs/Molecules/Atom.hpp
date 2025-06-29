@@ -12,26 +12,26 @@ class Atom : public Particle{
 	protected:
 		static constexpr float K_COULOMB= 1389.35458; //kJ/mol to e-2
 		bool is_HAtom;
-		float s_AO;
-		float e_AO;
+		float sigma;
+		float epsilon;
 		int Z;
 	public:
 		void setis_Hatom(bool Hatom){is_HAtom=Hatom;}
 		bool getis_Hatom() const {return(is_HAtom);}
 		
-		void setSigma_AO(float s_AOxigen){s_AO=s_AOxigen;}
-		float getSigma_AO() const {return(s_AO);}
-		void setEpsilon_AO(float e_AOxigen){e_AO=e_AOxigen;}
-		float getEpsilon_AO() const {return(e_AO);}
+		void setSigma(float s){sigma=s;}
+		float getSigma() const {return(sigma);}
+		void setEpsilon(float e){epsilon=e;}
+		float getEpsilon() const {return(epsilon);}
 		void setZ(int atom_type){Z=atom_type;is_HAtom= Z==1;}
 		int getZ() const {return(Z);}
 
-		Atom(): Particle(), is_HAtom(false), Z(0), e_AO(0), s_AO(0) {}
+		Atom(): Particle(), is_HAtom(false), Z(0), epsilon(0), sigma(0) {}
 
 		Atom(Vector pos, int id): Particle(pos, id, 0) {}
 		
-		Atom(Vector pos, int id, float mass, float charge, float e_AO, float s_AO, int Z):
-			Particle(pos, id, mass, charge), Z(Z), e_AO(e_AO), s_AO(s_AO) {
+		Atom(Vector pos, int id, float mass, float charge, float e, float s, int Z):
+			Particle(pos, id, mass, charge), Z(Z), epsilon(e), sigma(s) {
 				is_HAtom= Z==1;
 			}
 
