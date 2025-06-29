@@ -13,6 +13,11 @@
 
 class AmberTopologyReader : public TopologyReader {
     private:
+        /**
+         * This function returns a map with the position of the flags in the topology
+         * @param file The topology file
+         * @return A map with the position of the flags
+         */
         inline map<string, int> flag_position(ifstream &file) const
         {
             string line="";
@@ -30,6 +35,12 @@ class AmberTopologyReader : public TopologyReader {
             return(flag);
         }
 
+        /**
+         * This function returns a map with the position of the pointers in the topology
+         * @param file The topology file
+         * @param position The position of the POINTERS flag
+         * @return A map with the position of the pointers
+         */
         inline map<string,int> read_pointers(ifstream& file_prmtop,int position) const
         {
             string list_of_names[32]= {
@@ -73,6 +84,13 @@ class AmberTopologyReader : public TopologyReader {
             return dict_pointers;
         }
 
+        /**
+         * This function returns a vector with the atom names
+         * @param file The topology file
+         * @param dict_pointers A map with the position of the pointers
+         * @param position The position of the ATOM_NAME flag
+         * @return A vector with the atom names
+         */
         inline vector<string> read_atom_name(ifstream &file, map<string,int>& dict_pointers,int position) const
         {
             string line;
@@ -110,6 +128,14 @@ class AmberTopologyReader : public TopologyReader {
             return(atoms);
         }
 
+        /**
+         * This function returns a vector with the name and charges
+         * @param file The topology file
+         * @param dict_pointers A map with the position of the pointers
+         * @param atom_names A vector with the atom names
+         * @param position The position of the CHARGE flag
+         * @return A vector with the name and charges
+         */
         inline vector<tuple<string,float>> read_charge(ifstream &file, map<string,int>& dict_pointers, vector<string> atom_names,int position) const
         {
             string line = "";
@@ -144,6 +170,13 @@ class AmberTopologyReader : public TopologyReader {
             return(charges);
         }
 
+        /**
+         * This function returns a vector with the number of solvent atoms
+         * @param file The topology file
+         * @param dict_pointers A map with the position of the pointers
+         * @param position The position of the SOLVENT_POINTERS flag
+         * @return A vector with the number of solvent atoms
+         */
         inline vector<int> read_solvent_pointers(ifstream &file, map<string,int>& dict_pointers,int position) const
         {
             string line = "";
@@ -168,6 +201,13 @@ class AmberTopologyReader : public TopologyReader {
             return(number_solute_solvent);
         }
 
+        /**
+         * This function returns a vector with the atom type index
+         * @param file The topology file
+         * @param dict_pointers A map with the position of the pointers
+         * @param position The position of the AMBER_ATOM_TYPE flag
+         * @return A vector with the atom type index
+         */
         inline vector<string> atom_type_index_to_amber_type(ifstream &file, map<string,int>& dict_pointers , map<string, int> position) const
         {
             vector<string> ati_to_amber_type(dict_pointers["NTYPES"]+1);
@@ -240,6 +280,14 @@ class AmberTopologyReader : public TopologyReader {
             return(ati_to_amber_type);
         }
 
+        /**
+         * This function returns a map with the name of the atom and the type of the atom
+         * @param dict_pointers A map with the position of the pointers
+         * @param atom_names A vector with the atom names
+         * @param atom_type_index A vector with the atom type index
+         * @param ati_to_amber_type A vector with the atom type index
+         * @return A map with the name of the atom and the type of the atom
+         */
         inline map<string,string> read_name_type(map<string,int>& dict_pointers, vector<string> atom_names, vector<int> atom_type_index, vector<string> ati_to_amber_type) const
         {
             map<string,string> name_type;
@@ -250,7 +298,12 @@ class AmberTopologyReader : public TopologyReader {
             return(name_type);
         }
 
-
+        /**
+         * This function returns a map with the number of atoms per different molecule
+         * @param file The topology file
+         * @param position The position of the SOLVENT_POINTERS flag
+         * @return A map with the number of atoms per different molecule
+         */
         inline map<string,tuple<int,int>> read_atoms_per_different_molecule(ifstream &file, map<string, int> position) const
         {
             string line = "";
@@ -366,7 +419,13 @@ class AmberTopologyReader : public TopologyReader {
             return(label_and_number_atom);
         }
 
-
+        /**
+         * This function returns a vector with the number of atoms per different molecule
+         * @param file The topology file
+         * @param dict_pointers A map with the position of the pointers
+         * @param position The position of the SOLVENT_POINTERS flag
+         * @return A vector with the number of atoms per different molecule
+         */
         inline vector<int> read_atoms_per_molecule(ifstream &file, map<string,int>& dict_pointers,int position) const
         {
             string line = "";
@@ -415,6 +474,13 @@ class AmberTopologyReader : public TopologyReader {
             return(atoms_per_molecule);
         }
 
+        /**
+         * This function returns a vector with the atomic number of each atom
+         * @param file The topology file
+         * @param dict_pointers A map with the position of the pointers
+         * @param position The position of the ATOMIC_NUMBER flag
+         * @return A vector with the atomic number
+         */
         inline vector<int> read_atomic_number(ifstream &file, map<string,int>& dict_pointers,int position) const
         {
             string line="";
@@ -454,6 +520,13 @@ class AmberTopologyReader : public TopologyReader {
             return(atomic_number);
         }
 
+        /**
+         * This function returns a vector with the atom type index
+         * @param file The topology file
+         * @param dict_pointers A map with the position of the pointers
+         * @param position The position of the ATOM_TYPE_INDEX flag
+         * @return A vector with the atom type index
+         */
         inline vector<int> read_ati(ifstream &file, map<string,int>& dict_pointers,int position) const
         {
             string line="";
@@ -492,6 +565,13 @@ class AmberTopologyReader : public TopologyReader {
             return(ati);
         }
 
+        /**
+         * This function returns a vector with the mass of each atom
+         * @param file The topology file
+         * @param dict_pointers A map with the position of the pointers
+         * @param position The position of the ATOM_TYPE_INDEX flag
+         * @return A vector with the mass
+         */
         inline vector<float> read_mass(ifstream &file, map<string,int>& dict_pointers,int position) const
         {
             string line="";
@@ -524,6 +604,14 @@ class AmberTopologyReader : public TopologyReader {
             return(mass);
         }
 
+        /**
+         * This function returns a map with the LJ coefficients
+         * @param file The topology file
+         * @param dict_pointers A map with the position of the pointers
+         * @param position The position of the ATOM_TYPE_INDEX flag
+         * @param amber_type A vector with the atom type
+         * @return A map with the LJ coefficients
+         */
         inline map<pair<string,string>,pair<float,float>> read_lj(ifstream &file, map<string,int>& dict_pointers,int position,vector<string> amber_type) const
         {
             string line="";
@@ -631,6 +719,10 @@ class AmberTopologyReader : public TopologyReader {
             return(lj_coefficient_in_amber_type);
         }
 
+        /**
+         * This function returns a map with the LJ coefficients for the diagonal terms
+         * @param lj_map A map with the LJ coefficients
+         */
         inline map<string,pair<float,float>> read_lj_diagonal(map<pair<string,string>,pair<float,float>> lj_map) const
         {
             map<string,pair<float,float>> lj_coefficient;
@@ -644,6 +736,14 @@ class AmberTopologyReader : public TopologyReader {
             return(lj_coefficient);
         }
 
+        /**
+         * This function returns a map with the LJ coefficients for the off-diagonal terms
+         * @param dict_pointers A map with the position of the pointers
+         * @param atom_type_index A vector with the atom type index
+         * @param atomic_number A vector with the atomic number
+         * @param ati_to_amber_type A vector with the atom type index
+         * @return A map with the type and atomic number
+         */
         inline map<string,int> type_atomic_number(map<string,int>& dict_pointers,vector<int> atom_type_index, vector<int> atomic_number, vector<string> ati_to_amber_type) const
         {
             map<string,int> type_atomic_number_index;
@@ -655,6 +755,11 @@ class AmberTopologyReader : public TopologyReader {
         }
 
     public:
+        /**
+         * This function reads the topology file and returns a TopolInfo object
+         * @param filename The name of the topology file
+         * @return A TopolInfo object
+         */
         TopolInfo readTopology(const string& filename) const override {
             TopolInfo topology= TopolInfo();
 
@@ -711,21 +816,21 @@ class AmberCoordinateReader : public CoordinateReader {
     public:
         AmberCoordinateReader()= default;
 
+        #ifdef USE_SLOW_READER
         /**
-         * Reads the coordinates file .pdb
+         * Reads the coordinates file .pdb, even if the molecules are separated in different residues
          * @param filename The name of the coordinates file (single frame)
          * @param topol_info The topology information (use AmberTopologyReader)
          * @param molecs An empty array of molecule pointers
          * @return True if the coordinates were read successfully
          */
-        bool readCoordinates_slow(const string& filename, const TopolInfo& topol_info, Molecule* molecs) const {
+        bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule* molecs) const {
             ifstream f(filename);
             if(!f.is_open()) {
                 cout << "Failed to open file " << filename << endl;
                 return false;
             }
             
-
             string line;
             vector<Vector> coords;
             map<int,vector<int>> atoms_each_order_molecule;
@@ -773,6 +878,15 @@ class AmberCoordinateReader : public CoordinateReader {
             return true;
         }
 
+        #else // USE_SLOW_READER
+
+        /**
+         * Reads the coordinates file .pdb
+         * @param filename The name of the coordinates file (single frame)
+         * @param topol_info The topology information (use AmberTopologyReader)
+         * @param molecs An empty array of molecule pointers
+         * @return True if the coordinates were read successfully
+         */
         bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs, Vector& bounds) const override {
             ifstream f(filename);
             if(!f.is_open()) {
@@ -825,6 +939,8 @@ class AmberCoordinateReader : public CoordinateReader {
 
             return true;
         }
+
+        #endif // USE_SLOW_READER
 };
 
-#endif
+#endif // AMBER_READERS_HPP

@@ -209,7 +209,7 @@ namespace Geometrics {
 	};
 
 	/**
-	 * 
+	 * STRUCT representing a list of spheres in space
 	 */
 	struct SphereList {
 		int size;

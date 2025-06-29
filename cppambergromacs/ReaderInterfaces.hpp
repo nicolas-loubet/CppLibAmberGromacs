@@ -90,6 +90,15 @@ class CoordinateReader {
  * Interface for topology readers
  */
 class TopologyReader {
+    protected:
+        static inline const map<string,int> periodic_table= {
+            {"H" , 1},                                                                                                                                                                                 {"HE", 2},
+            {"LI", 3}, {"BE", 4},                                                                                                               {"B" , 5}, {"C" , 6}, {"N" , 7}, {"O" , 8}, {"F" , 9}, {"NE",10},
+            {"NA",11}, {"MG",12},                                                                                                               {"AL",13}, {"SI",14}, {"P" ,15}, {"S" ,16}, {"CL",17}, {"AR",18},
+            {"K" ,19}, {"CA",20}, {"SC",21}, {"TI",22}, {"V" ,23}, {"CR",24}, {"MN",25}, {"FE",26}, {"CO",27}, {"NI",28}, {"CU",29}, {"ZN",30}, {"GA",31}, {"GE",32}, {"AS",33}, {"SE",34}, {"BR",35}, {"KR",36},
+            {"RB",37}, {"SR",38}, {"Y" ,39}, {"ZR",40}, {"NB",41}, {"MO",42}, {"TC",43}, {"RU",44}, {"RH",45}, {"PD",46}, {"AG",47}, {"CD",48}, {"IN",49}, {"SN",50}, {"SB",51}, {"TE",52}, {"I" ,53}, {"XE",54},
+            {"CS",55}, {"BA",56} // ...
+        };
     public:
         TopologyReader()= default;
         virtual ~TopologyReader()= default;

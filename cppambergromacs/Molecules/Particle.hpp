@@ -33,6 +33,12 @@ class Particle{
 		Particle (Vector position, int id, float Mass) : pos(position), ID(id), mass(Mass),charge(0) {}
 		Particle (Vector position, int id, float Mass, float Charge) : pos(position), ID(id), mass(Mass), charge(Charge) {}
 
+		/**
+		 * It returns the distance between two particles in periodic boundary conditions
+		 * @param other The other particle
+		 * @param box The box size
+		 * @return The distance between the two particles
+		 */
 		float distanceTo(const Particle& other, const Vector box) const 
 			{
 			return distancePBC(pos, other.getPosition(), box);

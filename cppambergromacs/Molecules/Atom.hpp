@@ -45,6 +45,17 @@ class Atom : public Particle{
 			return (K_COULOMB*charge*a.getCharge()) / distanceTo(a,bounds);
 		}
 
+		/**
+		 * Returns the atom in PDB format
+		 * @param i The index of the atom
+		 * @param id_molec The ID of the molecule
+		 * @param atom_name The name of the atom, defaults to "UNK"
+		 * @param residue_name The name of the residue, defaults to "UNK"
+		 * @param chain_id The chain ID, defaults to " "
+		 * @param occupancy The occupancy, defaults to 1.00f
+		 * @param temp_factor The temperature factor, defaults to 0.00f
+		 * @return The atom in PDB format
+		 */
 		std::string toPDBFormat(const int i= 0, const int id_molec= 0, const std::string& atom_name= "UNK",
 			               const std::string& residue_name= "UNK", const std::string& chain_id= " ",
 						   const float occupancy= 1.00f, const float temp_factor= 0.00f) const {

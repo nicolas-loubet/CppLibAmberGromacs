@@ -13,15 +13,6 @@
 
 class GromacsTopologyReader : public TopologyReader {
     private:
-        static inline const map<string,int> periodic_table= {
-            {"H" , 1},                                                                                                                                                                                 {"HE", 2},
-            {"LI", 3}, {"BE", 4},                                                                                                               {"B" , 5}, {"C" , 6}, {"N" , 7}, {"O" , 8}, {"F" , 9}, {"NE",10},
-            {"NA",11}, {"MG",12},                                                                                                               {"AL",13}, {"SI",14}, {"P" ,15}, {"S" ,16}, {"CL",17}, {"AR",18},
-            {"K" ,19}, {"CA",20}, {"SC",21}, {"TI",22}, {"V" ,23}, {"CR",24}, {"MN",25}, {"FE",26}, {"CO",27}, {"NI",28}, {"CU",29}, {"ZN",30}, {"GA",31}, {"GE",32}, {"AS",33}, {"SE",34}, {"BR",35}, {"KR",36},
-            {"RB",37}, {"SR",38}, {"Y" ,39}, {"ZR",40}, {"NB",41}, {"MO",42}, {"TC",43}, {"RU",44}, {"RH",45}, {"PD",46}, {"AG",47}, {"CD",48}, {"IN",49}, {"SN",50}, {"SB",51}, {"TE",52}, {"I" ,53}, {"XE",54},
-            {"CS",55}, {"BA",56} // ...
-        };
-
         /**
          * Given a file, read the molecule type in the next line.
          * @param file The file to read
@@ -137,6 +128,11 @@ class GromacsTopologyReader : public TopologyReader {
             return atoms;
         }
 
+        /**
+         * Given a string, return the atomic number from the periodic table.
+         * @param name The name of the atom
+         * @return The atomic number
+         */
         static int getZFromName(string name) {
             transform(name.begin(), name.end(), name.begin(), ::toupper);
 
@@ -149,6 +145,12 @@ class GromacsTopologyReader : public TopologyReader {
             return -1;
         }
 
+        /**
+         * Given a file, read the LJ parameters.
+         * @param file The file to read
+         * @param position The position of the flag
+         * @return The LJ parameters mapped type -> pair (epsilon, sigma)
+         */
         static map<string,pair<float,float>> readLJParameters(ifstream &file, int position) {
             map<string,pair<float,float>> parameters;
             string line= "";
@@ -181,6 +183,12 @@ class GromacsTopologyReader : public TopologyReader {
             return parameters;
         }
 
+        /**
+         * Given a file, read the LJ special parameters.
+         * @param file The file to read
+         * @param position The position of the flag
+         * @return The LJ special parameters mapped pair (type1,type2) -> pair (epsilon,sigma)
+         */
         static map<pair<string,string>,pair<float,float>> readSpecialInteractions(ifstream &file, int position) {
             map<pair<string,string>,pair<float,float>> parameters;
             string line= "";
@@ -211,14 +219,19 @@ class GromacsTopologyReader : public TopologyReader {
     public:
         GromacsTopologyReader()= default;
 
-        TopolInfo readTopology(const std::string& filename) const override {
+        /**
+         * Given a file, read the topology.
+         * @param filename The name of the file
+         * @return A TopolInfo object
+         */
+        TopolInfo readTopology(const string& filename) const override {
             TopolInfo ti= TopolInfo();
 
             string line;
             ifstream f(filename);
 
             if(!f.is_open()) {
-                std::cerr << "Topology not found" << std::endl;
+                cerr << "Topology not found" << endl;
                 return ti;
             }
 
@@ -254,6 +267,14 @@ class GromacsTopologyReader : public TopologyReader {
 
 class GromacsCoordinateReader : public CoordinateReader {
     private:
+        /**
+         * Create a new Molecule object
+         * @param molec_name The name of the molecule
+         * @param i_molec The index of the molecule
+         * @param molecs The array of Molecule objects
+         * @param atom_list The array of Atom objects
+         * @param number_of_atom_in_list The number of atoms in the atom_list
+         */
         static void createNewMolecule(string molec_name, int i_molec, Molecule** molecs, Atom* atom_list, int number_of_atom_in_list) {
             if(molec_name == "SOL" || molec_name == "WAT") {
                 molecs[i_molec-1]= new Water(i_molec, atom_list, number_of_atom_in_list);
@@ -262,6 +283,18 @@ class GromacsCoordinateReader : public CoordinateReader {
             }
         }
 
+        /**
+         * Check if a new Molecule object must be created
+         * @param i_molec The index of the molecule
+         * @param molec_name The name of the molecule
+         * @param atom_list The array of Atom objects
+         * @param number_of_atom_in_list The number of atoms in the atom_list
+         * @param topol_info The topology information
+         * @param molecs The array of Molecule objects
+         * @param previous_molec_name The name of the previous molecule
+         * @param previous_different_molec_id The index of the previous different molecule
+         * @param previous_molec_id The index of the previous molecule
+         */
         static void checkIfNewMolecule(int i_molec, string molec_name, Atom*& atom_list, int& number_of_atom_in_list, const TopolInfo& topol_info, Molecule** molecs, string& previous_molec_name, int& previous_different_molec_id, int& previous_molec_id) {
             if(atom_list != nullptr) {
                 createNewMolecule(previous_molec_name, i_molec-1, molecs, atom_list, number_of_atom_in_list);
@@ -277,6 +310,18 @@ class GromacsCoordinateReader : public CoordinateReader {
             atom_list= new Atom[topol_info.number_of_atoms_per_different_molecule.at(molec_name)];
         }
 
+        /**
+         * Read an Atom object
+         * @param line The line to read in .gro format
+         * @param topol_info The topology information
+         * @param molecs The array of Molecule objects
+         * @param previous_molec_name The name of the previous molecule
+         * @param previous_different_molec_id The index of the previous different molecule
+         * @param previous_molec_id The index of the previous molecule
+         * @param atom_list The array of Atom objects
+         * @param number_of_atom_in_list The number of atoms in the atom_list
+         * @return The Atom object
+         */
         static Atom readAtom(string line, const TopolInfo& topol_info, Molecule** molecs, string& previous_molec_name, int& previous_different_molec_id, int& previous_molec_id, Atom*& atom_list, int& number_of_atom_in_list) {
             int i_molec= stoi(line.substr(0,5));
             string molec_name= ToolKit::strip(line.substr(5,5));
@@ -297,6 +342,11 @@ class GromacsCoordinateReader : public CoordinateReader {
             return Atom(Vector(x*10,y*10,z*10), i_atom, mass, q, e, s, Z);
         }
 
+        /**
+         * Read the bounds from the .gro file
+         * @param line The line to read
+         * @return The bounds as a Vector object
+         */
         static Vector readBounds(string line) {
             float x,y,z;
             stringstream ss(line);
@@ -306,6 +356,15 @@ class GromacsCoordinateReader : public CoordinateReader {
 
     public:
         GromacsCoordinateReader()= default;
+
+        /**
+         * Read the coordinates from a .gro file
+         * @param filename The name of the file
+         * @param topol_info The topology information
+         * @param molecs The array of Molecule objects to be created
+         * @param bounds The bounds of the system to be read
+         * @return True if the coordinates were read successfully
+         */
         bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs, Vector& bounds) const override {
             ifstream f(filename);
             string line;

@@ -32,6 +32,9 @@ namespace ToolKit {
         int size= 0;
     };
 
+    /**
+     * STRUCT that contains the pointer to an array of float and the size of that array
+     */
     struct FlaggedArrFloat {
         int size;
         float* arr;

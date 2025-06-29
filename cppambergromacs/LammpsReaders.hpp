@@ -118,6 +118,12 @@ class LammpsTopologyReader : public TopologyReader {
             return make_tuple(atom_id,mol_id,atom_type_int,q,x,y,z);
         }
 
+        /**
+         * Find the atom name and mass for a given atom type.
+         * @param atom_type_int The atom type ID.
+         * @param atomtype_mass_name A map of atom type IDs to their masses and names.
+         * @return A tuple containing the atom type, atom name, and mass.
+         */
         inline static tuple<string,string,float> findAtomNameMass(int atom_type_int, map<string,pair<float,string>> atomtype_mass_name) {
             string type_str= "at"+to_string(atom_type_int);
             float mass= 0.0f;
@@ -186,6 +192,15 @@ class LammpsTopologyReader : public TopologyReader {
             }
         }
 
+        /**
+         * Check if a new molecule has been found.
+         * @param previous_molecule_id The ID of the previous molecule.
+         * @param atom_in_molecule_counter The number of atoms in the molecule.
+         * @param water_molecule_type The type of the water molecule (to be updated).
+         * @param mol_id The ID of the molecule.
+         * @param topology The topology information.
+         * @param atom_id The ID of the first atom in the molecule.
+         */
         inline static void checkIfNewMolecule(int& previous_molecule_id, int& atom_in_molecule_counter, string& water_molecule_type, int mol_id, TopolInfo& topology, int atom_id) {
             if(mol_id != previous_molecule_id) {
                 if(previous_molecule_id != -1) {
@@ -255,20 +270,28 @@ class LammpsTopologyReader : public TopologyReader {
             return atom_keys;
         }
 
+        /**
+         * Map the atomic numbers of the atoms.
+         * @param atom_keys A vector of atom keys.
+         * @param map_name_type A map of atom names to their types.
+         * @return A map of atom names to their atomic numbers.
+         */
         inline static map<string,int> mapZValues(vector<string> atom_keys, map<string,string> map_name_type) {
             map<string,int> Z_values;
-            const map<string,int> ref_values= {{"H",1},{"C",6},{"N",7},{"O",8},{"F",9},{"Na",11},{"Mg",12},{"Cl",17},{"K",19},{"Ca",20}};
-            for(string& key: atom_keys) {
-                if(ref_values.count(key)) {
-                    Z_values[map_name_type.at("Atom"+key)]= ref_values.at(key);
+            for(string& k: atom_keys) {
+                string key= k;
+                transform(key.begin(), key.end(), key.begin(), ::toupper);
+
+                if(periodic_table.count(key)) {
+                    Z_values[map_name_type.at("Atom"+key)]= periodic_table.at(key);
                     continue;
                 }
 
                 // Remove numeric digits
                 string key_without_digits= key;
                 key_without_digits.erase(remove_if(key_without_digits.begin(), key_without_digits.end(), ::isdigit), key_without_digits.end());
-                if(ref_values.count(key_without_digits)) {
-                    Z_values[map_name_type.at("Atom"+key)]= ref_values.at(key_without_digits);
+                if(periodic_table.count(key_without_digits)) {
+                    Z_values[map_name_type.at("Atom"+key)]= periodic_table.at(key_without_digits);
                     continue;
                 }
 
