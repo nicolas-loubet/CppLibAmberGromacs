@@ -10,17 +10,16 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include <unordered_map>
 
 class GromacsTopologyReader : public TopologyReader {
     private:
-        static inline const unordered_map<string,int> periodic_table= {
-            {"H" , 1},                                                                                                                                                                                 {"He", 2},
-            {"Li", 3}, {"Be", 4},                                                                                                               {"B" , 5}, {"C" , 6}, {"N" , 7}, {"O" , 8}, {"F" , 9}, {"Ne",10},
-            {"Na",11}, {"Mg",12},                                                                                                               {"Al",13}, {"Si",14}, {"P" ,15}, {"S" ,16}, {"Cl",17}, {"Ar",18},
-            {"K" ,19}, {"Ca",20}, {"Sc",21}, {"Ti",22}, {"V" ,23}, {"Cr",24}, {"Mn",25}, {"Fe",26}, {"Co",27}, {"Ni",28}, {"Cu",29}, {"Zn",30}, {"Ga",31}, {"Ge",32}, {"As",33}, {"Se",34}, {"Br",35}, {"Kr",36},
-            {"Rb",37}, {"Sr",38}, {"Y" ,39}, {"Zr",40}, {"Nb",41}, {"Mo",42}, {"Tc",43}, {"Ru",44}, {"Rh",45}, {"Pd",46}, {"Ag",47}, {"Cd",48}, {"In",49}, {"Sn",50}, {"Sb",51}, {"Te",52}, {"I" ,53}, {"Xe",54},
-            {"Cs",55}, {"Ba",56}, // ...
+        static inline const map<string,int> periodic_table= {
+            {"H" , 1},                                                                                                                                                                                 {"HE", 2},
+            {"LI", 3}, {"BE", 4},                                                                                                               {"B" , 5}, {"C" , 6}, {"N" , 7}, {"O" , 8}, {"F" , 9}, {"NE",10},
+            {"NA",11}, {"MG",12},                                                                                                               {"AL",13}, {"SI",14}, {"P" ,15}, {"S" ,16}, {"CL",17}, {"AR",18},
+            {"K" ,19}, {"CA",20}, {"SC",21}, {"TI",22}, {"V" ,23}, {"CR",24}, {"MN",25}, {"FE",26}, {"CO",27}, {"NI",28}, {"CU",29}, {"ZN",30}, {"GA",31}, {"GE",32}, {"AS",33}, {"SE",34}, {"BR",35}, {"KR",36},
+            {"RB",37}, {"SR",38}, {"Y" ,39}, {"ZR",40}, {"NB",41}, {"MO",42}, {"TC",43}, {"RU",44}, {"RH",45}, {"PD",46}, {"AG",47}, {"CD",48}, {"IN",49}, {"SN",50}, {"SB",51}, {"TE",52}, {"I" ,53}, {"XE",54},
+            {"CS",55}, {"BA",56} // ...
         };
 
         /**
@@ -139,16 +138,14 @@ class GromacsTopologyReader : public TopologyReader {
         }
 
         static int getZFromName(string name) {
-            if(name.length() >= 2) {
-                auto it= periodic_table.find(name.substr(0,2));
-                if(it != periodic_table.end())
-                    return it->second;
-            }
-            if(name.length() >= 1) {
-                auto it= periodic_table.find(name.substr(0,1));
-                if(it != periodic_table.end())
-                    return it->second;
-            }
+            transform(name.begin(), name.end(), name.begin(), ::toupper);
+
+            if(name.length() >= 2)
+                if(periodic_table.count(name.substr(0,2)))
+                    return periodic_table.at(name.substr(0,2));
+            if(name.length() >= 1)
+                if(periodic_table.count(name.substr(0,1)))
+                    return periodic_table.at(name.substr(0,1));
             return -1;
         }
 
@@ -234,12 +231,14 @@ class GromacsTopologyReader : public TopologyReader {
             for(auto it_molec= ti.number_of_each_different_molecule.begin(); it_molec != ti.number_of_each_different_molecule.end(); it_molec++) {
                 map<int,tuple<string,string,float,float>> atoms= readAtomsFlags(f, flags["[ atoms ]_"+it_molec->first]);
                 ti.number_of_atoms_per_different_molecule[it_molec->first]= atoms.size();
+                ti.total_number_of_atoms+= atoms.size()*it_molec->second;
                 ti.atom_type_name_charge_mass.push_back(atoms);
                 for(auto it_atom= atoms.begin(); it_atom != atoms.end(); it_atom++) {
                     string type= get<0>(it_atom->second);
                     string name= it_molec->first+":"+get<1>(it_atom->second);
                     ti.name_type[name]= type;
-                    ti.type_Z[type]= getZFromName(name);
+                    if(!ti.type_Z.count(type))
+                        ti.type_Z[type]= getZFromName(get<1>(it_atom->second));
                 }
             }
 
@@ -254,11 +253,84 @@ class GromacsTopologyReader : public TopologyReader {
 };
 
 class GromacsCoordinateReader : public CoordinateReader {
+    private:
+        static void createNewMolecule(string molec_name, int i_molec, Molecule** molecs, Atom* atom_list, int number_of_atom_in_list) {
+            if(molec_name == "SOL" || molec_name == "WAT") {
+                molecs[i_molec-1]= new Water(i_molec, atom_list, number_of_atom_in_list);
+            } else {
+                molecs[i_molec-1]= new Molecule(i_molec, atom_list, number_of_atom_in_list);
+            }
+        }
+
+        static void checkIfNewMolecule(int i_molec, string molec_name, Atom*& atom_list, int& number_of_atom_in_list, const TopolInfo& topol_info, Molecule** molecs, string& previous_molec_name, int& previous_different_molec_id, int& previous_molec_id) {
+            if(atom_list != nullptr) {
+                createNewMolecule(previous_molec_name, i_molec-1, molecs, atom_list, number_of_atom_in_list);
+                number_of_atom_in_list= 0;
+            }
+
+            previous_molec_id= i_molec;
+            if(molec_name != previous_molec_name) {
+                previous_different_molec_id++;
+                previous_molec_name= molec_name;
+            }
+
+            atom_list= new Atom[topol_info.number_of_atoms_per_different_molecule.at(molec_name)];
+        }
+
+        static Atom readAtom(string line, const TopolInfo& topol_info, Molecule** molecs, string& previous_molec_name, int& previous_different_molec_id, int& previous_molec_id, Atom*& atom_list, int& number_of_atom_in_list) {
+            int i_molec= stoi(line.substr(0,5));
+            string molec_name= ToolKit::strip(line.substr(5,5));
+            string atom_name= ToolKit::strip(line.substr(10,5));
+            int i_atom= stoi(line.substr(15,5));
+            float x= stof(line.substr(20,8));
+            float y= stof(line.substr(28,8));
+            float z= stof(line.substr(36,8));
+
+            if(i_molec != previous_molec_id)
+                checkIfNewMolecule(i_molec, molec_name, atom_list, number_of_atom_in_list, topol_info, molecs, previous_molec_name, previous_different_molec_id, previous_molec_id);
+
+            string type, name; float q, mass, e, s;
+            tie(type,name,q,mass)= topol_info.atom_type_name_charge_mass[previous_different_molec_id].at(number_of_atom_in_list+1);
+            int Z= topol_info.type_Z.at(type);
+            tie(e,s)= topol_info.type_LJparam.at(type);
+
+            return Atom(Vector(x*10,y*10,z*10), i_atom, mass, q, e, s, Z);
+        }
+
+        static Vector readBounds(string line) {
+            float x,y,z;
+            stringstream ss(line);
+            ss >> x >> y >> z;
+            return Vector(x*10,y*10,z*10);
+        }
+
     public:
         GromacsCoordinateReader()= default;
         bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs, Vector& bounds) const override {
-            // Implementación para leer .gro o .trr de GROMACS
-            // Los datos se guardan en el Molecule**
+            ifstream f(filename);
+            string line;
+
+            getline(f, line); // Title
+            getline(f, line);
+            int natoms= stoi(line);
+
+            string previous_molec_name= "ERRORMOLECULE";
+            int previous_different_molec_id= -1;
+            int previous_molec_id= -1;
+            Atom* atom_list= nullptr;
+            int number_of_atom_in_list= 0;
+
+            for(int i= 0; i < natoms; i++) {
+                getline(f, line);
+                atom_list[number_of_atom_in_list++]= readAtom(line, topol_info, molecs, previous_molec_name, previous_different_molec_id, previous_molec_id, atom_list, number_of_atom_in_list);
+            }
+
+            if(atom_list != nullptr) // Add last molecule read
+                createNewMolecule(previous_molec_name, previous_molec_id, molecs, atom_list, number_of_atom_in_list);
+
+            getline(f, line);
+            bounds= readBounds(line);
+
             return true;
         }
 };

@@ -8,9 +8,9 @@ int main() {
 
     CoordinateReader* cr= ReaderFactory::createCoordinateReader(ReaderFactory::ProgramFormat::GROMACS);
     ToolKit::takeTime([&ti,&f,&cr]() {
-        for(int i= 0; i < 1; i++) {
-            //Configuration conf= Configuration(cr, f, ti);
-            //vector<float> vis= conf.getInteractionsPerSite(4092);
+        for(int i= 0; i < 5000; i++) {
+            Configuration conf= Configuration(cr, f, ti);
+            //vector<float> vis= conf.getInteractionsPerSite(ti.num_solutes+5);
             //cout << vis[0] << "\t" << vis[1] << "\t" << vis[2] << "\t" << vis[3] << endl;
         }
     });
