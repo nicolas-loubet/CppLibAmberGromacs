@@ -23,6 +23,9 @@ class Configuration {
 		int N_MOLEC; //The number of Molecule objects in the array
 		Vector bounds; //The bounds of the system
 
+		/**
+		 * Adds the potential of an atom with a water molecule to the sum_per_site vector, used in getInteractionsPerSite
+		 */
 		void addToSumVector(vector<Vector>& sites, vector<float>& sum_per_site, Water& center_water, Atom& atom, const float R_CUT_OFF) {
 			int i_close= 0;
 			float d_close= distancePBC(sites[0],atom.getPosition(),bounds);
@@ -38,6 +41,9 @@ class Configuration {
 			}
 		}
 
+		/**
+		 * Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite
+		 */
 		void addToSumVector(vector<Vector>& sites, vector<float>& sum_per_site, Water& center_water, Water& other, float** potential_matrix, ToolKit::ArrInt* neighbours, const float R_CUT_OFF) {
 			int i_close= 0;
 			float d_close= distancePBC(sites[0],other.getPosition(),bounds);
@@ -48,19 +54,52 @@ class Configuration {
 					d_close= d_new;
 				}
 			}
-			if(d_close <= R_CUT_OFF) {
-				if(potential_matrix != nullptr) {
-					int min= (center_water.getID() < other.getID()  ?  center_water.getID() : other.getID()) - 1;
-					int max= (center_water.getID() > other.getID()  ?  center_water.getID() : other.getID()) - 1;
-					if(potential_matrix[max][min] == NOT_CLASSIFIED)
-						potential_matrix[max][min]= center_water.potentialWith(other,bounds);
-					sum_per_site[i_close]+= potential_matrix[max][min];
-					if(neighbours != nullptr)
-						neighbours[center_water.getID()-1].arr[neighbours[center_water.getID()-1].size++]= other.getID();
-				} else {
-					sum_per_site[i_close]+= center_water.potentialWith(other,bounds);
+			if(d_close > R_CUT_OFF) return;
+
+			float pot;
+			if(potential_matrix != nullptr) {
+				int min= (center_water.getID() < other.getID()  ?  center_water.getID() : other.getID()) - 1;
+				int max= (center_water.getID() > other.getID()  ?  center_water.getID() : other.getID()) - 1;
+				if(potential_matrix[max][min] == NOT_CLASSIFIED)
+					potential_matrix[max][min]= center_water.potentialWith(other,bounds);
+				pot= potential_matrix[max][min];
+				if(neighbours != nullptr)
+					neighbours[center_water.getID()-1].arr[neighbours[center_water.getID()-1].size++]= other.getID();
+			} else {
+				pot= center_water.potentialWith(other,bounds);
+			}
+			sum_per_site[i_close]+= pot;
+		}
+
+		/**
+		 * Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite flagged with water-water interactions < V_CUT_OFF
+		 */
+		void addToSumVector(vector<Vector>& sites, vector<float>& sum_per_site, Water& center_water, Water& other, float** potential_matrix, ToolKit::ArrInt* neighbours, const float R_CUT_OFF, bool* ww_interaction, const float V_CUT_OFF) {
+			int i_close= 0;
+			float d_close= distancePBC(sites[0],other.getPosition(),bounds);
+			for(int i= 1; i < 4; i++) {
+				float d_new= distancePBC(sites[i],other.getPosition(),bounds);
+				if(d_close > d_new) {
+					i_close= i;
+					d_close= d_new;
 				}
 			}
+			if(d_close > R_CUT_OFF) return;
+
+			float pot;
+			if(potential_matrix != nullptr) {
+				int min= (center_water.getID() < other.getID()  ?  center_water.getID() : other.getID()) - 1;
+				int max= (center_water.getID() > other.getID()  ?  center_water.getID() : other.getID()) - 1;
+				if(potential_matrix[max][min] == NOT_CLASSIFIED)
+					potential_matrix[max][min]= center_water.potentialWith(other,bounds);
+				pot= potential_matrix[max][min];
+				if(neighbours != nullptr)
+					neighbours[center_water.getID()-1].arr[neighbours[center_water.getID()-1].size++]= other.getID();
+			} else {
+				pot= center_water.potentialWith(other,bounds);
+			}
+			sum_per_site[i_close]+= pot;
+			ww_interaction[i_close]= ww_interaction[i_close] || (pot <= V_CUT_OFF);
 		}
 
 	public:
@@ -342,6 +381,63 @@ class Configuration {
 						if(molecule.distanceTo(getMolec(j+1).getAtom(a),bounds) < R_CUT_OFF+1.1) {
 							addToSumVector(sites, sum_per_site, molecule, getMolec(j+1).getAtom(a), R_CUT_OFF);
 						}
+				}
+			}
+
+			Sorter::sort(sum_per_site,false);
+			return sum_per_site;
+		}
+
+		/**
+		 * It returns the interactions per site of the molecule specified by its ID, with a flag to know if there is a water-water interaction in each site
+		 * @param ID The ID of the molecule
+		 * @param potential_matrix The matrix with the potential values, default is nullptr
+		 * @param neighbours The neighbours of the molecule, default is nullptr
+		 * @param R_CUT_OFF The cutoff radius, default is 5.
+		 * @param V_CUT_OFF The potential cutoff, default is -12
+		 * @param flag_ww A flag to know if there is a water-water interaction
+		 * @return The interactions per site, sorted in descending order
+		 */
+		vector<float> getInteractionsPerSite(const int ID, bool& flag_ww, const float V_CUT_OFF= -12.0f, const float R_CUT_OFF= 5., float** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr) {
+			Water& molecule= *dynamic_cast<Water*>(molecs[ID-1]);
+			Vector o= molecule.getOxygen().getPosition();
+			Vector h1= molecule.getHydrogen_1().getPosition();
+			Vector h2= molecule.getHydrogen_2().getPosition();
+			Geometrics::TetrahedronVertices t= Geometrics::getPerfectTetrahedron(o, h1, h2, bounds);
+			
+			vector<float> sum_per_site(4,0.0f);
+			vector<Vector> sites= {t.H1, t.H2, t.L1, t.L2};
+
+			bool* water_water_interaction= new bool[4];
+			for(int i= 0; i < 4; i++)
+				water_water_interaction[i]= false;
+			
+			for(int j= 0; j < N_MOLEC; j++) {
+				if(j+1 == ID) continue; // Same molecule, skip
+				
+				if((getMolec(j+1).getNAtoms() == 1) && (getMolec(j+1).getCharge() >= 1 || getMolec(j+1).getCharge() <= -1)) {
+					// We found a ion, consider it always
+					addToSumVector(sites, sum_per_site, molecule, getMolec(j+1).getAtom(1), R_CUT_OFF);
+					continue;
+				}
+				
+				Water* other= dynamic_cast<Water*>(molecs[j]);
+				if(other != nullptr) { // We found a water molecule
+					if(molecule.distanceTo(*other,bounds) > R_CUT_OFF+1.1) continue;
+					addToSumVector(sites, sum_per_site, molecule, *other, potential_matrix, neighbours, R_CUT_OFF, water_water_interaction, V_CUT_OFF);
+				} else { // We found another type of molecule, study atom by atom
+					for(int a= 1; a <= getMolec(j+1).getNAtoms(); a++)
+						if(molecule.distanceTo(getMolec(j+1).getAtom(a),bounds) < R_CUT_OFF+1.1) {
+							addToSumVector(sites, sum_per_site, molecule, getMolec(j+1).getAtom(a), R_CUT_OFF);
+						}
+				}
+			}
+
+			flag_ww= true;
+			for(int iv= 0; iv < 4; iv++) {
+				if(!water_water_interaction[iv]) {
+					flag_ww= false;
+					break;
 				}
 			}
 
