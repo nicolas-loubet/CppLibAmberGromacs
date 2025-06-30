@@ -34,6 +34,18 @@ class Atom : public Particle{
 			Particle(pos, id, mass, charge), Z(Z), epsilon(e), sigma(s) {
 				is_HAtom= Z==1;
 			}
+		
+		Atom(const Atom& other) : Particle(other), is_HAtom(other.is_HAtom), sigma(other.sigma), epsilon(other.epsilon), Z(other.Z) {}
+
+		Atom& operator=(const Atom& other) {
+			if(this == &other) return *this;
+			Particle::operator=(other);
+			is_HAtom= other.is_HAtom;
+			sigma= other.sigma;
+			epsilon= other.epsilon;
+			Z= other.Z;
+			return *this;
+		}
 
 		/**
 		 * Calculates the electrostatic potential energy between two atoms

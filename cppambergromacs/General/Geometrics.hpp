@@ -215,9 +215,29 @@ namespace Geometrics {
 		int size;
 		Vector* centers;
 
-		SphereList(const int N_MAX) {size= 0; centers= new Vector[N_MAX];}
+		SphereList(): size(0), centers(nullptr) {}
+		SphereList(const int N_MAX): size(0), centers(new Vector[N_MAX]) {}
+		SphereList(const SphereList& other): size(other.size), centers(nullptr) {
+			if(other.size <= 0) return;
+			centers= new Vector[other.size];
+			for(int i = 0; i < other.size; i++)
+				centers[i]= other.centers[i];
+		}
 		SphereList(int size, Vector* centers): size(size), centers(centers) {}
-		~SphereList() {delete[] centers;}
+
+		SphereList& operator=(const SphereList& other) {
+			if(this == &other) return *this;
+			delete[] centers;
+			size= other.size;
+			centers= nullptr;
+			if(other.size <= 0) return *this;
+			centers= new Vector[other.size];
+			for(int i = 0; i < other.size; i++)
+				centers[i]= other.centers[i];
+			return *this;
+		}
+
+		~SphereList() { delete[] centers; }
 	};
 
 	/**

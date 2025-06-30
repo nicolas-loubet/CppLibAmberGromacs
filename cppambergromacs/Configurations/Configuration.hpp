@@ -125,6 +125,29 @@ class Configuration {
 			if(!coord_reader->readCoordinates(filename, topol_info, molecs, bounds))
 				throw runtime_error("Failed to read coordinates");
 		}
+
+		/**
+		 * Copy constructor
+		 */
+		Configuration(const Configuration& other) : N_MOLEC(other.N_MOLEC), bounds(other.bounds), molecs(nullptr) {
+			molecs= new Molecule*[N_MOLEC];
+			for(int i = 0; i < N_MOLEC; i++)
+				molecs[i]= other.molecs[i] ? new Molecule(*other.molecs[i]) : nullptr;
+		}
+
+		Configuration& operator=(const Configuration& other) {
+			if(this == &other) return *this;
+			for(int i= 0; i < N_MOLEC; i++)
+				delete molecs[i];
+			delete[] molecs;
+
+			N_MOLEC= other.N_MOLEC;
+			bounds= other.bounds;
+			molecs= new Molecule*[N_MOLEC];
+			for(int i= 0; i < N_MOLEC; i++)
+				molecs[i]= other.molecs[i] ? new Molecule(*other.molecs[i]) : nullptr;
+			return *this;
+		}
 	
 		/**
 		 * Destructor. It destroys the molecule array

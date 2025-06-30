@@ -35,6 +35,14 @@ class Water : public Molecule {
 		 */
 		Water(const int id, Atom* atoms, const int n_atoms): Molecule(id, atoms, n_atoms, atoms[0].getPosition()), classif(NOT_CLASSIFIED) {}
 
+		Water(const Water& other): Molecule(other), classif(other.classif) {}
+
+		Water& operator=(const Water& other) {
+			if(this == &other) return *this;
+			Molecule::operator=(other);
+			classif= other.classif;
+			return *this;
+		}
 		/**
 		 * Destructor
 		 */

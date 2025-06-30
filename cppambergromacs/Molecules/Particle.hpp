@@ -33,6 +33,17 @@ class Particle{
 		Particle (Vector position, int id, float Mass) : pos(position), ID(id), mass(Mass),charge(0) {}
 		Particle (Vector position, int id, float Mass, float Charge) : pos(position), ID(id), mass(Mass), charge(Charge) {}
 
+		Particle(const Particle& other) : pos(other.pos), ID(other.ID), mass(other.mass), charge(other.charge) {}
+
+		Particle& operator=(const Particle& other) {
+			if(this == &other) return *this;
+			pos= other.pos;
+			ID= other.ID;
+			mass= other.mass;
+			charge= other.charge;
+			return *this;
+		}
+
 		/**
 		 * It returns the distance between two particles in periodic boundary conditions
 		 * @param other The other particle

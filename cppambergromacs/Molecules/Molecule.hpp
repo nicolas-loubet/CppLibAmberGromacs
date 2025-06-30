@@ -45,6 +45,29 @@ class Molecule : public Particle{
 		Molecule(int id, Atom* Atoms, int nAtoms, Vector pos_molecule) : Particle(pos_molecule, id, totalMass(Atoms,nAtoms), totalCharge(Atoms,nAtoms)), atoms(Atoms), n_atoms(nAtoms){}
 		Molecule(int id, Atom* Atoms, int nAtoms) : Molecule(id, Atoms, nAtoms, centerOfMass(Atoms,nAtoms)) {}
 		Molecule() : Molecule(0,nullptr,0) {}
+
+		/**
+		 * Copy constructor
+		 */
+		Molecule(const Molecule& other): Particle(other), n_atoms(other.n_atoms), atoms(nullptr) {
+			if(n_atoms <= 0) return;
+			atoms= new Atom[n_atoms];
+			for (int i= 0; i < n_atoms; i++)
+				atoms[i]= other.atoms[i];
+		}
+
+		Molecule& operator=(const Molecule& other) {
+			if(this == &other) return *this;
+			Particle::operator=(other);
+			delete[] atoms;
+			n_atoms= other.n_atoms;
+			atoms= nullptr;
+			if(n_atoms <= 0) return *this;
+			atoms = new Atom[n_atoms];
+			for(int i= 0; i < n_atoms; i++)
+				atoms[i]= other.atoms[i];
+			return *this;
+		}
 		
 		/**
 		 * Calculates the center of mass of the molecule
