@@ -8,22 +8,12 @@
 
 #include "Molecule.hpp"
 
-#define NOT_CLASSIFIED -314159265
-
 /**
  * This class creates a Water molecule object, with the 3 atoms: H2O
  */
 class Water : public Molecule {
-	protected:
-		int classif;
-
 	public:
-		//Setters and getters
-		void setClassification(const int c) { classif= c; }
-		void removeClassification() { classif= NOT_CLASSIFIED; }
-		int getClassification() const { return classif; }
-		bool isClassified() const { return classif != NOT_CLASSIFIED; }
-
+		// Getters
 		Atom getOxygen() const { return atoms[0]; }
 		Atom getHydrogen_1() const { return atoms[1]; }
 		Atom getHydrogen_2() const { return atoms[2]; }
@@ -33,9 +23,9 @@ class Water : public Molecule {
 		 * @param id Number of ID to identify the molecule in the configuration
 		 * @param atoms *Atom for the oxygen and the two hydrogens
 		 */
-		Water(const int id, Atom* atoms, const int n_atoms): Molecule(id, atoms, n_atoms, atoms[0].getPosition()), classif(NOT_CLASSIFIED) {}
+		Water(const int id, Atom* atoms, const int n_atoms): Molecule(id, atoms, n_atoms, atoms[0].getPosition()) {}
 
-		Water(const Water& other): Molecule(other), classif(other.classif) {}
+		Water(const Water& other): Molecule(other) {}
 
 		Water& operator=(const Water& other) {
 			if(this == &other) return *this;
