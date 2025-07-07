@@ -151,8 +151,8 @@ class GromacsTopologyReader : public TopologyReader {
          * @param position The position of the flag
          * @return The LJ parameters mapped type -> pair (epsilon, sigma)
          */
-        static map<string,pair<float,float>> readLJParameters(ifstream &file, int position) {
-            map<string,pair<float,float>> parameters;
+        static map<string,tuple<float,float,float,float>> readLJFlagFully(ifstream &file, int position) {
+            map<string,tuple<float,float,float,float>> parameters;
             string line= "";
             file.clear();
             file.seekg(position);
@@ -169,18 +169,33 @@ class GromacsTopologyReader : public TopologyReader {
 
                 ss >> type1 >> type2 >> mass >> q >> ptype >> sigma >> epsilon;
                 if(!ss.fail()) {
-                    parameters[type1]= make_pair(epsilon,sigma);
+                    parameters[type1]= make_tuple(mass,q,epsilon,sigma);
                     continue;
                 }
                 
                 ss >> type1 >> mass >> q >> ptype >> sigma >> epsilon;
                 if(!ss.fail()) {
-                    parameters[type1]= make_pair(epsilon,sigma);
+                    parameters[type1]= make_tuple(mass,q,epsilon,sigma);
                     continue;
                 }
                 throw runtime_error("Error reading LJ parameters from GROMACS topology file.");
             }
             return parameters;
+        }
+
+        static void checkMass(map<int,tuple<string,string,float,float>> atoms, map<string,tuple<float,float,float,float>> params) {
+            for(auto it= atoms.begin(); it != atoms.end(); it++) {
+                string type, name; float charge, mass;
+                tie(type,name,charge,mass)= it->second;
+                if(mass > 0.8f) continue;
+
+                float mass_LJ, charge_LJ, s, e;
+                if(params.count(type) > 0) continue;
+                tie(mass_LJ,charge_LJ,e,s)= params.at(type);
+                
+                if(mass_LJ < 0.8f) continue;
+                get<3>(it->second)= mass_LJ;
+            }
         }
 
         /**
@@ -240,9 +255,14 @@ class GromacsTopologyReader : public TopologyReader {
             ti.num_molecules= sumMoleculesInMap(ti.number_of_each_different_molecule);
             ti.num_solvents= sumMoleculesConsideredSolvent(ti.number_of_each_different_molecule);
             ti.num_solutes= ti.num_molecules-ti.num_solvents;
+
+            map<string,tuple<float,float,float,float>> parameters_LJflag_full= readLJFlagFully(f, flags["[ atomtypes ]"]);
+            for(auto it= parameters_LJflag_full.begin(); it != parameters_LJflag_full.end(); it++)
+                ti.type_LJparam[it->first]= make_pair(get<2>(it->second),get<3>(it->second));
             
             for(auto it_molec= ti.number_of_each_different_molecule.begin(); it_molec != ti.number_of_each_different_molecule.end(); it_molec++) {
                 map<int,tuple<string,string,float,float>> atoms= readAtomsFlags(f, flags["[ atoms ]_"+it_molec->first]);
+                checkMass(atoms, parameters_LJflag_full);
                 ti.number_of_atoms_per_different_molecule[it_molec->first]= atoms.size();
                 ti.total_number_of_atoms+= atoms.size()*it_molec->second;
                 ti.atom_type_name_charge_mass.push_back(atoms);
@@ -255,7 +275,6 @@ class GromacsTopologyReader : public TopologyReader {
                 }
             }
 
-            ti.type_LJparam= readLJParameters(f, flags["[ atomtypes ]"]);
             if(flags.find("[ nonbond_params ]") == flags.end())
                 ti.special_interaction= map<pair<string,string>,pair<float,float>>();
             else
