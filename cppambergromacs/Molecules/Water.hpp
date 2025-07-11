@@ -23,7 +23,9 @@ class Water : public Molecule {
 		 * @param id Number of ID to identify the molecule in the configuration
 		 * @param atoms *Atom for the oxygen and the two hydrogens
 		 */
-		Water(const int id, Atom* atoms, const int n_atoms): Molecule(id, atoms, n_atoms, atoms[0].getPosition()) {}
+		Water(const int id, Atom* atoms, const int n_atoms): Molecule(id, atoms, n_atoms, atoms[0].getPosition()) {
+			is_water= true;
+		}
 
 		Water(const Water& other): Molecule(other) {}
 

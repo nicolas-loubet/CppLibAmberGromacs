@@ -15,6 +15,7 @@ class Molecule : public Particle{
 		Atom* atoms;
 		int n_atoms;
 		int classif;
+		bool is_water;
 
 		/**
 		 * Calculates the total mass of the molecule
@@ -47,7 +48,7 @@ class Molecule : public Particle{
 	public:
 		Molecule(int id, Atom* Atoms, int nAtoms, Vector pos_molecule):
 			Particle(pos_molecule, id, totalMass(Atoms,nAtoms), totalCharge(Atoms,nAtoms)),
-			atoms(Atoms), n_atoms(nAtoms), classif(NOT_CLASSIFIED){}
+			atoms(Atoms), n_atoms(nAtoms), classif(NOT_CLASSIFIED), is_water(false) {}
 		Molecule(int id, Atom* Atoms, int nAtoms) : Molecule(id, Atoms, nAtoms,
 			centerOfMass(Atoms,nAtoms)) {}
 		Molecule() : Molecule(0,nullptr,0) {}
@@ -100,11 +101,13 @@ class Molecule : public Particle{
 		Atom* getAtoms() const {return(atoms);}
 		Atom& getAtom(int id) const { return(atoms[id-1]); }
 		int getNAtoms() const {return(n_atoms);}
+		bool isWater() const { return is_water; }
 
 		void setClassification(const int c) { classif= c; }
 		void removeClassification() { classif= NOT_CLASSIFIED; }
 		int getClassification() const { return classif; }
 		bool isClassified() const { return classif != NOT_CLASSIFIED; }
+		void setIsWater(bool is_water) { this->is_water= is_water; }
 
 };
 
