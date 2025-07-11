@@ -117,6 +117,22 @@ namespace ToolKit {
             thread.join();
     }
 
+    /**
+     * Function that executes a function for each element of a list, one after the other
+     * @param f The function to execute (first argument must be one of the elements of the list, type T; second argument must be a reference to the result of the function, type Res)
+     * @param list The list of elements (for example, the directories to be analyzed)
+     * @param args The arguments of the function
+     * @tparam Func The type of the function to execute
+     * @tparam T The type of the elements of the list
+     * @tparam Res The type of the return value of the function
+     * @tparam Args The types of the arguments of the function
+     */
+    template<typename Func, typename T, typename Res, typename... Args>
+    void serialExecution(Func f, std::vector<T>& list, std::vector<Res>& res, Args... args) {
+        for(size_t i= 0; i < list.size(); i++)
+            f(list[i], res[i], args...);
+    }
+
 }
 
 #endif
