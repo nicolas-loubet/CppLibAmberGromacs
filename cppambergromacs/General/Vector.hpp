@@ -452,7 +452,7 @@ inline float getAngle(Vector c1, Vector c2, Vector c3, Vector bounds) {
 	float b= distancePBC(c1,c2,bounds);
 	float c= distancePBC(c2,c3,bounds);
 	//Law of cosines
-	return abs(acos((pow(b,2)+pow(c,2)-pow(a,2))/(2*b*c)));
+	return std::fabs(acos((pow(b,2)+pow(c,2)-pow(a,2))/(2*b*c)));
 }
 
 /**
