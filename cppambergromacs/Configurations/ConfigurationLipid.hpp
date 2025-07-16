@@ -7,6 +7,8 @@
  */
 
 #include "Configuration.hpp"
+#include <array>
+#include <vector>
 
 /**
  * This class creates a Configuration object, with an array of molecules (specific for lipid systems)
