@@ -11,6 +11,8 @@
 #include <fstream>
 #include <sstream>
 
+#define USE_SLOW_READER
+
 class AmberTopologyReader : public TopologyReader {
     private:
         /**
@@ -27,7 +29,7 @@ class AmberTopologyReader : public TopologyReader {
                 if (line.find("%FLAG") != string::npos) {
                     line=ToolKit::strip(line.substr(5, 80));
                     flag[line]=file.tellg();
-                    flag[line]-= 200;
+                    flag[line]-= 120;
                     if(flag[line] < 0) flag[line]= 0;
                     continue;
                 }
@@ -772,7 +774,7 @@ class AmberTopologyReader : public TopologyReader {
             vector<int> number_solute_solvent =read_solvent_pointers(file, dict_pointers,positions_of_flags["SOLVENT_POINTERS"]);
             vector<string> ati_to_amber_type=atom_type_index_to_amber_type(file,  dict_pointers , positions_of_flags);        
             vector<int> atomic_number=read_atomic_number(file,dict_pointers,positions_of_flags["ATOMIC_NUMBER"]); 
-            map<string,tuple<int,int>> atoms_per_diff_molecule=read_atoms_per_different_molecule(file, positions_of_flags);
+            //map<string,tuple<int,int>> atoms_per_diff_molecule=read_atoms_per_different_molecule(file, positions_of_flags);
             vector<int> atoms_per_molecule = read_atoms_per_molecule(file, dict_pointers,positions_of_flags["SOLVENT_POINTERS"]); 
             vector<int> atom_type_index=read_ati(file,dict_pointers,positions_of_flags["ATOM_TYPE_INDEX"]); 
             vector<float> mass=read_mass(file,dict_pointers,positions_of_flags["MASS"]);
@@ -782,13 +784,13 @@ class AmberTopologyReader : public TopologyReader {
             map<string,string> name_types = read_name_type(dict_pointers, atom_names,atom_type_index,ati_to_amber_type);
             
             topology.num_molecules=number_solute_solvent[1];
-			topology.num_solutes=number_solute_solvent[0];
-			topology.num_solvents=number_solute_solvent[1]-number_solute_solvent[0];
+			topology.num_solutes=number_solute_solvent[2]-1;
+			topology.num_solvents=number_solute_solvent[1]-topology.num_solutes;
             
-            for (const auto& pair : atoms_per_diff_molecule) {
+            /*for (const auto& pair : atoms_per_diff_molecule) {
                 topology.number_of_atoms_per_different_molecule[pair.first]=get<0>(pair.second);
                 topology.number_of_each_different_molecule[pair.first]=get<1>(pair.second);
-            }
+            }*/
 			
             topology.total_number_of_atoms=dict_pointers["NATOM"];
             map<int, tuple<string, string, float, float>> molecule_atoms;
@@ -824,19 +826,25 @@ class AmberCoordinateReader : public CoordinateReader {
          * @param molecs An empty array of molecule pointers
          * @return True if the coordinates were read successfully
          */
-        bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule* molecs) const {
+        bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs, Vector& bounds) const override {
             ifstream f(filename);
             if(!f.is_open()) {
                 cout << "Failed to open file " << filename << endl;
                 return false;
             }
-            
             string line;
+            getline(f,line);
+            if(line.rfind("CRYST1",0) == 0){
+                bounds= Vector( stof(line.substr(6,9)) , stof(line.substr(15,9)) , stof(line.substr(24,9)) );
+            }
+            f.clear();
+            f.seekg(0);
             vector<Vector> coords;
+            vector<string> is_water(topol_info.num_molecules);
             map<int,vector<int>> atoms_each_order_molecule;
-
+            int molecule_number=0;
             while(getline(f,line)) {
-                if(line.rfind("ATOM  ",0) == 0 || line.rfind("HETATM",0) == 0) {
+                if(line.rfind("ATOM",0) == 0 || line.rfind("HETATM",0) == 0) {
                     string record, atom_name, res_name;
                     int atom_id, res_id;
                     float x, y, z;
@@ -848,10 +856,15 @@ class AmberCoordinateReader : public CoordinateReader {
                     x=stof(ToolKit::strip(line.substr(26, 12)));
                     y=stof(ToolKit::strip(line.substr(38, 8)));
                     z=stof(ToolKit::strip(line.substr(46, 8)));
-                 
-                    atoms_each_order_molecule[res_id].push_back(atom_id);
+                    
+                    is_water[molecule_number]=res_name;
+                    atoms_each_order_molecule[molecule_number].push_back(atom_id);
                     coords.emplace_back(Vector(x,y,z));
                 }
+                if(line.rfind("TER",0) == 0) 
+                    {
+                        molecule_number+=1;
+                    }
             }
             f.close();
 
@@ -862,20 +875,30 @@ class AmberCoordinateReader : public CoordinateReader {
                 const auto& atom_data= topol_info.atom_type_name_charge_mass[mol_pair.first];
                 int num_atoms_per_molecule=mol_pair.second.size();
                 Atom* atoms= new Atom[num_atoms_per_molecule];
-
-                for(int j= 0; j < num_atoms_per_molecule; j++,atom_idx++) {
+                for(int j= 0; j < num_atoms_per_molecule; j++) {
                     
                     const auto& [type,name,charge,mass]= atom_data.at(j);
                     const auto& [epsilon,sigma]= topol_info.type_LJparam.at(type);
 
                     int Z=topol_info.type_Z.at(type);
-                    atoms[j]= Atom(coords[atoms_each_order_molecule[mol_pair.first][j]], atom_idx+1, mass, charge, epsilon, sigma, Z);
+                    atoms[j]= Atom(coords[(atoms_each_order_molecule[mol_pair.first][j])-1], atom_idx+1, mass, charge, epsilon, sigma, Z);
+                    atom_idx+=1;
                 }
-
-                molecs[molec_idx]= Molecule(mol_pair.first, atoms, num_atoms_per_molecule);
-                molec_idx+=1;
+                
+                if(is_water[molec_idx] != "WAT")
+                {
+                    molecs[molec_idx]= new Molecule(mol_pair.first+1, atoms, num_atoms_per_molecule);
+                    molec_idx+=1;
+                    continue;
+                }
+                else
+                {
+                    molecs[molec_idx] = new Water(mol_pair.first+1, atoms, num_atoms_per_molecule);;
+                    molec_idx+=1;
+                }
             }
             return true;
+
         }
 
         #else // USE_SLOW_READER
