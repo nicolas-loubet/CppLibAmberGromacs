@@ -772,7 +772,7 @@ class AmberTopologyReader : public TopologyReader {
             vector<string> atom_names = read_atom_name(file, dict_pointers,positions_of_flags["ATOM_NAME"]);
             vector<tuple<string,float>> map_atoms = read_charge(file, dict_pointers, atom_names ,positions_of_flags["CHARGE"]);
             vector<int> number_solute_solvent =read_solvent_pointers(file, dict_pointers,positions_of_flags["SOLVENT_POINTERS"]);
-            vector<string> ati_to_amber_type=atom_type_index_to_amber_type(file,  dict_pointers , positions_of_flags);        
+            vector<string> ati_to_amber_type=atom_type_index_to_amber_type(file, dict_pointers, positions_of_flags);        
             vector<int> atomic_number=read_atomic_number(file,dict_pointers,positions_of_flags["ATOMIC_NUMBER"]); 
             //map<string,tuple<int,int>> atoms_per_diff_molecule=read_atoms_per_different_molecule(file, positions_of_flags);
             vector<int> atoms_per_molecule = read_atoms_per_molecule(file, dict_pointers,positions_of_flags["SOLVENT_POINTERS"]); 
@@ -796,7 +796,6 @@ class AmberTopologyReader : public TopologyReader {
             map<int, tuple<string, string, float, float>> molecule_atoms;
             vector<map<int, tuple<string, string, float, float>>> atom_type_name_charge_mass;
             int _k=0;
-
             for(size_t _j=0; _j<number_solute_solvent[1];_j++)
             {
                 for (size_t i = 0; i < atoms_per_molecule[_j]; i+=1) {
