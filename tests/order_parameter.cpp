@@ -29,6 +29,26 @@ int main() {
             resultado2[j]+=resultado_molecula[j]/ti2.num_solutes;
             }
         }
+    
+    TopolInfo ti= ReaderFactory::createTopologyReader(ReaderFactory::ProgramFormat::AMBER)->readTopology("DMPC/jj.prmtop");
+    string file= "DMPC/frame1.pdb";
+    ToolKit::takeTime([&ti,&file,&cr]() {
+        vector<float> resultado(24);
+        for(int i= 0; i < 100; i++) {
+            ConfigurationLipid c= ConfigurationLipid(cr, file, ti);
+            for(int i=1; i<=ti.num_solutes;i++)
+                {
+                vector<float> resultado_molecula = c.orderParameter(i);
+                for(int j=0; j<resultado_molecula.size();j++)
+                    {
+                    resultado[j]=resultado_molecula[j]/ti.num_solutes;
+                    }
+                }
+            
+        }
+    });
+    
+
 
     ofstream f("parametro_de_orden.csv");
     f<<"Carbono,"<< "Orden_gel,"<<"Orden_cristal" <<endl; 
