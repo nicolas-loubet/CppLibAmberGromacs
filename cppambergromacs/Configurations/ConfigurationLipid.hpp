@@ -127,20 +127,25 @@ class ConfigurationLipid : public Configuration {
                     {
                     if(getMolec(ID_MOLEC).getAtom(NearbyAtoms[j]).getZ()==8) // An Oxigen has been found
                         {
+                        exit=false;
                         vector<int> NearbyAtoms_oxigen=findNearbyAtoms(ID_MOLEC, NearbyAtoms[j], 1.65);
-                        for(int k=0; k<NearbyAtoms_oxigen.size(); k++)
-                            {
-                            if(getMolec(ID_MOLEC).getAtom(NearbyAtoms_oxigen[k]).getZ()==6) //Search in the oxigen for the next carbon
+
+                        if(NearbyAtoms_oxigen.size()>=2)
+                            {    
+                            for(int k=0; k<NearbyAtoms_oxigen.size(); k++)
                                 {
-                                if(NearbyAtoms_oxigen[k]!=previous_c) // that is not the previous, so it is SN1 or SN2 Carbon
+                                if(getMolec(ID_MOLEC).getAtom(NearbyAtoms_oxigen[k]).getZ()==6) //Search in the oxigen for the next carbon
                                     {
-                                    vector<int> NearbyAtoms_SN2=findNearbyAtoms(ID_MOLEC, NearbyAtoms_oxigen[k], 1.65);    
-                                    for(int l=0; l<NearbyAtoms_SN2.size(); l++)
+                                    if(NearbyAtoms_oxigen[k]!=next_C) // that is not the previous, so it is SN1 or SN2 Carbon
                                         {
-                                        if(getMolec(ID_MOLEC).getAtom(NearbyAtoms_SN2[l]).getZ()==1) {SN_hydrogen+=1;}  //Count the number of Hydrogen to determne if it is SN1 or SN2
+                                        vector<int> NearbyAtoms_SN2=findNearbyAtoms(ID_MOLEC, NearbyAtoms_oxigen[k], 1.65);    
+                                        for(int l=0; l<NearbyAtoms_SN2.size(); l++)
+                                            {
+                                            if(getMolec(ID_MOLEC).getAtom(NearbyAtoms_SN2[l]).getZ()==1) {SN_hydrogen+=1;}  //Count the number of Hydrogen to determne if it is SN1 or SN2
+                                            }
+                                        exit=true;
+                                        break;
                                         }
-                                    exit=true;
-                                    break;
                                     }
                                 }
                             }
@@ -152,8 +157,9 @@ class ConfigurationLipid : public Configuration {
                             chain_lenght+=1;
                             break;
                             }
-                        continue;
+                        
                         }
+                    if(exit==true){continue;}
                     if(getMolec(ID_MOLEC).getAtom(NearbyAtoms[j]).getZ()==6) // if no Oxigen was found and Carbon was found
                         {
                         if(NearbyAtoms[j]!=previous_c) // And it is no the previuos Carbon, thien is the next.
@@ -179,12 +185,14 @@ class ConfigurationLipid : public Configuration {
          * @return returns a list of atoms and the order parameter of the chain.
          */
 
-        inline vector<float> Molecule_analizer(const int ID_MOLEC) const
+        inline vector<vector<float>> Molecule_analizer(const int ID_MOLEC) const
             {
-            vector<float> order_per_carbon(22);  // sets a maximun chain lenght of 22 
+            
             vector<int> CH3_found = findCH3(ID_MOLEC); // finds the terminal CH3
+            vector<vector<float>> order_per_chain(3,vector<float>(22,0.0f));
             for(int i=0; i<CH3_found.size();i++) //for each CH3 found
                 {
+                vector<float> order_per_carbon(22);  // sets a maximun chain lenght of 22 
                 pair<int,vector<map<int,vector<int>>>> cadena = analizeChain(ID_MOLEC, CH3_found[i]); //Chain is analyzed
                 vector<map<int,vector<int>>> cadena_analizada=cadena.second; //Grabs the chain
                 
@@ -211,17 +219,34 @@ class ConfigurationLipid : public Configuration {
 
                         }
                         if(n_hydrogen==0){order=0;n_hydrogen=1;}
-                        order_per_carbon[j]+=order/(n_hydrogen*CH3_found.size()); //adds order from the hydrogen considered divided by the total number of Hydrogen atoms for that Carbon
+                        order_per_carbon[j]+=order/(n_hydrogen); //adds order from the hydrogen considered divided by the total number of Hydrogen atoms for that Carbon
                     }
+                /*    
+                if(cadena.first==2)
+                    {
+                    for(int o=0;o<cadena_analizada.size();o++)
+                        {
+                        cout<< order_per_carbon[o]<< "," ;
+                        }
+                        cout<<endl;
+                    }*/
+                order_per_chain[cadena.first]=order_per_carbon;
                 }
-            return order_per_carbon;
+            return order_per_chain;
             }
 	public:
         ConfigurationLipid(CoordinateReader* coord_reader, const string& filename, TopolInfo& topol_info) :
         Configuration(coord_reader, filename, topol_info) {}
         
-        vector<float> orderParameter(const int ID_MOLEC) {
-            return Molecule_analizer(ID_MOLEC);
+        vector<vector<float>> orderParameter(const int ID_MOLEC) {
+            vector<vector<float>> test = Molecule_analizer(ID_MOLEC);
+            /*for(int o=0;o<test[2].size();o++)
+                {
+                cout<< test[2][o]<< "," ;
+                }
+                cout<<endl;*/
+            //return Molecule_analizer(ID_MOLEC);
+            return test;
         }
 		
 };
