@@ -32,13 +32,13 @@ class ConfigurationBulk : public Configuration {
 		 * @param V_index Same of vI [See vI(m,V_index)], default is 4 (V4)
 		 * @return If the v4 value is higher that the threshold, or false if it is not Water
 		 */
-		bool isD(const int ID_CENTER, const float threshold=-12.0, const int V_index=4) {
+		bool isD(const int ID_CENTER, const Real threshold=-12.0, const int V_index=4) {
 			//If it has been classified, it returns that value
 			Water* m= dynamic_cast<Water*>(molecs[ID_CENTER-1]);
 			if(m == nullptr) return false; //If it is not a Water
 			if(m->getClassification() != NOT_CLASSIFIED) return m->getClassification() == CLASSIFICATION_D_MOLECULE;
 
-			float v4= vI(ID_CENTER, V_index);
+			Real v4= vI(ID_CENTER, V_index);
 
 			if(v4 > threshold) {
 				m->setClassification(CLASSIFICATION_D_MOLECULE);
@@ -53,7 +53,7 @@ class ConfigurationBulk : public Configuration {
 		 * @param threshold The value of potential to which compare the v4, default is -12.0
 		 * @return If the v4 value is higher that the threshold, or false if it is not Water
 		 */
-		bool isD3(const int ID_CENTER, const float threshold=-12.0) {
+		bool isD3(const int ID_CENTER, const Real threshold=-12.0) {
 			return isD(ID_CENTER, threshold);
 		}
 
@@ -63,7 +63,7 @@ class ConfigurationBulk : public Configuration {
 		 * @param threshold The value of potential to which compare the v5, default is -12.0
 		 * @return If the v5 value is lower that the threshold, or false if it is not Water
 		 */
-		bool isD5(const int ID_CENTER, const float threshold=-12.0) {
+		bool isD5(const int ID_CENTER, const Real threshold=-12.0) {
 			return !isD(ID_CENTER, threshold, 5);
 		}
 
@@ -73,18 +73,18 @@ class ConfigurationBulk : public Configuration {
 		 * @param threshold The value of potential to which compare the v4 and v5, default is -12.0
 		 * @return If the v4 value is higher that the threshold or v5 value is lower, or false if it is not Water
 		 */
-		bool isDX(const int ID_CENTER, const float threshold=-12.0) {
+		bool isDX(const int ID_CENTER, const Real threshold=-12.0) {
 			return isD3(ID_CENTER, threshold) || isD5(ID_CENTER, threshold);
 		}
 
 		/**
 		 * It creates a matrix for the getNeighboursByPotential() function
-		 * @return A float** to the matrix
+		 * @return A Real** to the matrix
 		 */
-		float** createPotentialMatrix() {
-			float** potential_matrix= new float*[N_MOLEC];
+		Real** createPotentialMatrix() {
+			Real** potential_matrix= new Real*[N_MOLEC];
 			for(int i= 1; i < N_MOLEC; i++) {
-				potential_matrix[i]= new float[i];
+				potential_matrix[i]= new Real[i];
 				for(int j= 0; j < i; j++)
 					potential_matrix[i][j]= NOT_CLASSIFIED;
 			}
@@ -93,9 +93,9 @@ class ConfigurationBulk : public Configuration {
 
 		/**
 		 * It dealocates the matrix generated for the getNeighboursByPotential() function (created with createPotentialMatrix() function)
-		 * @param A float** to the matrix
+		 * @param A Real** to the matrix
 		 */
-		void deletePotentialMatrix(float** potential_matrix) {
+		void deletePotentialMatrix(Real** potential_matrix) {
 			for(int i= 1; i < N_MOLEC; i++)
 				delete[] potential_matrix[i];
 			delete[] potential_matrix;
@@ -107,14 +107,14 @@ class ConfigurationBulk : public Configuration {
 		 * @param V_index Same of vI [See vI(m,V_index)], default is 4
 		 * @param threshold The value of potential to which compare the vI return value, default is -12
 		 */
-		void classifyMolecules(const int V_index=4, const float threshold=-12.0) {
+		void classifyMolecules(const int V_index=4, const Real threshold=-12.0) {
 			const int NUMBER_OF_NEIGHBOURS= 4;
 
-			float** potential_matrix= createPotentialMatrix();
+			Real** potential_matrix= createPotentialMatrix();
 
 			//Firstly, I want to know every D molecule
 			for(int i= 0; i < N_MOLEC; i++) {
-				vector<float> pots_neighs_vector;
+				vector<Real> pots_neighs_vector;
 				vector<int> neighs_vector;
 
 				Water* w= dynamic_cast<Water*>(molecs[i]);
@@ -138,7 +138,7 @@ class ConfigurationBulk : public Configuration {
 					if(w == nullptr) continue;
 					if(w->getClassification() != CLASSIFICATION_T2_MOLECULE) continue;
 
-					vector<float> pots_neighs_vector;
+					vector<Real> pots_neighs_vector;
 					vector<int> neighs_vector;
 
 					getNeighboursByPotential(w, pots_neighs_vector, neighs_vector, potential_matrix);
@@ -163,14 +163,14 @@ class ConfigurationBulk : public Configuration {
 		 * @param V_index Same of vI [See vI(m,V_index)], default is 4
 		 * @param threshold The value of potential to which compare the vI return value, default is -12
 		 */
-		void classifyMolecules_includePentacoordinated(const int V_index=4, const float threshold=-12.0) {
+		void classifyMolecules_includePentacoordinated(const int V_index=4, const Real threshold=-12.0) {
 			const int NUMBER_OF_NEIGHBOURS= 4;
 			
-			float** potential_matrix= createPotentialMatrix();
+			Real** potential_matrix= createPotentialMatrix();
 
 			//Firstly, I want to know every D molecule
 			for(int i= 0; i < N_MOLEC; i++) {
-				vector<float> pots_neighs_vector;
+				vector<Real> pots_neighs_vector;
 				vector<int> neighs_vector;
 
 				Water* w= dynamic_cast<Water*>(molecs[i]);
@@ -194,7 +194,7 @@ class ConfigurationBulk : public Configuration {
 				if(w == nullptr) continue;
 				if(w->getClassification() != CLASSIFICATION_TB_MOLECULE) continue;
 
-				vector<float> pots_neighs_vector;
+				vector<Real> pots_neighs_vector;
 				vector<int> neighs_vector;
 
 				getNeighboursByPotential(w, pots_neighs_vector, neighs_vector, potential_matrix);
@@ -222,9 +222,9 @@ class ConfigurationBulk : public Configuration {
 		 * @param neighbours An array with the neighbours of each molecule, default is nullptr
 		 * @return An array with the V_4S values
 		 */
-		float* v_4S_arr(const int inic_value= 1, const int i_V= 4, const float R_CUT_OFF= 5., ToolKit::ArrInt* neighbours= nullptr) {
-			float* output= new float[N_MOLEC];
-			float** pm= createPotentialMatrix();
+		Real* v_4S_arr(const int inic_value= 1, const int i_V= 4, const Real R_CUT_OFF= 5., ToolKit::ArrInt* neighbours= nullptr) {
+			Real* output= new Real[N_MOLEC];
+			Real** pm= createPotentialMatrix();
 			for(int i= inic_value; i < N_MOLEC; i++)
 				output[i-inic_value]= getInteractionsPerSite(i,R_CUT_OFF,pm,neighbours)[i_V-1];
 			deletePotentialMatrix(pm);
@@ -238,10 +238,10 @@ class ConfigurationBulk : public Configuration {
 		 * @param MAX_A_HB The angle O-O-H that it could be considereded an HB (near 30°)
 		 * @return The potential number V_index of a sorted list of all potentials
 		 */
-		float Tanaka(Water* m, const float MAX_D_HB= 3.5, const float MAX_A_HB= 30.) {
-			const float MAX_D_ANALYSIS= 6.0; //Maximum distance for analysis
-			float dist;
-			vector<float> ls_d_HB, ls_d_nHB;
+		Real Tanaka(Water* m, const Real MAX_D_HB= 3.5, const Real MAX_A_HB= 30.) {
+			const Real MAX_D_ANALYSIS= 6.0; //Maximum distance for analysis
+			Real dist;
+			vector<Real> ls_d_HB, ls_d_nHB;
 
 			for(int i= 0; i < N_MOLEC; i++) {
 				if(i+1 == m->getID()) continue;
@@ -258,9 +258,9 @@ class ConfigurationBulk : public Configuration {
 					ls_d_nHB.push_back(dist);
 			}
 
-			float min_value= *min_element(ls_d_HB.begin(),ls_d_HB.end());
-			float max_value= *max_element(ls_d_nHB.begin(),ls_d_nHB.end());
-			float output= min_value-max_value;
+			Real min_value= *min_element(ls_d_HB.begin(),ls_d_HB.end());
+			Real max_value= *max_element(ls_d_nHB.begin(),ls_d_nHB.end());
+			Real output= min_value-max_value;
 			
 			return output;
 		}
@@ -270,15 +270,15 @@ class ConfigurationBulk : public Configuration {
 		 * @param id The ID of the molecule (1-N)
 		 * @return the LSI value
 		 */
-		float LSI(const int id) {
-			const float R_MAX= 3.7; //A (CUT-OFF)
-			vector<float> distances;
+		Real LSI(const int id) {
+			const Real R_MAX= 3.7; //A (CUT-OFF)
+			vector<Real> distances;
 
-			float dist_peripheral= bounds.x+bounds.y+bounds.z;
+			Real dist_peripheral= bounds.x+bounds.y+bounds.z;
 
 			for(int j= 1; j <= N_MOLEC; j++) {
 				if(j==id) continue;
-				float d= getMolec(id).distanceTo(getMolec(j), bounds);
+				Real d= getMolec(id).distanceTo(getMolec(j), bounds);
 				if(d > R_MAX) {
 					if(d < dist_peripheral)
 						dist_peripheral= d;
@@ -293,15 +293,15 @@ class ConfigurationBulk : public Configuration {
 			Sorter::sort(distances, Sorter::Order::Ascending);
 			int N= distances.size()-1;
 
-			float sum_deltas= 0.;
-			float sum_squared_deltas= 0.;
+			Real sum_deltas= 0.;
+			Real sum_squared_deltas= 0.;
 			for(int j= 0; j < N; j++) {
-				float delta_j= distances[j+1]-distances[j];
+				Real delta_j= distances[j+1]-distances[j];
 				sum_deltas+= delta_j;
 				sum_squared_deltas+= delta_j*delta_j;
 			}
 
-			float mean_delta= sum_deltas/N;
+			Real mean_delta= sum_deltas/N;
 			return sum_squared_deltas/N - mean_delta*mean_delta;
 		}
 

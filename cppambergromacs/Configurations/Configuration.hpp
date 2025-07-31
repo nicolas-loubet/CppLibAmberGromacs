@@ -26,11 +26,11 @@ class Configuration {
 		/**
 		 * Adds the potential of an atom with a water molecule to the sum_per_site vector, used in getInteractionsPerSite
 		 */
-		void addToSumVector(vector<Vector>& sites, vector<float>& sum_per_site, Water& center_water, Atom& atom, const float R_CUT_OFF) {
+		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Atom& atom, const Real R_CUT_OFF) {
 			int i_close= 0;
-			float d_close= distancePBC(sites[0],atom.getPosition(),bounds);
+			Real d_close= distancePBC(sites[0],atom.getPosition(),bounds);
 			for(int i= 1; i < 4; i++) {
-				float d_new= distancePBC(sites[i],atom.getPosition(),bounds);
+				Real d_new= distancePBC(sites[i],atom.getPosition(),bounds);
 				if(d_close > d_new) {
 					i_close= i;
 					d_close= d_new;
@@ -44,11 +44,11 @@ class Configuration {
 		/**
 		 * Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite
 		 */
-		void addToSumVector(vector<Vector>& sites, vector<float>& sum_per_site, Water& center_water, Water& other, float** potential_matrix, ToolKit::ArrInt* neighbours, const float R_CUT_OFF) {
+		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other, Real** potential_matrix, ToolKit::ArrInt* neighbours, const Real R_CUT_OFF) {
 			int i_close= 0;
-			float d_close= distancePBC(sites[0],other.getPosition(),bounds);
+			Real d_close= distancePBC(sites[0],other.getPosition(),bounds);
 			for(int i= 1; i < 4; i++) {
-				float d_new= distancePBC(sites[i],other.getPosition(),bounds);
+				Real d_new= distancePBC(sites[i],other.getPosition(),bounds);
 				if(d_close > d_new) {
 					i_close= i;
 					d_close= d_new;
@@ -56,7 +56,7 @@ class Configuration {
 			}
 			if(d_close > R_CUT_OFF) return;
 
-			float pot;
+			Real pot;
 			if(potential_matrix != nullptr) {
 				int min= (center_water.getID() < other.getID()  ?  center_water.getID() : other.getID()) - 1;
 				int max= (center_water.getID() > other.getID()  ?  center_water.getID() : other.getID()) - 1;
@@ -76,11 +76,11 @@ class Configuration {
 		/**
 		 * Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite flagged with water-water interactions < V_CUT_OFF
 		 */
-		void addToSumVector(vector<Vector>& sites, vector<float>& sum_per_site, Water& center_water, Water& other, float** potential_matrix, ToolKit::ArrInt* neighbours, const float R_CUT_OFF, bool* ww_interaction, const float V_CUT_OFF) {
+		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other, Real** potential_matrix, ToolKit::ArrInt* neighbours, const Real R_CUT_OFF, bool* ww_interaction, const Real V_CUT_OFF) {
 			int i_close= 0;
-			float d_close= distancePBC(sites[0],other.getPosition(),bounds);
+			Real d_close= distancePBC(sites[0],other.getPosition(),bounds);
 			for(int i= 1; i < 4; i++) {
-				float d_new= distancePBC(sites[i],other.getPosition(),bounds);
+				Real d_new= distancePBC(sites[i],other.getPosition(),bounds);
 				if(d_close > d_new) {
 					i_close= i;
 					d_close= d_new;
@@ -88,7 +88,7 @@ class Configuration {
 			}
 			if(d_close > R_CUT_OFF) return;
 
-			float pot;
+			Real pot;
 			if(potential_matrix != nullptr) {
 				int min= (center_water.getID() < other.getID()  ?  center_water.getID() : other.getID()) - 1;
 				int max= (center_water.getID() > other.getID()  ?  center_water.getID() : other.getID()) - 1;
@@ -175,10 +175,10 @@ class Configuration {
 		/**
 		 * Finds the molecules nearby the specified one
 		 * @param ID_CENTER int The ID of the Molecule that is the center of the search
-		 * @param D_MAX_NEI float Maximum radium of neighbour search
+		 * @param D_MAX_NEI Real Maximum radium of neighbour search
 		 * @return A ToolKit::ArrInt with the IDs of the molecules that are at a distance of D_MAX_NEI Angstrom or less
 		 */
-		ToolKit::ArrInt findNearby(const int ID_CENTER, const float D_MAX_NEI) const {
+		ToolKit::ArrInt findNearby(const int ID_CENTER, const Real D_MAX_NEI) const {
 			int* i_nearby= new int[N_MOLEC];
 			int counter= 0;
 
@@ -200,12 +200,12 @@ class Configuration {
 		 * @param MAX_V4 The radii of cut-off to not compare all the molecules
 		 * @return The potential number V_index of a sorted list of all potentials
 		 */
-		float* getVList(const int ID_CENTER, const float MAX_V4= 5.5) {
+		Real* getVList(const int ID_CENTER, const Real MAX_V4= 5.5) {
 			if(!getMolec(ID_CENTER).isWater()) return nullptr;
 			Water w1= *static_cast<Water*>(molecs[ID_CENTER-1]);
 
 			int ls_V_i= 0;
-			float* ls_V= new float[N_MOLEC];
+			Real* ls_V= new Real[N_MOLEC];
 
 			for(int j= 0; j < N_MOLEC; j++) {
 				if(j+1 == ID_CENTER) continue; //If they are the same molecule
@@ -225,9 +225,9 @@ class Configuration {
 		 * @param V_index The i to return the ith potential, default is 4 (V4)
 		 * @return The potential number V_index of a sorted list of all potentials
 		 */
-		float vI(const int ID_CENTER, const int V_index=4) {
-			float *ls_V= getVList(ID_CENTER);
-			float v_i= ls_V[V_index-1];
+		Real vI(const int ID_CENTER, const int V_index=4) {
+			Real *ls_V= getVList(ID_CENTER);
+			Real v_i= ls_V[V_index-1];
 			delete(ls_V);
 			return v_i;
 		}
@@ -235,12 +235,12 @@ class Configuration {
 		/**
 		 * Finds the water molecules nearby the specified one in terms of potential energy
 		 * @param m *Water that is the center of the search
-		 * @param pots *float To return the potential
+		 * @param pots *Real To return the potential
 		 * @param identificators *ToolKit::ArrInt (use &) To return the ids of the molecules for each potential
-		 * @param potential_matrix **float where to register the potentials to avoid two times search
+		 * @param potential_matrix **Real where to register the potentials to avoid two times search
 		 */
-		void getNeighboursByPotential(Water* m, vector<float>& pots, vector<int>& identificators, float** potential_matrix) {
-			const float MAX_R_V4= 5.5; //Cutoff to not compare all the molecules
+		void getNeighboursByPotential(Water* m, vector<Real>& pots, vector<int>& identificators, Real** potential_matrix) {
+			const Real MAX_R_V4= 5.5; //Cutoff to not compare all the molecules
 
 			for(int i= 0; i < N_MOLEC; i++) {
 				if(i+1 == m->getID()) continue;
@@ -266,7 +266,7 @@ class Configuration {
 		 * @param R_CUT_OFF The cutoff radius, default is 5.
 		 * @return The interactions per site, sorted in descending order
 		 */
-		vector<float> getInteractionsPerSite(const int ID, const float R_CUT_OFF= 5.0f, float** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr) {
+		vector<Real> getInteractionsPerSite(const int ID, const Real R_CUT_OFF= 5.0, Real** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr) {
 			if(!getMolec(ID).isWater()) throw invalid_argument("The molecule is not a water molecule.");
 			Water& molecule= *static_cast<Water*>(molecs[ID-1]);
 			Vector o= molecule.getOxygen().getPosition();
@@ -274,7 +274,7 @@ class Configuration {
 			Vector h2= molecule.getHydrogen_2().getPosition();
 			Geometrics::TetrahedronVertices t= Geometrics::getPerfectTetrahedron(o, h1, h2, bounds);
 			
-			vector<float> sum_per_site(4,0.0f);
+			vector<Real> sum_per_site(4,0.0);
 			vector<Vector> sites= {t.H1, t.H2, t.L1, t.L2};
 			
 			for(int j= 0; j < N_MOLEC; j++) {
@@ -312,7 +312,7 @@ class Configuration {
 		 * @param flag_ww A flag to know if there is a water-water interaction
 		 * @return The interactions per site, sorted in descending order
 		 */
-		vector<float> getInteractionsPerSite(const int ID, bool& flag_ww, const float V_CUT_OFF= -12.0f, const float R_CUT_OFF= 5.0f, float** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr) {
+		vector<Real> getInteractionsPerSite(const int ID, bool& flag_ww, const Real V_CUT_OFF= -12.0, const Real R_CUT_OFF= 5.0, Real** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr) {
 			if(!getMolec(ID).isWater()) throw invalid_argument("The molecule is not a water molecule.");
 			Water& molecule= *static_cast<Water*>(molecs[ID-1]);
 			Vector o= molecule.getOxygen().getPosition();
@@ -320,7 +320,7 @@ class Configuration {
 			Vector h2= molecule.getHydrogen_2().getPosition();
 			Geometrics::TetrahedronVertices t= Geometrics::getPerfectTetrahedron(o, h1, h2, bounds);
 			
-			vector<float> sum_per_site(4,0.0f);
+			vector<Real> sum_per_site(4,0.0);
 			vector<Vector> sites= {t.H1, t.H2, t.L1, t.L2};
 
 			bool* water_water_interaction= new bool[4];
@@ -367,7 +367,7 @@ class Configuration {
 		 * @param R_CUT_OFF The cutoff radius, default is 5.
 		 * @return The V_4S value
 		 */
-		float v_4S(const int ID, const int i_V= 4, const float R_CUT_OFF= 5.0f) {
+		Real v_4S(const int ID, const int i_V= 4, const Real R_CUT_OFF= 5.0) {
 			return getInteractionsPerSite(ID, R_CUT_OFF, nullptr, nullptr)[i_V-1];
 		}
 

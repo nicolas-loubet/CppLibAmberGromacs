@@ -165,22 +165,22 @@ class ConfigurationLipid : public Configuration {
         /**
          * Calculation of the order parameter.
          * @param ID_MOLEC ID of the molecule
-         * @return A vector<vector<float>> with the first dimension being the chain and the second dimension being the order parameter for the atom i
+         * @return A vector<vector<Real>> with the first dimension being the chain and the second dimension being the order parameter for the atom i
          */
 
-        vector<vector<float>> orderParameter(const int ID_MOLEC) {
+        vector<vector<Real>> orderParameter(const int ID_MOLEC) {
             vector<int> CH3_found = findCH3(ID_MOLEC); // finds the terminal CH3
-            vector<vector<float>> order_per_chain(3,vector<float>(22,0.0f));
+            vector<vector<Real>> order_per_chain(3,vector<Real>(22,0.0));
             for(int i=0; i<CH3_found.size();i++) //for each CH3 found
                 {
-                vector<float> order_per_carbon(22);  // sets a maximun chain lenght of 22 
+                vector<Real> order_per_carbon(22);  // sets a maximun chain lenght of 22 
                 pair<int,vector<map<int,vector<int>>>> chain = analizeChain(ID_MOLEC, CH3_found[i]); //Chain is analyzed
                 vector<map<int,vector<int>>> chain_studied=chain.second; //Grabs the chain
                 
                 for(int j=0; j<chain_studied.size(); j++)
                     {
                     map<int,vector<int>> analyzed_atom=chain_studied[j];
-                    float order=0.0;
+                    Real order=0.0;
                     int n_hydrogen=0;
                     for(const auto& mol_pair : analyzed_atom)
                         {
@@ -191,7 +191,7 @@ class ConfigurationLipid : public Configuration {
                             if(getMolec(ID_MOLEC).getAtom(lista[k]).getZ()==1) //finds the Hydrogen
                                 {
                                 Vector CH=getMolec(ID_MOLEC).getAtom(carbon_number).getPosition() - getMolec(ID_MOLEC).getAtom(lista[k]).getPosition(); //Gets the unit vector of the CH bond
-                                float z = (CH/CH.magnitude()).z; //calculates the cosene (proyection of the unit vector with z)
+                                Real z = (CH/CH.magnitude()).z; //calculates the cosene (proyection of the unit vector with z)
                                 order+=0.5*(3*z*z-1);
                                 n_hydrogen+=1;
                                 }
