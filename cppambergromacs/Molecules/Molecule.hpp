@@ -24,8 +24,8 @@ class Molecule : public Particle{
 		 * @param nAtoms Number of atoms
 		 * @return The total mass
 		 */
-		static float totalMass(Atom* Atoms, int nAtoms){
-			float total_mass=0.0f;
+		static Real totalMass(Atom* Atoms, int nAtoms){
+			Real total_mass=0.0;
 			for(int _i=0;_i<nAtoms;++_i){
 				total_mass+=Atoms[_i].getMass();
 			}
@@ -38,8 +38,8 @@ class Molecule : public Particle{
 		 * @param nAtoms Number of atoms
 		 * @return The total charge
 		 */
-		static float totalCharge(Atom* Atoms, int nAtoms){
-			float total_charge=0.0f;
+		static Real totalCharge(Atom* Atoms, int nAtoms){
+			Real total_charge=0.0;
 			for(int _i=0;_i<nAtoms;++_i){
 				total_charge+=Atoms[_i].getCharge();
 			}
@@ -84,11 +84,11 @@ class Molecule : public Particle{
 		 * @return The center of mass
 		 */
 		static Vector centerOfMass(Atom* Atoms, int nAtoms){
-			Vector com ={0.0f,0.0f,0.0f};
+			Vector com ={0.0,0.0,0.0};
 			for(int _i=0;_i<nAtoms;++_i){
 				com+=Atoms[_i].getPosition();
 			}
-			return(com/static_cast<float>(nAtoms));
+			return(com/static_cast<Real>(nAtoms));
 		}
 
 		/**
@@ -113,11 +113,11 @@ class Molecule : public Particle{
         /**
          * This function find the nearest atoms to the parameter, being par of the same molecule
          * @param ID_CENTER ID of the atom center to search
-         * @param D_MAX_NEI float that indicate maximum bond distanece to search
+         * @param D_MAX_NEI Real that indicate maximum bond distanece to search
 		 * @param bounds Vector with the size of the box for PBC
          * @return A vector<int> with the IDs of the atoms
          */
-        inline std::vector<int> findNearbyAtoms(const int ID_CENTER, const float D_MAX_NEI, const Vector& bounds) const {
+        inline std::vector<int> findNearbyAtoms(const int ID_CENTER, const Real D_MAX_NEI, const Vector& bounds) const {
 			std::vector<int> i_nearby;
 			int counter= 0;
 

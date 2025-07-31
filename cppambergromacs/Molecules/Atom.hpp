@@ -10,19 +10,19 @@
 
 class Atom : public Particle{
 	protected:
-		static constexpr float K_COULOMB= 1389.35458; //kJ/mol to e-2
+		static constexpr Real K_COULOMB= 1389.35458; //kJ/mol to e-2
 		bool is_HAtom;
-		float sigma;
-		float epsilon;
+		Real sigma;
+		Real epsilon;
 		int Z;
 	public:
 		void setis_Hatom(bool Hatom){is_HAtom=Hatom;}
 		bool getis_Hatom() const {return(is_HAtom);}
 		
-		void setSigma(float s){sigma=s;}
-		float getSigma() const {return(sigma);}
-		void setEpsilon(float e){epsilon=e;}
-		float getEpsilon() const {return(epsilon);}
+		void setSigma(Real s){sigma=s;}
+		Real getSigma() const {return(sigma);}
+		void setEpsilon(Real e){epsilon=e;}
+		Real getEpsilon() const {return(epsilon);}
 		void setZ(int atom_type){Z=atom_type;is_HAtom= Z==1;}
 		int getZ() const {return(Z);}
 
@@ -30,7 +30,7 @@ class Atom : public Particle{
 
 		Atom(Vector pos, int id): Particle(pos, id, 0) {}
 		
-		Atom(Vector pos, int id, float mass, float charge, float e, float s, int Z):
+		Atom(Vector pos, int id, Real mass, Real charge, Real e, Real s, int Z):
 			Particle(pos, id, mass, charge), Z(Z), epsilon(e), sigma(s) {
 				is_HAtom= Z==1;
 			}
@@ -53,7 +53,7 @@ class Atom : public Particle{
 		 * @param bounds The coordinate of the last point, so the components are the width, height and length
 		 * @return The potential energy in kJ/mol between the two atoms
 		 */
-		float getCoulombPotential(Atom a, Vector bounds) const {
+		Real getCoulombPotential(Atom a, Vector bounds) const {
 			return (K_COULOMB*charge*a.getCharge()) / distanceTo(a,bounds);
 		}
 

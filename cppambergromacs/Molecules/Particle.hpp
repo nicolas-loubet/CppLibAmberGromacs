@@ -12,8 +12,8 @@ class Particle{
 	protected:
 		Vector pos;
 		int ID;
-		float mass;
-		float charge;
+		Real mass;
+		Real charge;
 	public:
 		void setPosition(Vector position){pos=position;}
 		Vector getPosition() const {return(pos);}
@@ -21,17 +21,17 @@ class Particle{
 		void setID(int ID_variable){ID=ID_variable;}
 		int getID() const {return(ID);}
 
-		void setMass(float mass_variable){mass=mass_variable;}
-		float getMass() const {return(mass);}
+		void setMass(Real mass_variable){mass=mass_variable;}
+		Real getMass() const {return(mass);}
 
-		void setCharge(float Charge){charge=Charge;}
-		float getCharge() const {return(charge);}
+		void setCharge(Real Charge){charge=Charge;}
+		Real getCharge() const {return(charge);}
 		
-		Particle():pos({0.0f,0.0f,0.0f}), ID(0), mass(0),charge(0) {}
+		Particle():pos({0.0,0.0,0.0}), ID(0), mass(0),charge(0) {}
 		Particle (Vector position) : pos(position), ID(0), mass(0),charge(0) {}
 		Particle (Vector position, int id) : pos(position), ID(id), mass(0),charge(0) {}
-		Particle (Vector position, int id, float Mass) : pos(position), ID(id), mass(Mass),charge(0) {}
-		Particle (Vector position, int id, float Mass, float Charge) : pos(position), ID(id), mass(Mass), charge(Charge) {}
+		Particle (Vector position, int id, Real Mass) : pos(position), ID(id), mass(Mass),charge(0) {}
+		Particle (Vector position, int id, Real Mass, Real Charge) : pos(position), ID(id), mass(Mass), charge(Charge) {}
 
 		Particle(const Particle& other) : pos(other.pos), ID(other.ID), mass(other.mass), charge(other.charge) {}
 
@@ -50,7 +50,7 @@ class Particle{
 		 * @param box The box size
 		 * @return The distance between the two particles
 		 */
-		float distanceTo(const Particle& other, const Vector box) const 
+		Real distanceTo(const Particle& other, const Vector box) const 
 			{
 			return distancePBC(pos, other.getPosition(), box);
 			}

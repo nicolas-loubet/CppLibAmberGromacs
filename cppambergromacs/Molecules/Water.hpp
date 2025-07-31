@@ -48,10 +48,10 @@ class Water : public Molecule {
 		 * @param bounds The coordinate of the last point, so the components are the width, height and length
 		 * @return true if the two molecules form an HB
 		 */
-		bool isHB(const Water& m, const Vector& bounds, const float MAX_D_HB= 3.5, const float MAX_A_HB= 30) const {
+		bool isHB(const Water& m, const Vector& bounds, const Real MAX_D_HB= 3.5, const Real MAX_A_HB= 30) const {
 			if(distanceTo(m, bounds) > MAX_D_HB) return false;
 
-			const float MAX_A_HB_RAD= MAX_A_HB*Vector::PI/180.;
+			const Real MAX_A_HB_RAD= MAX_A_HB*Vector::PI/180.;
 			Atom* atoms_other= m.getAtoms();
 			if(getAngle(atoms[0].getPosition(), atoms_other[0].getPosition(), atoms_other[1].getPosition(), bounds) < MAX_A_HB_RAD) return true;
 			if(getAngle(atoms[0].getPosition(), atoms_other[0].getPosition(), atoms_other[2].getPosition(), bounds) < MAX_A_HB_RAD) return true;
@@ -68,8 +68,8 @@ class Water : public Molecule {
 		 * @param bounds The coordinate of the last point, so the components are the width, height and length
 		 * @return The L-J potential energy in kJ/mol between the two molecules
 		 */
-		float getLJPotential(const Particle& m, const float s, const float e, const Vector& bounds) const {
-			const float s_over_R= s/distanceTo(m,bounds);
+		Real getLJPotential(const Particle& m, const Real s, const Real e, const Vector& bounds) const {
+			const Real s_over_R= s/distanceTo(m,bounds);
 			return 4*e*(pow(s_over_R,12)-pow(s_over_R,6));
 		}
 
@@ -79,8 +79,8 @@ class Water : public Molecule {
 		 * @param bounds The coordinate of the last point, so the components are the width, height and length
 		 * @return the potential energy in kJ/mol of the interaction between this two molecules
 		 */
-		float potentialWith(const Water& m, const Vector& bounds) const {
-			float Vtot= getLJPotential(m, atoms[0].getSigma(), atoms[0].getEpsilon(), bounds);
+		Real potentialWith(const Water& m, const Vector& bounds) const {
+			Real Vtot= getLJPotential(m, atoms[0].getSigma(), atoms[0].getEpsilon(), bounds);
 
 			Atom* arr_other= m.getAtoms();
 			for(int i= 0; i < n_atoms; i++)
@@ -96,13 +96,13 @@ class Water : public Molecule {
 		 * @param bounds The coordinate of the last point, so the components are the width, height and length
 		 * @return the potential energy in kJ/mol of the interaction between this two molecules
 		 */
-		float potentialWith(const Molecule& m, const Vector& bounds) const {
+		Real potentialWith(const Molecule& m, const Vector& bounds) const {
 			Atom* arr_other= m.getAtoms();
 			//Combination rules: Lorentz-Berthelot
-			float s= .5*(atoms[0].getSigma() + arr_other[0].getSigma());
-			float e= sqrt(atoms[0].getEpsilon() * arr_other[0].getEpsilon());
+			Real s= .5*(atoms[0].getSigma() + arr_other[0].getSigma());
+			Real e= sqrt(atoms[0].getEpsilon() * arr_other[0].getEpsilon());
 
-			float Vtot= getLJPotential(m, s, e, bounds);
+			Real Vtot= getLJPotential(m, s, e, bounds);
 
 			for(int i= 0; i < n_atoms; i++)
 				for(int j= 0; j < m.getNAtoms(); j++)
@@ -117,11 +117,11 @@ class Water : public Molecule {
 		 * @param bounds The coordinate of the last point, so the components are the width, height and length
 		 * @return the potential energy in kJ/mol of the interaction between this two molecules
 		 */
-		float potentialWith(const Atom& atom, const Vector& bounds) {
-			float s= .5*(atoms[0].getSigma() + atom.getSigma());
-			float e= sqrt(atoms[0].getEpsilon() * atom.getEpsilon());
+		Real potentialWith(const Atom& atom, const Vector& bounds) {
+			Real s= .5*(atoms[0].getSigma() + atom.getSigma());
+			Real e= sqrt(atoms[0].getEpsilon() * atom.getEpsilon());
 
-			float Vtot= getLJPotential(atom, s, e, bounds);
+			Real Vtot= getLJPotential(atom, s, e, bounds);
 
 			for(int i= 0; i < n_atoms; i++)
 				Vtot+= atoms[i].getCoulombPotential(atom,bounds);
