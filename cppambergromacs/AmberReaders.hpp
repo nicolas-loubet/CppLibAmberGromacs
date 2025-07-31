@@ -831,6 +831,8 @@ class AmberCoordinateReader : public CoordinateReader {
                 cout << "Failed to open file " << filename << endl;
                 return false;
             }
+            if(molecs == nullptr) return false;
+            
             string line;
             getline(f,line);
             if(line.rfind("CRYST1",0) == 0){

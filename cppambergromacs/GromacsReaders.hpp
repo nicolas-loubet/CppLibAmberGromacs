@@ -386,6 +386,11 @@ class GromacsCoordinateReader : public CoordinateReader {
          */
         bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs, Vector& bounds) const override {
             ifstream f(filename);
+            if(!f.is_open()) {
+                cout << "Error: Failed to open file " << filename << endl;
+                return false;
+            }
+            if(molecs == nullptr) return false;
             string line;
 
             getline(f, line); // Title

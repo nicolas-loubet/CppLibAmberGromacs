@@ -64,6 +64,7 @@ class CoordinateReader {
         virtual bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs, Vector& bounds) const= 0;
 
         static vector<pair<int,string>> getFileIterator(const string& directory, const string& pattern) {
+            if(pattern.find("*") == string::npos) throw runtime_error("The pattern must contain a *");
             string regex_pattern= regex_replace(pattern, regex("\\*"), "(\\d+)");
             regex file_regex(regex_pattern);
             vector<pair<int,string>> list_files;

@@ -422,6 +422,7 @@ class LammpsCoordinateReader : public CoordinateReader {
                 cout << "Error: Failed to open file " << filename << endl;
                 return false;
             }
+            if(molecs == nullptr) return false;
 
             string line;
             int num_atoms_in_frame= 0;
