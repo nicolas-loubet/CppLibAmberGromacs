@@ -138,11 +138,11 @@ class AmberTopologyReader : public TopologyReader {
          * @param position The position of the CHARGE flag
          * @return A vector with the name and charges
          */
-        inline vector<tuple<string,float>> read_charge(ifstream &file, map<string,int>& dict_pointers, vector<string> atom_names,int position) const
+        inline vector<tuple<string,Real>> read_charge(ifstream &file, map<string,int>& dict_pointers, vector<string> atom_names,int position) const
         {
             string line = "";
             bool inFlag = false;
-            vector<tuple<string,float>> charges;
+            vector<tuple<string,Real>> charges;
             int _j = 0;
             file.clear();
             file.seekg(position);
@@ -158,7 +158,7 @@ class AmberTopologyReader : public TopologyReader {
                         continue;
                     }
                     for (size_t i = 0; i + 15 < line.length(); i += 16) {
-                        charges.push_back(make_tuple(atom_names[_j], stof(line.substr(i, 16))/18.2223));
+                        charges.push_back(make_tuple(atom_names[_j], RealParser(line.substr(i, 16))/18.2223));
                         ++_j;
                     }
                     
@@ -574,11 +574,11 @@ class AmberTopologyReader : public TopologyReader {
          * @param position The position of the ATOM_TYPE_INDEX flag
          * @return A vector with the mass
          */
-        inline vector<float> read_mass(ifstream &file, map<string,int>& dict_pointers,int position) const
+        inline vector<Real> read_mass(ifstream &file, map<string,int>& dict_pointers,int position) const
         {
             string line="";
             bool inFlag = false;
-            vector<float> mass(dict_pointers["NATOM"]); 
+            vector<Real> mass(dict_pointers["NATOM"]); 
             int _j=0;
             file.clear();
             file.seekg(position);
@@ -593,7 +593,7 @@ class AmberTopologyReader : public TopologyReader {
                         continue;
                     }
                     for (size_t i = 0; i + 15 < line.length(); i += 16) {
-                        mass[_j]=stof(ToolKit::strip(line.substr(i, 16)));
+                        mass[_j]=RealParser(ToolKit::strip(line.substr(i, 16)));
                         ++_j;
                     }
                     if (_j>=dict_pointers["NATOM"]) {
@@ -614,11 +614,11 @@ class AmberTopologyReader : public TopologyReader {
          * @param amber_type A vector with the atom type
          * @return A map with the LJ coefficients
          */
-        inline map<pair<string,string>,pair<float,float>> read_lj(ifstream &file, map<string,int>& dict_pointers,int position,vector<string> amber_type) const
+        inline map<pair<string,string>,pair<Real,Real>> read_lj(ifstream &file, map<string,int>& dict_pointers,int position,vector<string> amber_type) const
         {
             string line="";
             bool inFlag = false;
-            map<tuple<int,int>,tuple<float,float>> lj_coefficient;
+            map<tuple<int,int>,tuple<Real,Real>> lj_coefficient;
             file.clear();
             file.seekg(position);
             int _j=0;
@@ -643,7 +643,7 @@ class AmberTopologyReader : public TopologyReader {
                     }
                     
                     for (size_t i = 0; i + 15< line.length(); i += 16) {
-                        float coef_a=stof(ToolKit::strip(line.substr(i, 16)));
+                        Real coef_a=RealParser(ToolKit::strip(line.substr(i, 16)));
                         
                         //lj_coefficient[{_i,_k}]={coef_a,0.0};
                         get<0>(lj_coefficient[{_i,_k}])=coef_a;
@@ -675,7 +675,7 @@ class AmberTopologyReader : public TopologyReader {
                     }
                     
                     for (size_t i = 0; i + 15< line.length(); i += 16) {
-                        float coef_b=stof(ToolKit::strip(line.substr(i, 16)));
+                        Real coef_b=RealParser(ToolKit::strip(line.substr(i, 16)));
 
                         get<1>(lj_coefficient[{_i,_k}])=coef_b;
                         get<1>(lj_coefficient[{_k,_i}])=coef_b;
@@ -692,10 +692,10 @@ class AmberTopologyReader : public TopologyReader {
                 }
             }
 
-            float sigma=0;
-            float epsilon=0;
-            float a=0;
-            float b=0;
+            Real sigma=0;
+            Real epsilon=0;
+            Real a=0;
+            Real b=0;
             for(int _i=1;_i<=dict_pointers["NTYPES"];++_i)
                 {
                 for(int _k=1;_k<=dict_pointers["NTYPES"];++_k)
@@ -708,13 +708,13 @@ class AmberTopologyReader : public TopologyReader {
                         get<1>(lj_coefficient[{_i,_k}])=sigma;
                     }
                 }
-            map<pair<string,string>,pair<float,float>> lj_coefficient_in_amber_type;
+            map<pair<string,string>,pair<Real,Real>> lj_coefficient_in_amber_type;
             for(int _i=1;_i<=dict_pointers["NTYPES"];++_i)
                 {
                 for(int _k=1;_k<=dict_pointers["NTYPES"];++_k)
                     {
                         pair<string,string> lj_type=make_pair(amber_type[_i],amber_type[_k]);
-                        pair<float,float> lj_coef=make_pair(get<0>(lj_coefficient[{_i,_k}]),get<1>(lj_coefficient[{_i,_k}]));
+                        pair<Real,Real> lj_coef=make_pair(get<0>(lj_coefficient[{_i,_k}]),get<1>(lj_coefficient[{_i,_k}]));
                         lj_coefficient_in_amber_type[lj_type]=lj_coef;
                     }
                 }
@@ -725,9 +725,9 @@ class AmberTopologyReader : public TopologyReader {
          * This function returns a map with the LJ coefficients for the diagonal terms
          * @param lj_map A map with the LJ coefficients
          */
-        inline map<string,pair<float,float>> read_lj_diagonal(map<pair<string,string>,pair<float,float>> lj_map) const
+        inline map<string,pair<Real,Real>> read_lj_diagonal(map<pair<string,string>,pair<Real,Real>> lj_map) const
         {
-            map<string,pair<float,float>> lj_coefficient;
+            map<string,pair<Real,Real>> lj_coefficient;
             for (const auto& par : lj_map) 
             {
                 if(get<0>(par.first)==get<1>(par.first))
@@ -770,16 +770,16 @@ class AmberTopologyReader : public TopologyReader {
             map<string, int> positions_of_flags=flag_position(file);
             map<string,int> dict_pointers = read_pointers(file,positions_of_flags["POINTERS"]);
             vector<string> atom_names = read_atom_name(file, dict_pointers,positions_of_flags["ATOM_NAME"]);
-            vector<tuple<string,float>> map_atoms = read_charge(file, dict_pointers, atom_names ,positions_of_flags["CHARGE"]);
+            vector<tuple<string,Real>> map_atoms = read_charge(file, dict_pointers, atom_names ,positions_of_flags["CHARGE"]);
             vector<int> number_solute_solvent =read_solvent_pointers(file, dict_pointers,positions_of_flags["SOLVENT_POINTERS"]);
             vector<string> ati_to_amber_type=atom_type_index_to_amber_type(file, dict_pointers, positions_of_flags);        
             vector<int> atomic_number=read_atomic_number(file,dict_pointers,positions_of_flags["ATOMIC_NUMBER"]); 
             //map<string,tuple<int,int>> atoms_per_diff_molecule=read_atoms_per_different_molecule(file, positions_of_flags);
             vector<int> atoms_per_molecule = read_atoms_per_molecule(file, dict_pointers,positions_of_flags["SOLVENT_POINTERS"]); 
             vector<int> atom_type_index=read_ati(file,dict_pointers,positions_of_flags["ATOM_TYPE_INDEX"]); 
-            vector<float> mass=read_mass(file,dict_pointers,positions_of_flags["MASS"]);
-            map<pair<string,string>,pair<float,float>> lj_coefficient=read_lj(file,dict_pointers,positions_of_flags["LENNARD_JONES_ACOEF"],  ati_to_amber_type);
-            map<string,pair<float,float>> lj_diagonal= read_lj_diagonal(lj_coefficient);
+            vector<Real> mass=read_mass(file,dict_pointers,positions_of_flags["MASS"]);
+            map<pair<string,string>,pair<Real,Real>> lj_coefficient=read_lj(file,dict_pointers,positions_of_flags["LENNARD_JONES_ACOEF"],  ati_to_amber_type);
+            map<string,pair<Real,Real>> lj_diagonal= read_lj_diagonal(lj_coefficient);
             map<string,int> type_atomic_z = type_atomic_number(dict_pointers, atom_type_index,atomic_number,ati_to_amber_type);
             map<string,string> name_types = read_name_type(dict_pointers, atom_names,atom_type_index,ati_to_amber_type);
             
@@ -793,8 +793,8 @@ class AmberTopologyReader : public TopologyReader {
             }*/
 			
             topology.total_number_of_atoms=dict_pointers["NATOM"];
-            map<int, tuple<string, string, float, float>> molecule_atoms;
-            vector<map<int, tuple<string, string, float, float>>> atom_type_name_charge_mass;
+            map<int, tuple<string, string, Real, Real>> molecule_atoms;
+            vector<map<int, tuple<string, string, Real, Real>>> atom_type_name_charge_mass;
             int _k=0;
             for(size_t _j=0; _j<number_solute_solvent[1];_j++)
             {
@@ -834,7 +834,7 @@ class AmberCoordinateReader : public CoordinateReader {
             string line;
             getline(f,line);
             if(line.rfind("CRYST1",0) == 0){
-                bounds= Vector( stof(line.substr(6,9)) , stof(line.substr(15,9)) , stof(line.substr(24,9)) );
+                bounds= Vector( RealParser(line.substr(6,9)) , RealParser(line.substr(15,9)) , RealParser(line.substr(24,9)) );
             }
             f.clear();
             f.seekg(0);
@@ -846,15 +846,15 @@ class AmberCoordinateReader : public CoordinateReader {
                 if(line.rfind("ATOM",0) == 0 || line.rfind("HETATM",0) == 0) {
                     string record, atom_name, res_name;
                     int atom_id, res_id;
-                    float x, y, z;
+                    Real x, y, z;
                     record=ToolKit::strip(line.substr(0, 6));
                     atom_id=stoi(ToolKit::strip(line.substr(6, 5)));
                     atom_name=ToolKit::strip(line.substr(11, 5));
                     res_name=ToolKit::strip(line.substr(16, 4));
                     res_id=stoi(ToolKit::strip(line.substr(20, 6)));
-                    x=stof(ToolKit::strip(line.substr(26, 12)));
-                    y=stof(ToolKit::strip(line.substr(38, 8)));
-                    z=stof(ToolKit::strip(line.substr(46, 8)));
+                    x=RealParser(ToolKit::strip(line.substr(26, 12)));
+                    y=RealParser(ToolKit::strip(line.substr(38, 8)));
+                    z=RealParser(ToolKit::strip(line.substr(46, 8)));
                     
                     is_water[molecule_number]=res_name;
                     atoms_each_order_molecule[molecule_number].push_back(atom_id);
@@ -921,7 +921,7 @@ class AmberCoordinateReader : public CoordinateReader {
             
             getline(f,line);
             if(line.rfind("CRYST1",0) == 0)
-                bounds= Vector( stof(line.substr(6,9)) , stof(line.substr(15,9)) , stof(line.substr(24,9)) );
+                bounds= Vector( RealParser(line.substr(6,9)) , RealParser(line.substr(15,9)) , RealParser(line.substr(24,9)) );
             
             for(int i= 0; i < topol_info.num_molecules; i++)
             {
@@ -935,9 +935,9 @@ class AmberCoordinateReader : public CoordinateReader {
                             break;
                         }
                     if(line.rfind("ATOM  ",0) == 0 || line.rfind("HETATM",0) == 0) {
-                        float x=stof(ToolKit::strip(line.substr(26, 12)));
-                        float y=stof(ToolKit::strip(line.substr(38, 8)));
-                        float z=stof(ToolKit::strip(line.substr(46, 8)));
+                        Real x=RealParser(ToolKit::strip(line.substr(26, 12)));
+                        Real y=RealParser(ToolKit::strip(line.substr(38, 8)));
+                        Real z=RealParser(ToolKit::strip(line.substr(46, 8)));
                         is_water = ToolKit::strip(line.substr(16, 4));
                         const auto& [type,name,charge,mass]= atom_data.at(number_of_atoms);
                         const auto& [epsilon,sigma]= topol_info.type_LJparam.at(type);

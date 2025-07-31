@@ -49,8 +49,8 @@ class LammpsTopologyReader : public TopologyReader {
          * @param position The position of the 'Masses' section in the file.
          * @return A map of atom type IDs to their masses.
          */
-        inline map<string,pair<float,string>> readMasses(ifstream& file, streampos position) const {
-            map<string,pair<float,string>> masses;
+        inline map<string,pair<Real,string>> readMasses(ifstream& file, streampos position) const {
+            map<string,pair<Real,string>> masses;
             file.clear();
             file.seekg(position);
             string line;
@@ -65,7 +65,7 @@ class LammpsTopologyReader : public TopologyReader {
 
                 stringstream ss(line_before_comment);
                 int atom_type_id;
-                float mass_val;
+                Real mass_val;
                 ss >> atom_type_id >> mass_val;
                 string type_name= "at"+to_string(atom_type_id);
                 if(ss.fail()) {
@@ -92,11 +92,11 @@ class LammpsTopologyReader : public TopologyReader {
 
             topology.number_of_each_different_molecule= map<string,int>();
             topology.number_of_atoms_per_different_molecule= map<string,int>();
-            topology.atom_type_name_charge_mass= vector<map<int,tuple<string,string,float,float>>>();
+            topology.atom_type_name_charge_mass= vector<map<int,tuple<string,string,Real,Real>>>();
             topology.name_type= map<string,string>();
             topology.type_Z= map<string,int>();
 
-            topology.atom_type_name_charge_mass.push_back(map<int,tuple<string,string,float,float>>());
+            topology.atom_type_name_charge_mass.push_back(map<int,tuple<string,string,Real,Real>>());
             return topology;
         }
 
@@ -105,10 +105,10 @@ class LammpsTopologyReader : public TopologyReader {
          * @param line The line containing the atom data.
          * @return A tuple containing the atom ID, molecule ID, atom type, charge, x, y, and z coordinates.
          */
-        inline static tuple<int,int,int,float,float,float,float> readAtomData(string& line) {
+        inline static tuple<int,int,int,Real,Real,Real,Real> readAtomData(string& line) {
             stringstream ss(line);
             int atom_id, mol_id, atom_type_int;
-            float q, x, y, z;
+            Real q, x, y, z;
             string atom_style_type;
             ss >> atom_id >> mol_id >> atom_type_int >> q >> x >> y >> z;
             
@@ -124,9 +124,9 @@ class LammpsTopologyReader : public TopologyReader {
          * @param atomtype_mass_name A map of atom type IDs to their masses and names.
          * @return A tuple containing the atom type, atom name, and mass.
          */
-        inline static tuple<string,string,float> findAtomNameMass(int atom_type_int, map<string,pair<float,string>> atomtype_mass_name) {
+        inline static tuple<string,string,Real> findAtomNameMass(int atom_type_int, map<string,pair<Real,string>> atomtype_mass_name) {
             string type_str= "at"+to_string(atom_type_int);
-            float mass= 0.0f;
+            Real mass= 0.0;
             string atom_name_str= "ERROR";
             if(atomtype_mass_name.count(type_str)) {
                 mass= atomtype_mass_name.at(type_str).first;
@@ -148,8 +148,8 @@ class LammpsTopologyReader : public TopologyReader {
             if(atom_in_molecule_counter > 5) return false;
             for(int i_ox= 0; i_ox < 3; i_ox++) {
                 // Searching for 3-atom water to 5-atom water
-                tuple<string,string,float,float> atom_data= topology.atom_type_name_charge_mass[0][atom_id-5+i_ox];
-                float mass_val= get<3>(atom_data);
+                tuple<string,string,Real,Real> atom_data= topology.atom_type_name_charge_mass[0][atom_id-5+i_ox];
+                Real mass_val= get<3>(atom_data);
                 if(int(mass_val+.2) != 16) continue; // Ox
 
                 atom_data= topology.atom_type_name_charge_mass[0][atom_id-4+i_ox];
@@ -219,7 +219,7 @@ class LammpsTopologyReader : public TopologyReader {
          * @param masses_map A map of atom type IDs to their masses.
          * @return A map of atom IDs to their type, name, charge, and mass.
          */
-        inline TopolInfo readAtoms(ifstream& file, streampos position, const map<string,pair<float,string>>& atomtype_mass_name) const {
+        inline TopolInfo readAtoms(ifstream& file, streampos position, const map<string,pair<Real,string>>& atomtype_mass_name) const {
             file.clear();
             file.seekg(position);
             string line;
@@ -238,10 +238,10 @@ class LammpsTopologyReader : public TopologyReader {
                     break;
                 }
 
-                int atom_id, mol_id, atom_type_int; float q, x, y, z;
+                int atom_id, mol_id, atom_type_int; Real q, x, y, z;
                 tie(atom_id,mol_id,atom_type_int,q,x,y,z)= readAtomData(line);
 
-                string type_str, atom_name_str; float mass;
+                string type_str, atom_name_str; Real mass;
                 tie(type_str,atom_name_str,mass)= findAtomNameMass(atom_type_int, atomtype_mass_name);
 
                 checkIfNewMolecule(previous_molecule_id, atom_in_molecule_counter, water_molecule_type, mol_id, topology, atom_id);
@@ -306,8 +306,8 @@ class LammpsTopologyReader : public TopologyReader {
          * @param position The position of the 'Pair Coeffs' section in the file.
          * @return A map of atom type IDs to their epsilon and sigma values.
          */
-        inline map<string,pair<float,float>> readLJParameters(ifstream& file, streampos position) const {
-            map<string,pair<float,float>> lj_params;
+        inline map<string,pair<Real,Real>> readLJParameters(ifstream& file, streampos position) const {
+            map<string,pair<Real,Real>> lj_params;
             file.clear();
             file.seekg(position);
             string line;
@@ -317,7 +317,7 @@ class LammpsTopologyReader : public TopologyReader {
 
                 string line_without_comment= line.substr(1,line.find("##")-1);
                 stringstream ss(line_without_comment);
-                int atom_type_id;float epsilon, sigma;
+                int atom_type_id;Real epsilon, sigma;
                 ss >> atom_type_id >> epsilon >> sigma;
 
                 if(ss.fail()) {
@@ -338,7 +338,7 @@ class LammpsTopologyReader : public TopologyReader {
             file.clear();
             file.seekg(0);
             string line;
-            float xlo=0, xhi=0, ylo=0, yhi=0, zlo=0, zhi=0;
+            Real xlo=0, xhi=0, ylo=0, yhi=0, zlo=0, zhi=0;
 
             while(getline(file,line)) {
                 if(line.find("xlo xhi") != string::npos) {
@@ -380,7 +380,7 @@ class LammpsTopologyReader : public TopologyReader {
 
             map<string,streampos> positions_of_sections= findSectionPositions(file);
 
-            map<string,pair<float,string>> atomtype_mass_name;
+            map<string,pair<Real,string>> atomtype_mass_name;
             if(positions_of_sections.count("Masses"))
                 atomtype_mass_name= readMasses(file, positions_of_sections["Masses"]);
 
@@ -443,7 +443,7 @@ class LammpsCoordinateReader : public CoordinateReader {
             for(int i= 0; i < num_atoms_in_frame; i++) {
                 if(getline(f,line)) {
                     stringstream ss(line);
-                    string symbol; float x, y, z;
+                    string symbol; Real x, y, z;
                     ss >> symbol >> x >> y >> z;
                     atom_symbols[i]= symbol;
                     coords[i]= Vector(x,y,z);
@@ -462,7 +462,7 @@ class LammpsCoordinateReader : public CoordinateReader {
                 for(int j= 0; j < num_atoms_per_molecule; j++,global_atom_idx++) {
                     const auto& [type,atom_name,q,mass]= topol_info.atom_type_name_charge_mass[0].at(global_atom_idx+1);
 
-                    float e= 0.0f, s= 0.0f;
+                    Real e= 0.0, s= 0.0;
                     if(topol_info.type_LJparam.count(type)) {
                         e= topol_info.type_LJparam.at(type).first;
                         s= topol_info.type_LJparam.at(type).second;

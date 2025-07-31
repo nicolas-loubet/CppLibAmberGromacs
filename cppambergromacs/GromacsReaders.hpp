@@ -106,8 +106,8 @@ class GromacsTopologyReader : public TopologyReader {
          * @param position The position of the flag
          * @return The atom info mapped int -> tuple (type, atom, charge, mass)
          */
-        static map<int,tuple<string,string,float,float>> readAtomsFlags(ifstream &file, int position) {
-            map<int,tuple<string,string,float,float>> atoms;
+        static map<int,tuple<string,string,Real,Real>> readAtomsFlags(ifstream &file, int position) {
+            map<int,tuple<string,string,Real,Real>> atoms;
             string line= "";
             file.clear();
             file.seekg(position);
@@ -120,7 +120,7 @@ class GromacsTopologyReader : public TopologyReader {
 
                 int nr,resi,cgnr;
                 string type,res,atom;
-                float charge,mass;
+                Real charge,mass;
 
                 ss >> nr >> type >> resi >> res >> atom >> cgnr >> charge >> mass;
                 atoms[nr]= make_tuple(type, atom, charge, mass);
@@ -151,8 +151,8 @@ class GromacsTopologyReader : public TopologyReader {
          * @param position The position of the flag
          * @return The LJ parameters mapped type -> pair (epsilon, sigma)
          */
-        static map<string,tuple<float,float,float,float>> readLJFlagFully(ifstream &file, int position) {
-            map<string,tuple<float,float,float,float>> parameters;
+        static map<string,tuple<Real,Real,Real,Real>> readLJFlagFully(ifstream &file, int position) {
+            map<string,tuple<Real,Real,Real,Real>> parameters;
             string line= "";
             file.clear();
             file.seekg(position);
@@ -165,7 +165,7 @@ class GromacsTopologyReader : public TopologyReader {
 
                 string type1,type2;
                 char ptype;
-                float sigma,epsilon,mass,q;
+                Real sigma,epsilon,mass,q;
 
                 ss >> type1 >> type2 >> mass >> q >> ptype >> sigma >> epsilon;
                 if(!ss.fail()) {
@@ -183,17 +183,17 @@ class GromacsTopologyReader : public TopologyReader {
             return parameters;
         }
 
-        static void checkMass(map<int,tuple<string,string,float,float>> atoms, map<string,tuple<float,float,float,float>> params) {
+        static void checkMass(map<int,tuple<string,string,Real,Real>> atoms, map<string,tuple<Real,Real,Real,Real>> params) {
             for(auto it= atoms.begin(); it != atoms.end(); it++) {
-                string type, name; float charge, mass;
+                string type, name; Real charge, mass;
                 tie(type,name,charge,mass)= it->second;
-                if(mass > 0.8f) continue;
+                if(mass > 0.8) continue;
 
-                float mass_LJ, charge_LJ, s, e;
+                Real mass_LJ, charge_LJ, s, e;
                 if(params.count(type) > 0) continue;
                 tie(mass_LJ,charge_LJ,e,s)= params.at(type);
                 
-                if(mass_LJ < 0.8f) continue;
+                if(mass_LJ < 0.8) continue;
                 get<3>(it->second)= mass_LJ;
             }
         }
@@ -204,8 +204,8 @@ class GromacsTopologyReader : public TopologyReader {
          * @param position The position of the flag
          * @return The LJ special parameters mapped pair (type1,type2) -> pair (epsilon,sigma)
          */
-        static map<pair<string,string>,pair<float,float>> readSpecialInteractions(ifstream &file, int position) {
-            map<pair<string,string>,pair<float,float>> parameters;
+        static map<pair<string,string>,pair<Real,Real>> readSpecialInteractions(ifstream &file, int position) {
+            map<pair<string,string>,pair<Real,Real>> parameters;
             string line= "";
             file.clear();
             file.seekg(position);
@@ -218,7 +218,7 @@ class GromacsTopologyReader : public TopologyReader {
 
                 string type1,type2;
                 int func;
-                float sigma,epsilon;
+                Real sigma,epsilon;
 
                 ss >> type1 >> type2 >> func >> sigma >> epsilon;
                 if(!ss.fail()) {
@@ -256,12 +256,12 @@ class GromacsTopologyReader : public TopologyReader {
             ti.num_solvents= sumMoleculesConsideredSolvent(ti.number_of_each_different_molecule);
             ti.num_solutes= ti.num_molecules-ti.num_solvents;
 
-            map<string,tuple<float,float,float,float>> parameters_LJflag_full= readLJFlagFully(f, flags["[ atomtypes ]"]);
+            map<string,tuple<Real,Real,Real,Real>> parameters_LJflag_full= readLJFlagFully(f, flags["[ atomtypes ]"]);
             for(auto it= parameters_LJflag_full.begin(); it != parameters_LJflag_full.end(); it++)
                 ti.type_LJparam[it->first]= make_pair(get<2>(it->second),get<3>(it->second));
             
             for(auto it_molec= ti.number_of_each_different_molecule.begin(); it_molec != ti.number_of_each_different_molecule.end(); it_molec++) {
-                map<int,tuple<string,string,float,float>> atoms= readAtomsFlags(f, flags["[ atoms ]_"+it_molec->first]);
+                map<int,tuple<string,string,Real,Real>> atoms= readAtomsFlags(f, flags["[ atoms ]_"+it_molec->first]);
                 checkMass(atoms, parameters_LJflag_full);
                 ti.number_of_atoms_per_different_molecule[it_molec->first]= atoms.size();
                 ti.total_number_of_atoms+= atoms.size()*it_molec->second;
@@ -276,7 +276,7 @@ class GromacsTopologyReader : public TopologyReader {
             }
 
             if(flags.find("[ nonbond_params ]") == flags.end())
-                ti.special_interaction= map<pair<string,string>,pair<float,float>>();
+                ti.special_interaction= map<pair<string,string>,pair<Real,Real>>();
             else
                 ti.special_interaction= readSpecialInteractions(f, flags["[ nonbond_params ]"]);
 
@@ -346,14 +346,14 @@ class GromacsCoordinateReader : public CoordinateReader {
             string molec_name= ToolKit::strip(line.substr(5,5));
             string atom_name= ToolKit::strip(line.substr(10,5));
             int i_atom= stoi(line.substr(15,5));
-            float x= stof(line.substr(20,8));
-            float y= stof(line.substr(28,8));
-            float z= stof(line.substr(36,8));
+            Real x= RealParser(line.substr(20,8));
+            Real y= RealParser(line.substr(28,8));
+            Real z= RealParser(line.substr(36,8));
 
             if(i_molec != previous_molec_id)
                 checkIfNewMolecule(i_molec, molec_name, atom_list, number_of_atom_in_list, topol_info, molecs, previous_molec_name, previous_different_molec_id, previous_molec_id);
 
-            string type, name; float q, mass, e, s;
+            string type, name; Real q, mass, e, s;
             tie(type,name,q,mass)= topol_info.atom_type_name_charge_mass[previous_different_molec_id].at(number_of_atom_in_list+1);
             int Z= topol_info.type_Z.at(type);
             tie(e,s)= topol_info.type_LJparam.at(type);
@@ -367,7 +367,7 @@ class GromacsCoordinateReader : public CoordinateReader {
          * @return The bounds as a Vector object
          */
         static Vector readBounds(string line) {
-            float x,y,z;
+            Real x,y,z;
             stringstream ss(line);
             ss >> x >> y >> z;
             return Vector(x*10,y*10,z*10);
