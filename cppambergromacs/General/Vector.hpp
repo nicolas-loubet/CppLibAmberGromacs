@@ -16,10 +16,10 @@
 class Vector {
 	public:
 		static constexpr double PI = 3.14159265358979323846;
-		static constexpr float EPSILON= 1e-5f;
-		static constexpr float RAD2DEG= 180.0f / static_cast<float>(PI);
+		static constexpr Real EPSILON= 1e-5;
+		static constexpr Real RAD2DEG= 180.0 / static_cast<Real>(PI);
 	
-		float x, y, z;
+		Real x, y, z;
 
 		/**
 		 * Basic constructor
@@ -27,7 +27,7 @@ class Vector {
 		 * @param v_y Is the y component of the vector (default=0)
 		 * @param v_z Is the z component of the vector (default=0)
 		 */
-		Vector(float v_x= 0.0f, float v_y= 0.0f, float v_z= 0.0f): x(v_x), y(v_y), z(v_z) {}
+		Vector(Real v_x= 0.0, Real v_y= 0.0, Real v_z= 0.0): x(v_x), y(v_y), z(v_z) {}
 
 		/**
 		 * Constructor for assigment
@@ -39,7 +39,7 @@ class Vector {
 		 * Compute the module of the vector
 		 * @return module of the vector
 		 */
-		float magnitude() const {
+		Real magnitude() const {
 			return sqrt(x*x+y*y+z*z);
 		}
 
@@ -75,7 +75,7 @@ class Vector {
 		 * @param v Other vector to operate
 		 * @return The scalar product of both vectors
 		 */
-		float operator *(const Vector& v) const {
+		Real operator *(const Vector& v) const {
 			return x*v.x + y*v.y + z*v.z;
 		}
 
@@ -84,7 +84,7 @@ class Vector {
 		 * @param k A constant (scalar)
 		 * @return The product of each component with the scalar k in a new Vector object
 		 */
-		Vector operator *(const float k) const {
+		Vector operator *(const Real k) const {
 			return Vector(x*k, y*k, z*k);
 		}
 
@@ -93,7 +93,7 @@ class Vector {
 		 * @param k A constant (scalar)
 		 * @return The division of each component with the scalar k in a new Vector object
 		 */
-		Vector operator /(const float k) const {
+		Vector operator /(const Real k) const {
 			return Vector(x/k, y/k, z/k);
 		}
 
@@ -112,7 +112,7 @@ class Vector {
 		 * @param v Other vector to operate
 		 * @return The scalar product of both vectors
 		 */
-		float dot(const Vector& v) const {
+		Real dot(const Vector& v) const {
 			return x*v.x + y*v.y + z*v.z;
 		}
 
@@ -130,7 +130,7 @@ class Vector {
 		 * @return The normalized vector in a new Vector object
 		 */
 		void normalize() {
-			float m= magnitude();
+			Real m= magnitude();
 			if(m > EPSILON) {
 				x/= m;
 				y/= m;
@@ -143,7 +143,7 @@ class Vector {
 		 * @return The normalized vector in a new Vector object
 		 */
 		Vector getNormalized() const {
-			float m= magnitude();
+			Real m= magnitude();
 			if(m > EPSILON) return Vector(x/m, y/m, z/m);
 			return Vector();
 		}
@@ -152,7 +152,7 @@ class Vector {
 		 * Compute the volume of the parallelepiped formed by the three vectors
 		 * @return The volume of the parallelepiped
 		 */
-		float volumeBox() const {
+		Real volumeBox() const {
 			return x*y*z;
 		}
 
@@ -181,7 +181,7 @@ class Vector {
 		 * @param k A constant (scalar)
 		 * @return The product of each component with the scalar k, replacing the actual object
 		 */
-		Vector& operator*=(const float k) {
+		Vector& operator*=(const Real k) {
 			x*= k; y*= k; z*= k;
 			return *this;
 		}
@@ -191,7 +191,7 @@ class Vector {
 		 * @param v Other vector to operate
 		 * @return The division of each component with the scalar k, replacing the actual object
 		 */
-		Vector& operator/=(const float k) {
+		Vector& operator/=(const Real k) {
 			x/= k; y/= k; z/= k;
 			return *this;
 		}
@@ -202,9 +202,9 @@ class Vector {
 		 * @return The cross (vector) product of both vectors, replacing the actual object
 		 */
 		Vector& operator%=(const Vector& v) {
-			float new_x= y*v.z - z*v.y;
-			float new_y= z*v.x - x*v.z;
-			float new_z= x*v.y - y*v.x;
+			Real new_x= y*v.z - z*v.y;
+			Real new_y= z*v.x - x*v.z;
+			Real new_z= x*v.y - y*v.x;
 			x= new_x; y= new_y; z= new_z;
 			return *this;
 		}
@@ -275,11 +275,11 @@ class Vector {
 		 * @param angle Angle of rotation in radians
 		 * @return Rotated vector
 		 */
-		Vector rotatedAround(const Vector& axis, float angle) const {
+		Vector rotatedAround(const Vector& axis, Real angle) const {
 			Vector k= axis;
 			k.normalize();
-			float cos_theta= std::cos(angle);
-			float sin_theta= std::sin(angle);
+			Real cos_theta= std::cos(angle);
+			Real sin_theta= std::sin(angle);
 			return (*this)*cos_theta + (k%(*this))*sin_theta + k*(k*(*this)) * (1-cos_theta);
 		}
 
@@ -298,7 +298,7 @@ class Vector {
 		 * @param c Third vector
 		 * @return The scalar value of the mixed product, volume of the parallelepiped formed by the three vectors
 		 */
-		static float mixedProduct(const Vector& a, const Vector& b, const Vector& c) {
+		static Real mixedProduct(const Vector& a, const Vector& b, const Vector& c) {
 			return a.dot(b % c);
 		}
 
@@ -310,7 +310,7 @@ class Vector {
  * @param v Vector to operate
  * @return The product of each component with the scalar k in a new Vector object
  */
-inline Vector operator*(float k, const Vector& v) {
+inline Vector operator*(Real k, const Vector& v) {
 	return v * k;
 }
 
@@ -332,10 +332,10 @@ inline std::ostream& operator <<(std::ostream& o, const Vector& v) {
  * @param b Second vector (position)
  * @return The scalar distance between the two points
  */
-inline float distanceWithoutPBC(const Vector& a, const Vector& b) {
-	float dx= a.x - b.x;
-	float dy= a.y - b.y;
-	float dz= a.z - b.z;
+inline Real distanceWithoutPBC(const Vector& a, const Vector& b) {
+	Real dx= a.x - b.x;
+	Real dy= a.y - b.y;
+	Real dz= a.z - b.z;
 	return std::sqrt(dx*dx + dy*dy + dz*dz);
 }
 
@@ -346,10 +346,10 @@ inline float distanceWithoutPBC(const Vector& a, const Vector& b) {
  * @param box Box dimensions in x, y, z (assumed orthorhombic)
  * @return The scalar distance between the two points using minimum image convention
  */
-inline float distancePBC(const Vector& a, const Vector& b, const Vector& box) {
-	float dx= a.x - b.x;
-	float dy= a.y - b.y;
-	float dz= a.z - b.z;
+inline Real distancePBC(const Vector& a, const Vector& b, const Vector& box) {
+	Real dx= a.x - b.x;
+	Real dy= a.y - b.y;
+	Real dz= a.z - b.z;
 
 	dx-= box.x * floorf(dx / box.x + 0.5f);
 	dy-= box.y * floorf(dy / box.y + 0.5f);
@@ -364,9 +364,9 @@ inline float distancePBC(const Vector& a, const Vector& b, const Vector& box) {
  * @param b Second vector (position)
  * @return The scalar distance between the two points, in 2D (ignoring z component)
  */
-inline float distance2D(const Vector& a, const Vector& b) {
-	float dx= a.x - b.x;
-	float dy= a.y - b.y;
+inline Real distance2D(const Vector& a, const Vector& b) {
+	Real dx= a.x - b.x;
+	Real dy= a.y - b.y;
 	return std::sqrt(dx*dx + dy*dy);
 }
 
@@ -378,9 +378,9 @@ inline float distance2D(const Vector& a, const Vector& b) {
  * @return Minimum image displacement vector from b to a
  */
 inline Vector displacementPBC(const Vector& a, const Vector& b, const Vector& box) {
-	float dx= a.x - b.x;
-	float dy= a.y - b.y;
-	float dz= a.z - b.z;
+	Real dx= a.x - b.x;
+	Real dy= a.y - b.y;
+	Real dz= a.z - b.z;
 
 	dx-= box.x * floorf(dx / box.x + 0.5f);
 	dy-= box.y * floorf(dy / box.y + 0.5f);
@@ -396,10 +396,10 @@ inline Vector displacementPBC(const Vector& a, const Vector& b, const Vector& bo
  * @param box Dimensions of the periodic box (assumed orthorhombic)
  * @return Squared minimum image distance
  */
-inline float squaredDistancePBC(const Vector& a, const Vector& b, const Vector& box) {
-	float dx= a.x - b.x;
-	float dy= a.y - b.y;
-	float dz= a.z - b.z;
+inline Real squaredDistancePBC(const Vector& a, const Vector& b, const Vector& box) {
+	Real dx= a.x - b.x;
+	Real dy= a.y - b.y;
+	Real dz= a.z - b.z;
 
 	dx-= box.x * floorf(dx / box.x + 0.5f);
 	dy-= box.y * floorf(dy / box.y + 0.5f);
@@ -414,14 +414,14 @@ inline float squaredDistancePBC(const Vector& a, const Vector& b, const Vector& 
  * @param b Second vector
  * @return Angle between a and b in radians (0 <= angle <= PI)
  */
-inline float angleBetweenRadians(const Vector& a, const Vector& b) {
-	float dotProduct= a*b;
-	float magA= a.magnitude();
-	float magB= b.magnitude();
+inline Real angleBetweenRadians(const Vector& a, const Vector& b) {
+	Real dotProduct= a*b;
+	Real magA= a.magnitude();
+	Real magB= b.magnitude();
 	
-	if(magA < Vector::EPSILON || magB < Vector::EPSILON) return 0.0f;
+	if(magA < Vector::EPSILON || magB < Vector::EPSILON) return 0.0;
 
-	float cosTheta= dotProduct / (magA * magB);
+	Real cosTheta= dotProduct / (magA * magB);
 
 	// Clamp value to [-1, 1] to avoid NaNs due to floating point errors
 	cosTheta= std::fmax(-1.0f, std::fmin(1.0f, cosTheta));
@@ -435,7 +435,7 @@ inline float angleBetweenRadians(const Vector& a, const Vector& b) {
  * @param b Second vector
  * @return Angle between a and b in degrees (0 <= angle <= 180)
  */
-inline float angleBetweenDegrees(const Vector& a, const Vector& b) {
+inline Real angleBetweenDegrees(const Vector& a, const Vector& b) {
 	return angleBetweenRadians(a,b) * Vector::RAD2DEG;
 }
 
@@ -447,10 +447,10 @@ inline float angleBetweenDegrees(const Vector& a, const Vector& b) {
  * @param bounds The coordinate of the last point, so the components are the width, height and length
  * @return The angle in radians formed by the 3 points
  */
-inline float getAngle(Vector c1, Vector c2, Vector c3, Vector bounds) {
-	float a= distancePBC(c1,c3,bounds); //Opposite to the angle
-	float b= distancePBC(c1,c2,bounds);
-	float c= distancePBC(c2,c3,bounds);
+inline Real getAngle(Vector c1, Vector c2, Vector c3, Vector bounds) {
+	Real a= distancePBC(c1,c3,bounds); //Opposite to the angle
+	Real b= distancePBC(c1,c2,bounds);
+	Real c= distancePBC(c2,c3,bounds);
 	//Law of cosines
 	return std::fabs(acos((pow(b,2)+pow(c,2)-pow(a,2))/(2*b*c)));
 }

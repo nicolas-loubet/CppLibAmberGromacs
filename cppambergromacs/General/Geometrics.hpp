@@ -10,8 +10,8 @@
 #include <vector>
 
 namespace Geometrics {
-	const float R_V4S_O_HL= 1; //Anstrongs between O and perfect vertices
-	const float PERFECT_ANGLE_FOR_TETRAHEDRON= std::acos(-1./3.)/2; //Perfect angle for tetrahedron
+	const Real R_V4S_O_HL= 1; //Anstrongs between O and perfect vertices
+	const Real PERFECT_ANGLE_FOR_TETRAHEDRON= std::acos(-1./3.)/2; //Perfect angle for tetrahedron
 	
 	struct TetrahedronVertices {
 		Vector H1;
@@ -59,40 +59,40 @@ namespace Geometrics {
 
 	/**
 	 * Calculates the determinant of a 3x3 matrix with the Sarrus Rule
-	 * @param matrix A 3x3 float array
+	 * @param matrix A 3x3 Real array
 	 * @return The matrix's determinant
 	 */
-	float determinant_3x3(float matrix[3][3]) {
+	Real determinant_3x3(Real matrix[3][3]) {
 		return matrix[0][0]*matrix[1][1]*matrix[2][2] + matrix[0][1]*matrix[1][2]*matrix[2][0] + matrix[0][2]*matrix[1][0]*matrix[2][1]
 			- matrix[0][2]*matrix[1][1]*matrix[2][0] - matrix[0][0]*matrix[1][2]*matrix[2][1] - matrix[0][1]*matrix[1][0]*matrix[2][2];
 	}
 
 	/**
 	 * Calculates the x,y,z values (a Vector) obteined from the Cramer's Rule
-	 * @param matrix A 3x3 float array of the base matrix
-	 * @param m_independents A float array of 3 values corresponding to the independt values
+	 * @param matrix A 3x3 Real array of the base matrix
+	 * @param m_independents A Real array of 3 values corresponding to the independt values
 	 * @return The Vector with the x, y and z values obtained. (The Vector must be removed with "delete()")
 	 */
-	Vector CramersRule(float matrix[3][3], float m_independents[3]) {
-		float A= determinant_3x3(matrix);
-		float Ax_matrix[3][3]= {
+	Vector CramersRule(Real matrix[3][3], Real m_independents[3]) {
+		Real A= determinant_3x3(matrix);
+		Real Ax_matrix[3][3]= {
 			{ m_independents[0] , matrix[0][1] , matrix[0][2] },
 			{ m_independents[1] , matrix[1][1] , matrix[1][2] },
 			{ m_independents[2] , matrix[2][1] , matrix[2][2] }
 		};
-		float Ax= determinant_3x3(Ax_matrix);
-		float Ay_matrix[3][3]= {
+		Real Ax= determinant_3x3(Ax_matrix);
+		Real Ay_matrix[3][3]= {
 			{ matrix[0][0] , m_independents[0] , matrix[0][2] },
 			{ matrix[1][0] , m_independents[1] , matrix[1][2] },
 			{ matrix[2][0] , m_independents[2] , matrix[2][2] }
 		};
-		float Ay= determinant_3x3(Ay_matrix);
-		float Az_matrix[3][3]= {
+		Real Ay= determinant_3x3(Ay_matrix);
+		Real Az_matrix[3][3]= {
 			{ matrix[0][0] , matrix[0][1] , m_independents[0] },
 			{ matrix[1][0] , matrix[1][1] , m_independents[1] },
 			{ matrix[2][0] , matrix[2][1] , m_independents[2] }
 		};
-		float Az= determinant_3x3(Az_matrix);
+		Real Az= determinant_3x3(Az_matrix);
 		return Vector(Ax/A, Ay/A, Az/A);
 	}
 
@@ -110,7 +110,7 @@ namespace Geometrics {
 		Vector H2= pbc_vectors[2];
 		delete[] pbc_vectors;
 
-		const float phy= angleBetweenRadians(H1_real-O_real,H2_real-O_real) / 2; //The /2 is because I need the angle between OH and b
+		const Real phy= angleBetweenRadians(H1_real-O_real,H2_real-O_real) / 2; //The /2 is because I need the angle between OH and b
 
 		//I step
 		Vector OH1= H1-O;
@@ -128,24 +128,24 @@ namespace Geometrics {
 		Vector h[2];
 		for(int i= 0; i < 2; i++) {
 			Vector OHi= hydrogens[i];
-			float k1= R_V4S_O_HL*b.magnitude()*std::cos(PERFECT_ANGLE_FOR_TETRAHEDRON);
-			float k2= R_V4S_O_HL*OHi.magnitude()*std::cos(PERFECT_ANGLE_FOR_TETRAHEDRON-phy);
+			Real k1= R_V4S_O_HL*b.magnitude()*std::cos(PERFECT_ANGLE_FOR_TETRAHEDRON);
+			Real k2= R_V4S_O_HL*OHi.magnitude()*std::cos(PERFECT_ANGLE_FOR_TETRAHEDRON-phy);
 
-			float A_matriz[3][3]= {
+			Real A_matriz[3][3]= {
 				{   b.x   ,   b.y   ,   b.z   },
 				{  OHi.x  ,  OHi.y  ,  OHi.z  },
 				{ nu_OH.x , nu_OH.y , nu_OH.z }
 			};
-			float m_scalars[3]= { k1, k2, 0. };
+			Real m_scalars[3]= { k1, k2, 0. };
 
 			Vector oh= CramersRule(A_matriz, m_scalars);
 			h[i]= oh + O;
 		}
 
 		//V step
-		Vector m_H= (h[0]+h[1])*0.5f;
+		Vector m_H= (h[0]+h[1])*0.5;
 		Vector mH_H= h[0] - m_H;
-		float delta= mH_H.magnitude();
+		Real delta= mH_H.magnitude();
 
 		//VI step
 		Vector O_2= O * 2.;
@@ -173,10 +173,10 @@ namespace Geometrics {
 	 */
 	struct Plane {
 		Vector normal;
-		float independent_term;
+		Real independent_term;
 
-		Plane(): normal(0.0f, 0.0f, 0.0f), independent_term(0.0f) {}
-		Plane(const Vector& n, float d): normal(n), independent_term(d) {}
+		Plane(): normal(0.0, 0.0, 0.0), independent_term(0.0) {}
+		Plane(const Vector& n, Real d): normal(n), independent_term(d) {}
 	};
 
 	/**
@@ -190,7 +190,7 @@ namespace Geometrics {
 		Vector dir;
 		Vector point;
 
-		Line(): dir(0.0f, 0.0f, 0.0f), point(0.0f, 0.0f, 0.0f) {}
+		Line(): dir(0.0, 0.0, 0.0), point(0.0, 0.0, 0.0) {}
 		Line(const Vector& d, const Vector& p): dir(d), point(p) {}
 	};
 
@@ -202,9 +202,9 @@ namespace Geometrics {
 		Vector min_pos;
 		Vector max_pos;
 
-		Box(): min_pos(0.0f, 0.0f, 0.0f), max_pos(0.0f, 0.0f, 0.0f) {}
+		Box(): min_pos(0.0, 0.0, 0.0), max_pos(0.0, 0.0, 0.0) {}
 		Box(const Vector& min, const Vector& max): min_pos(min), max_pos(max) {}
-		Box(const float min_x, const float min_y, const float min_z, const float max_x, const float max_y, const float max_z):
+		Box(const Real min_x, const Real min_y, const Real min_z, const Real max_x, const Real max_y, const Real max_z):
 			min_pos(min_x, min_y, min_z), max_pos(max_x, max_y, max_z) {}
 	};
 
@@ -258,9 +258,9 @@ namespace Geometrics {
 	 * Calculates the distance of a point to a plane
 	 * @param plane The plane object
 	 * @param P The point
-	 * @return float The distance perpendicular to the Plane up to the point P
+	 * @return Real The distance perpendicular to the Plane up to the point P
 	 */
-	float distanceToPlane(Plane plane, Vector P) {
+	Real distanceToPlane(Plane plane, Vector P) {
 		return std::fabs((plane.normal * P) + plane.independent_term);
 	}
 
@@ -269,10 +269,10 @@ namespace Geometrics {
 	 * @param line The line object
 	 * @param P The point
 	 * @param bounds The coordinate of the last point, so the components are the width, height and length
-	 * @return float The distance perpendicular to the line up to the point P
+	 * @return Real The distance perpendicular to the line up to the point P
 	 */
-	float distanceToLine(Line line, Vector P, Vector bounds) {
-		float dist_P_P0= distancePBC(P,line.point,bounds);
+	Real distanceToLine(Line line, Vector P, Vector bounds) {
+		Real dist_P_P0= distancePBC(P,line.point,bounds);
 		return std::sin( getAngle(P, line.point, line.point+line.dir, bounds) )*dist_P_P0;
 	}
 

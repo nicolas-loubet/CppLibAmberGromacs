@@ -14,7 +14,7 @@
 #include <algorithm>
 
 namespace ToolKit {
-    constexpr float k_B= -1.380649*6.02214076*0.001; // Boltzmann constant in kJ/(mol*K)
+    constexpr Real k_B= -1.380649*6.02214076*0.001; // Boltzmann constant in kJ/(mol*K)
 
     /**
      * STRUCT that contains the pointer to an array of int and the size of that array
@@ -25,22 +25,22 @@ namespace ToolKit {
     };
 
     /**
-     * STRUCT that contains the pointer to an array of float and the size of that array
+     * STRUCT that contains the pointer to an array of Real and the size of that array
      */
     struct ArrFloat {
-        float* arr;
+        Real* arr;
         int size= 0;
     };
 
     /**
-     * STRUCT that contains the pointer to an array of float and the size of that array
+     * STRUCT that contains the pointer to an array of Real and the size of that array
      */
     struct FlaggedArrFloat {
         int size;
-        float* arr;
+        Real* arr;
         bool flag;
     
-        FlaggedArrFloat(int size, float* arr, bool flag) {
+        FlaggedArrFloat(int size, Real* arr, bool flag) {
             this->size= size;
             this->arr= arr;
             this->flag= flag;
@@ -70,7 +70,7 @@ namespace ToolKit {
      * @throws std::out_of_range if trim is false and the position is out of bounds
      * @return position of the bin
      */
-    int getBinPosition(float value, const float LIMIT_MIN, const float LIMIT_MAX, const int N_BINS, bool trim= false) {
+    int getBinPosition(Real value, const Real LIMIT_MIN, const Real LIMIT_MAX, const int N_BINS, bool trim= false) {
         int pos= int((value-LIMIT_MIN)*N_BINS/(LIMIT_MAX-LIMIT_MIN));
         if(trim) {
             return std::max(0, std::min(N_BINS-1,pos));

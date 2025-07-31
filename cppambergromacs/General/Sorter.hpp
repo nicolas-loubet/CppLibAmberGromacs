@@ -72,7 +72,7 @@ namespace Sorter {
 	 */
 	template<typename T1, typename T2>
 	inline void cosort(std::vector<T1>& values, std::vector<T2>& indexes) {
-		std::vector<std::pair<float,int>> combined;
+		std::vector<std::pair<Real,int>> combined;
 		for(size_t i= 0; i < values.size(); i++)
 			combined.emplace_back(values[i],indexes[i]);
 
@@ -98,7 +98,7 @@ namespace Sorter {
 			throw std::invalid_argument("The sizes of the two vectors must be equal.");
 		}
 
-		std::vector<std::pair<float,int>> combined;
+		std::vector<std::pair<Real,int>> combined;
 		for(size_t i= 0; i < values.size(); i++)
 			combined.emplace_back(values[i],indexes[i]);
 
