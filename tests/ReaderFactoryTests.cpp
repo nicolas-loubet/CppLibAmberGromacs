@@ -318,3 +318,5 @@ TEST_CASE("TopologyReader - Tabla periódica", "[TopologyReader]") {
         REQUIRE_THROWS_AS(reader.getPeriodicTableValue("XX"), std::out_of_range);
     }
 }
+
+#include "MoleculeTests.cpp"

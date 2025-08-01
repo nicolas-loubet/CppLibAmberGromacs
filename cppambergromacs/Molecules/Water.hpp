@@ -27,7 +27,9 @@ class Water : public Molecule {
 			is_water= true;
 		}
 
-		Water(const Water& other): Molecule(other) {}
+		Water(const Water& other): Molecule(other) {
+			is_water= true;
+		}
 
 		Water& operator=(const Water& other) {
 			if(this == &other) return *this;
