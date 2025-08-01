@@ -320,3 +320,4 @@ TEST_CASE("TopologyReader - Tabla periódica", "[TopologyReader]") {
 }
 
 #include "MoleculeTests.cpp"
+#include "GeneralTests.cpp"
