@@ -27,6 +27,10 @@ class Water : public Molecule {
 			is_water= true;
 		}
 
+		Water(): Molecule() {
+			is_water= true;
+		}
+
 		Water(const Water& other): Molecule(other) {
 			is_water= true;
 		}

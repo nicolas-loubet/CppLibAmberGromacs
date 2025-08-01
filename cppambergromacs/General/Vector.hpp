@@ -276,6 +276,8 @@ class Vector {
 		 * @return Rotated vector
 		 */
 		Vector rotatedAround(const Vector& axis, Real angle) const {
+			if(angle==0.0) return *this;
+			if(axis.magnitude()==0.0) return *this;
 			Vector k= axis;
 			k.normalize();
 			Real cos_theta= std::cos(angle);

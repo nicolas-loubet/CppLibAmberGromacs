@@ -216,7 +216,7 @@ namespace Geometrics {
 		Vector* centers;
 
 		SphereList(): size(0), centers(nullptr) {}
-		SphereList(const int N_MAX): size(0), centers(new Vector[N_MAX]) {}
+		SphereList(const int N_MAX): size(0) { centers= (N_MAX <= 0) ? nullptr : new Vector[N_MAX]; }
 		SphereList(const SphereList& other): size(other.size), centers(nullptr) {
 			if(other.size <= 0) return;
 			centers= new Vector[other.size];
