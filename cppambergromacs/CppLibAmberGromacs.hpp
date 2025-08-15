@@ -1,6 +1,8 @@
 #ifndef CPPLIBAMBERGROMACS_HPP
 #define CPPLIBAMBERGROMACS_HPP
 
+#include <string>
+
 #ifdef USE_DOUBLE_PRECISION
     using Real= double;
     double RealParser(const std::string& s) { return std::stod(s); }
