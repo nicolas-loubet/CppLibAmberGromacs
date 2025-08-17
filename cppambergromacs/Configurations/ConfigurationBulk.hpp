@@ -322,16 +322,16 @@ class ConfigurationBulk : public Configuration {
 			void chargeData(vector<Vector>& sites, vector<Real>& sum_per_site, vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances) {
 				sum_per_site= sum_per_site;
 				bool hasD3= false, hasD5= false;
-				for (int i= 0; i < 4; ++i) {
-					if (ww_interactions[i].size() == 0) {
+				for(int i= 0; i < 4; ++i) {
+					if(ww_interactions[i].size() == 0) {
 						hasD3 = true;
 						lacking_site_position= sites[i];
 						lacking_site_potential= sum_per_site[i];
-					} else if (ww_interactions[i].size() >= 2) {
+					} else if(ww_interactions[i].size() >= 2) {
 						hasD5 = true;
 						bifurcated_site_position = sites[i];
 						bifurcated_site_potential = sum_per_site[i];
-						if(ww_interactions[i][0] > ww_interactions[i][1]) {
+						if(ww_interactions[i][0] < ww_interactions[i][1]) {
 							bifurcated_individual_potentials= {ww_interactions[i][0], ww_interactions[i][1]};
 							bifurcated_indivisual_distances= {ww_distances[i][0], ww_distances[i][1]};
 						} else {
@@ -369,11 +369,11 @@ class ConfigurationBulk : public Configuration {
 			std::vector<Real> sum_per_site;
 			initializeSiteVectors(ww_interactions, ww_distances, sum_per_site);
 
-			for (int j= 0; j < N_MOLEC; ++j) {
+			for(int j= 0; j < N_MOLEC; ++j) {
 				if(j+1 == ID) continue;
 
 				const Molecule& other_molec= getMolec(j + 1);
-				if (other_molec.getNAtoms() == 1 && (other_molec.getCharge() >= 1 || other_molec.getCharge() <= -1)) {
+				if(other_molec.getNAtoms() == 1 && (other_molec.getCharge() >= 1 || other_molec.getCharge() <= -1)) {
 					processIonInteraction(molecule, other_molec, sites, bounds, R_CUT_OFF, V_CUT_OFF, ww_interactions, ww_distances, sum_per_site);
 				} else if(molecs[j]->isWater()) {
 					Water& other = *static_cast<Water*>(molecs[j]);
