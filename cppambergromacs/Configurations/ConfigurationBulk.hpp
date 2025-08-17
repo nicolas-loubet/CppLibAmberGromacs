@@ -85,9 +85,10 @@ class ConfigurationBulk : public Configuration {
 		}
 
 		// Helper function to initialize site interaction vectors
-		void initializeSiteVectors(vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances, vector<Real>& sum_per_site) {
-			ww_interactions.assign(4, vector<Real>(4, 0.0));
-			ww_distances.assign(4, vector<Real>(4, 0.0));
+		void initializeSiteVectors(vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances, vector<vector<int>>& ww_indices, vector<Real>& sum_per_site) {
+			ww_interactions.assign(4, vector<Real>());
+			ww_distances.assign(4, vector<Real>());
+			ww_indices.assign(4, vector<int>());
 			sum_per_site.assign(4, 0.0);
 		}
 
@@ -324,7 +325,7 @@ class ConfigurationBulk : public Configuration {
 			DJInfo(): is_DJ(false) {}
 
 			void chargeData(vector<Vector>& sites, vector<Real>& sum_per_site, vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances, vector<vector<int>>& ww_indices) {
-				sum_per_site= sum_per_site;
+				this->sum_per_site= sum_per_site;
 				bool hasD3= false, hasD5= false;
 				for(int i= 0; i < 4; ++i) {
 					if(ww_interactions[i].size() == 0) {
@@ -374,7 +375,7 @@ class ConfigurationBulk : public Configuration {
 			vector<vector<Real>> ww_interactions, ww_distances;
 			vector<vector<int>> ww_indices;
 			vector<Real> sum_per_site;
-			initializeSiteVectors(ww_interactions, ww_distances, sum_per_site);
+			initializeSiteVectors(ww_interactions, ww_distances, ww_indices, sum_per_site);
 
 			for(int j= 0; j < N_MOLEC; ++j) {
 				if(j+1 == ID) continue;
