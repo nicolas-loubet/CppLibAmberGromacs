@@ -371,6 +371,39 @@ class Configuration {
 			return getInteractionsPerSite(ID, R_CUT_OFF, nullptr, nullptr)[i_V-1];
 		}
 
+		/**
+		 * It returns the limits of the box that contains all molecules from ID_FIRST_MOLECULE to ID_LAST_MOLECULE
+		 * @param ID_FIRST_MOLECULE The ID of the first molecule
+		 * @param ID_LAST_MOLECULE The ID of the last molecule
+		 * @param MARGIN_X The margin in the x direction (+ expands the box), default is 0
+		 * @param MARGIN_Y The margin in the y direction (+ expands the box), default is 0
+		 * @param MARGIN_Z The margin in the z direction (+ expands the box), default is 0
+		 * @return The limits of the box
+		 */
+		Geometrics::Box getLimitsFromRangeMolecules(const int ID_FIRST_MOLECULE, const int ID_LAST_MOLECULE, const Real MARGIN_X= 0.0, const Real MARGIN_Y= 0.0, const Real MARGIN_Z= 0.0) {
+			Geometrics::Box box(-numeric_limits<Real>::infinity(),-numeric_limits<Real>::infinity(),-numeric_limits<Real>::infinity(),numeric_limits<Real>::infinity(),numeric_limits<Real>::infinity(),numeric_limits<Real>::infinity());
+			for(int i= ID_FIRST_MOLECULE; i <= ID_LAST_MOLECULE; i++) {
+				const Molecule& molec= getMolec(i);
+				for(int a= 1; a <= molec.getNAtoms(); a++) {
+					if(molec.getAtom(a).getis_Hatom()) continue;
+					box.min_pos.x= min(box.min_pos.x, molec.getAtom(a).getPosition().x);
+					box.min_pos.y= min(box.min_pos.y, molec.getAtom(a).getPosition().y);
+					box.min_pos.z= min(box.min_pos.z, molec.getAtom(a).getPosition().z);
+					box.max_pos.x= max(box.max_pos.x, molec.getAtom(a).getPosition().x);
+					box.max_pos.y= max(box.max_pos.y, molec.getAtom(a).getPosition().y);
+					box.max_pos.z= max(box.max_pos.z, molec.getAtom(a).getPosition().z);
+				}
+			}
+
+			box.min_pos.x-= MARGIN_X;
+			box.min_pos.y-= MARGIN_Y;
+			box.min_pos.z-= MARGIN_Z;
+			box.max_pos.x+= MARGIN_X;
+			box.max_pos.y+= MARGIN_Y;
+			box.max_pos.z+= MARGIN_Z;
+			return box;
+		}
+
 };
 
 #endif
