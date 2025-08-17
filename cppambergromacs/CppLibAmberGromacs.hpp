@@ -14,5 +14,6 @@
 #include "ReaderFactory.hpp"
 #include "Configurations/ConfigurationBulk.hpp"
 #include "Configurations/ConfigurationLipid.hpp"
+#include "General/CSVWriter.hpp"
 
 #endif // CPPLIBAMBERGROMACS_HPP
