@@ -29,20 +29,21 @@ class ConfigurationBulk : public Configuration {
 
 		// Helper function to process interactions with an ion
 		void processIonInteraction(Water& molecule, const Molecule& ion, vector<Vector>& sites, const Vector& bounds, Real R_CUT_OFF, Real V_CUT_OFF,
-			                       vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances, vector<Real>& sum_per_site) {
+			                       vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances, vector<vector<int>>& ww_indices, vector<Real>& sum_per_site) {
 			auto [closest_idx, closest_dist]= findClosestSite(sites, ion.getAtom(1).getPosition(), bounds);
 			if(closest_dist > R_CUT_OFF) return;
 			Real pot= molecule.potentialWith(ion.getAtom(1), bounds);
 			sum_per_site[closest_idx]+= pot;
 			if(pot <= V_CUT_OFF) {
 				ww_interactions[closest_idx].push_back(pot);
-				ww_distances[closest_idx].push_back(0.0);
+				ww_distances[closest_idx].push_back(molecule.distanceTo(ion, bounds));
+				ww_indices[closest_idx].push_back(ion.getID());
 			}
 		}
 
 		// Helper function to process interactions with another water molecule
 		void processWaterInteraction(Water& molecule, Water& other, vector<Vector>& sites, const Vector& bounds, Real R_CUT_OFF, Real V_CUT_OFF,
-			                         vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances, vector<Real>& sum_per_site) {
+			                         vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances, vector<vector<int>>& ww_indices, vector<Real>& sum_per_site) {
 			Real d_ww= molecule.distanceTo(other, bounds);
 			if(d_ww > R_CUT_OFF + 1.1) return;
 
@@ -53,12 +54,13 @@ class ConfigurationBulk : public Configuration {
 			if(pot <= V_CUT_OFF) {
 				ww_interactions[closest_idx].push_back(pot);
 				ww_distances[closest_idx].push_back(d_ww);
+				ww_indices[closest_idx].push_back(other.getID());
 			}
 		}
 
 		// Helper function to process interactions with a non-water molecule
 		void processSoluteInteraction(Water& molecule, const Molecule& solute, vector<Vector>& sites, const Vector& bounds, Real R_CUT_OFF, Real V_CUT_OFF,
-			                          vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances, vector<Real>& sum_per_site) {
+			                          vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances, vector<vector<int>>& ww_indices, vector<Real>& sum_per_site) {
 			vector<Real> total_potential(4, 0.0);
 			vector<Real> min_distance(4, numeric_limits<Real>::infinity());
 
@@ -76,7 +78,8 @@ class ConfigurationBulk : public Configuration {
 			for(int i= 0; i < 4; ++i) {
 				if(total_potential[i] > V_CUT_OFF) continue;
 				ww_interactions[i].push_back(total_potential[i]);
-				ww_distances[i].push_back(0.0);
+				ww_distances[i].push_back(min_distance[i]);
+				ww_indices[i].push_back(solute.getID());
 				break;
 			}
 		}
@@ -311,7 +314,8 @@ class ConfigurationBulk : public Configuration {
 			bool is_DJ;
 			vector<Real> sum_per_site;
 			pair<Real,Real> bifurcated_individual_potentials;
-			pair<Real,Real> bifurcated_indivisual_distances;
+			pair<Real,Real> bifurcated_individual_distances;
+			pair<int,int> bifurcated_individual_indices;
 			Real bifurcated_site_potential;
 			Real lacking_site_potential;
 			Vector lacking_site_position;
@@ -319,7 +323,7 @@ class ConfigurationBulk : public Configuration {
 
 			DJInfo(): is_DJ(false) {}
 
-			void chargeData(vector<Vector>& sites, vector<Real>& sum_per_site, vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances) {
+			void chargeData(vector<Vector>& sites, vector<Real>& sum_per_site, vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances, vector<vector<int>>& ww_indices) {
 				sum_per_site= sum_per_site;
 				bool hasD3= false, hasD5= false;
 				for(int i= 0; i < 4; ++i) {
@@ -333,10 +337,12 @@ class ConfigurationBulk : public Configuration {
 						bifurcated_site_potential = sum_per_site[i];
 						if(ww_interactions[i][0] < ww_interactions[i][1]) {
 							bifurcated_individual_potentials= {ww_interactions[i][0], ww_interactions[i][1]};
-							bifurcated_indivisual_distances= {ww_distances[i][0], ww_distances[i][1]};
+							bifurcated_individual_distances= {ww_distances[i][0], ww_distances[i][1]};
+							bifurcated_individual_indices= {ww_indices[i][0], ww_indices[i][1]};
 						} else {
 							bifurcated_individual_potentials= {ww_interactions[i][1], ww_interactions[i][0]};
-							bifurcated_indivisual_distances= {ww_distances[i][1], ww_distances[i][0]};
+							bifurcated_individual_distances= {ww_distances[i][1], ww_distances[i][0]};
+							bifurcated_individual_indices= {ww_indices[i][1], ww_indices[i][0]};
 						}
 					}
 				}
@@ -356,7 +362,7 @@ class ConfigurationBulk : public Configuration {
          */
         DJInfo isDJ(const int ID, const Real R_CUT_OFF = 5.0, const Real V_CUT_OFF = -12.0) {
 			DJInfo output;
-			if(!getMolec(ID).isWater()) throw std::invalid_argument("The molecule is not a water molecule.");
+			if(!getMolec(ID).isWater()) throw invalid_argument("The molecule is not a water molecule.");
 
 			Water& molecule= *static_cast<Water*>(molecs[ID - 1]);
 			Vector o = molecule.getOxygen().getPosition();
@@ -365,8 +371,9 @@ class ConfigurationBulk : public Configuration {
 			Geometrics::TetrahedronVertices t= Geometrics::getPerfectTetrahedron(o, h1, h2, bounds);
 			vector<Vector> sites= {t.H1, t.H2, t.L1, t.L2};
 
-			std::vector<std::vector<Real>> ww_interactions, ww_distances;
-			std::vector<Real> sum_per_site;
+			vector<vector<Real>> ww_interactions, ww_distances;
+			vector<vector<int>> ww_indices;
+			vector<Real> sum_per_site;
 			initializeSiteVectors(ww_interactions, ww_distances, sum_per_site);
 
 			for(int j= 0; j < N_MOLEC; ++j) {
@@ -374,17 +381,17 @@ class ConfigurationBulk : public Configuration {
 
 				const Molecule& other_molec= getMolec(j + 1);
 				if(other_molec.getNAtoms() == 1 && (other_molec.getCharge() >= 1 || other_molec.getCharge() <= -1)) {
-					processIonInteraction(molecule, other_molec, sites, bounds, R_CUT_OFF, V_CUT_OFF, ww_interactions, ww_distances, sum_per_site);
+					processIonInteraction(molecule, other_molec, sites, bounds, R_CUT_OFF, V_CUT_OFF, ww_interactions, ww_distances, ww_indices, sum_per_site);
 				} else if(molecs[j]->isWater()) {
 					Water& other = *static_cast<Water*>(molecs[j]);
-					processWaterInteraction(molecule, other, sites, bounds, R_CUT_OFF, V_CUT_OFF, ww_interactions, ww_distances, sum_per_site);
+					processWaterInteraction(molecule, other, sites, bounds, R_CUT_OFF, V_CUT_OFF, ww_interactions, ww_distances, ww_indices, sum_per_site);
 				} else {
-					processSoluteInteraction(molecule, other_molec, sites, bounds, R_CUT_OFF, V_CUT_OFF, ww_interactions, ww_distances, sum_per_site);
+					processSoluteInteraction(molecule, other_molec, sites, bounds, R_CUT_OFF, V_CUT_OFF, ww_interactions, ww_distances, ww_indices, sum_per_site);
 				}
 			}
 
 			Sorter::sort(sum_per_site, Sorter::Order::Descending);
-			output.chargeData(sites, sum_per_site, ww_interactions, ww_distances);
+			output.chargeData(sites, sum_per_site, ww_interactions, ww_distances, ww_indices);
 			return output;
 		}
 
