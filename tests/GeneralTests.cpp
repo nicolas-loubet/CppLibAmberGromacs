@@ -483,6 +483,34 @@ TEST_CASE("CSVWriter", "[CSVWriter]") {
         REQUIRE(std::remove(fname.c_str()) == 0);
     }
 
+    SECTION("writeRow with vector<T>") {
+        string fname = "test_output_vector.csv";
+        {
+            CSVWriter csv(fname);
+            csv.writeHeader({"A", "B", "C", "D"});
+
+            // Probar con std::vector<float>
+            std::vector<float> row_float = {1.5f, 2.0f, 3.1416f, 4.0f};
+            csv.writeRow(row_float);
+
+            // Probar con std::vector<int>
+            std::vector<int> row_int = {10, 20, 30, 40};
+            csv.writeRow(row_int);
+
+            // Probar con std::vector<std::string>
+            std::vector<std::string> row_string = {"uno", "dos", "tres", "cuatro"};
+            csv.writeRow(row_string);
+        }
+
+        string expected =
+            "A,B,C,D\n"
+            "1.5,2,3.1416,4\n"
+            "10,20,30,40\n"
+            "uno,dos,tres,cuatro\n";
+        REQUIRE(readFile(fname) == expected);
+        REQUIRE(std::remove(fname.c_str()) == 0);
+    }
+    
     SECTION("writeDistribution without totals") {
         string fname = "test_output_dist.csv";
         int N_BINS = 3;

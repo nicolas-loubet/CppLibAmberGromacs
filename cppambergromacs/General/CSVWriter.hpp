@@ -65,6 +65,20 @@ class CSVWriter {
         }
 
         /**
+         * Writes a row from a vector of generic type T
+         * @param row vector containing the column values
+         * @tparam T type of the elements in the vector
+         */
+        template<typename T>
+        void writeRow(const std::vector<T>& row) {
+            for(size_t i= 0; i < row.size(); i++) {
+                file << toString(row[i]);
+                if(i+1 < row.size()) file << sep;
+            }
+            file << "\n";
+        }
+
+        /**
          * Writes a normalized distribution in several columns
          * @param bins vector of pointers to columns (each column has N_BINS values)
          * @param N_BINS number of bins
