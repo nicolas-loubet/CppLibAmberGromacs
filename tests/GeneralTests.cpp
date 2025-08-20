@@ -1005,3 +1005,137 @@ TEST_CASE("Toolkit - Structs", "[Toolkit]") {
         delete[] data;
     }
 }
+
+/// Helper: reads a file and returns its contents
+string readFile(const string& fname) {
+    ifstream in(fname);
+    REQUIRE(in.is_open());
+    stringstream buffer;
+    buffer << in.rdbuf();
+    return buffer.str();
+}
+
+TEST_CASE("CSVWriter", "[CSVWriter]") {
+    SECTION("writeHeader and writeRow") {
+        string fname = "test_output_basic.csv";
+        {
+            CSVWriter csv(fname);
+            csv.writeHeader({"A","B","C"});
+            csv.writeRow(1, 2.5, "hola");
+            csv.writeRow(2, 3.1416, "chau");
+        }
+        string expected =
+            "A,B,C\n"
+            "1,2.5,hola\n"
+            "2,3.1416,chau\n";
+        REQUIRE(readFile(fname) == expected);
+        REQUIRE(std::remove(fname.c_str()) == 0);
+    }
+
+    SECTION("writeRow with vector<T>") {
+        string fname = "test_output_vector.csv";
+        {
+            CSVWriter csv(fname);
+            csv.writeHeader({"A", "B", "C", "D"});
+
+            // Probar con std::vector<float>
+            std::vector<float> row_float = {1.5f, 2.0f, 3.1416f, 4.0f};
+            csv.writeRow(row_float);
+
+            // Probar con std::vector<int>
+            std::vector<int> row_int = {10, 20, 30, 40};
+            csv.writeRow(row_int);
+
+            // Probar con std::vector<std::string>
+            std::vector<std::string> row_string = {"uno", "dos", "tres", "cuatro"};
+            csv.writeRow(row_string);
+        }
+
+        string expected =
+            "A,B,C,D\n"
+            "1.5,2,3.1416,4\n"
+            "10,20,30,40\n"
+            "uno,dos,tres,cuatro\n";
+        REQUIRE(readFile(fname) == expected);
+        REQUIRE(std::remove(fname.c_str()) == 0);
+    }
+    
+    SECTION("writeDistribution without totals") {
+        string fname = "test_output_dist.csv";
+        int N_BINS = 3;
+        Real MIN_BINS = 0.0, MAX_BINS = 3.0;
+
+        Real* col1 = new Real[N_BINS]{1.0, 1.0, 2.0}; // sum = 4
+        Real* col2 = new Real[N_BINS]{0.0, 2.0, 2.0}; // sum = 4
+
+        {
+            CSVWriter csv(fname);
+            csv.writeDistribution({col1, col2}, N_BINS, MIN_BINS, MAX_BINS, {"x","dist1","dist2"});
+        }
+
+        string expected =
+            "x,dist1,dist2\n"
+            "0.5,0.25,0\n"
+            "1.5,0.25,0.5\n"
+            "2.5,0.5,0.5\n";
+        REQUIRE(readFile(fname) == expected);
+
+        REQUIRE(std::remove(fname.c_str()) == 0);
+        delete[] col1;
+        delete[] col2;
+    }
+
+    SECTION("writeDistribution with explicit totals") {
+        string fname = "test_output_dist_totals.csv";
+        int N_BINS = 2;
+        Real MIN_BINS = 0.0, MAX_BINS = 2.0;
+
+        Real* col1 = new Real[N_BINS]{1.0, 3.0};
+        Real* col2 = new Real[N_BINS]{2.0, 2.0};
+
+        vector<Real> totals = {10.0, 5.0}; // normalizadores externos
+
+        {
+            CSVWriter csv(fname);
+            csv.writeDistribution({col1,col2}, N_BINS, MIN_BINS, MAX_BINS, {"x","dist1","dist2"}, totals);
+        }
+
+        string expected =
+            "x,dist1,dist2\n"
+            "0.5,0.1,0.4\n"
+            "1.5,0.3,0.4\n";
+        REQUIRE(readFile(fname) == expected);
+
+        REQUIRE(std::remove(fname.c_str()) == 0);
+        delete[] col1;
+        delete[] col2;
+    }
+
+    SECTION("writeTable generic") {
+        string fname = "test_output_table.csv";
+
+        int nRows = 2, nCols = 2;
+        double** table = new double*[nRows];
+        for(int i=0; i<nRows; i++) {
+            table[i] = new double[nCols];
+            for(int j=0; j<nCols; j++) table[i][j] = i*10+j;
+        }
+        vector<string> rows = {"row1","row2"};
+        vector<string> cols = {"Name","C1","C2"};
+
+        {
+            CSVWriter csv(fname);
+            csv.writeTable(rows, table, nRows, nCols, cols);
+        }
+
+        string expected =
+            "Name,C1,C2\n"
+            "row1,0,1\n"
+            "row2,10,11\n";
+        REQUIRE(readFile(fname) == expected);
+
+        for(int i=0; i<nRows; i++) delete[] table[i];
+        delete[] table;
+        REQUIRE(std::remove(fname.c_str()) == 0);
+    }
+}

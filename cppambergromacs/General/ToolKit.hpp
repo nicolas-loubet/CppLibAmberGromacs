@@ -133,6 +133,32 @@ namespace ToolKit {
             f(list[i], res[i], args...);
     }
 
+    #ifndef CONSOLE_WIDTH
+        #define CONSOLE_WIDTH 180
+    #endif
+
+    /**
+     * Prints a charging bar for each parallel execution
+     * @param i The current iteration
+     * @param N The total number of iterations
+     * @param pos The position of the bar (0-20)
+     * @param total_pos The total number of positions
+     * @param symbol The symbol to print
+     */
+    void printPercentageParallel(int i, int N, int pos, int total_pos, const char symbol= '=') {
+        const int bar_width= CONSOLE_WIDTH/total_pos - 1;
+
+        static std::vector<std::string> bars(total_pos, std::string(bar_width, ' '));
+        int filled= (i * (bar_width-2)) / N;
+
+        bars[pos]= "[" + std::string(filled, symbol) + std::string(bar_width-2 - filled,' ') + "]";
+        
+        std::cout << "\r";
+        for (int p = 0; p < total_pos; ++p)
+            std::cout << bars[p];
+        std::cout.flush();
+    }
+
 }
 
 #endif

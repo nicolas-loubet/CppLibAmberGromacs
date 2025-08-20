@@ -74,6 +74,26 @@ class Configuration {
 		}
 
 		/**
+		 * Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite
+		 */
+		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other, const Real R_CUT_OFF, vector<Real>& sum_only_water) {
+			int i_close= 0;
+			Real d_close= distancePBC(sites[0],other.getPosition(),bounds);
+			for(int i= 1; i < 4; i++) {
+				Real d_new= distancePBC(sites[i],other.getPosition(),bounds);
+				if(d_close > d_new) {
+					i_close= i;
+					d_close= d_new;
+				}
+			}
+			if(d_close > R_CUT_OFF) return;
+
+			Real pot= center_water.potentialWith(other,bounds);
+			sum_per_site[i_close]+= pot;
+			sum_only_water[i_close]+= pot;
+		}
+
+		/**
 		 * Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite flagged with water-water interactions < V_CUT_OFF
 		 */
 		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other, Real** potential_matrix, ToolKit::ArrInt* neighbours, const Real R_CUT_OFF, bool* ww_interaction, const Real V_CUT_OFF) {
@@ -151,9 +171,7 @@ class Configuration {
 
 		Configuration& operator=(const Configuration& other) {
 			if(this == &other) return *this;
-			for(int i= 0; i < N_MOLEC; i++)
-				delete molecs[i];
-			delete[] molecs;
+			delete(this);
 
 			N_MOLEC= other.N_MOLEC;
 			bounds= other.bounds;
@@ -170,6 +188,7 @@ class Configuration {
 			for(int i= 0; i < N_MOLEC; i++)
 				delete molecs[i];
 			delete[] molecs;
+			molecs= nullptr;
 		}
 
 		/**
@@ -272,10 +291,9 @@ class Configuration {
 			Vector o= molecule.getOxygen().getPosition();
 			Vector h1= molecule.getHydrogen_1().getPosition();
 			Vector h2= molecule.getHydrogen_2().getPosition();
-			Geometrics::TetrahedronVertices t= Geometrics::getPerfectTetrahedron(o, h1, h2, bounds);
+			vector<Vector> sites= Geometrics::getPerfectTetrahedron(o, h1, h2, bounds).toVector();
 			
 			vector<Real> sum_per_site(4,0.0);
-			vector<Vector> sites= {t.H1, t.H2, t.L1, t.L2};
 			
 			for(int j= 0; j < N_MOLEC; j++) {
 				if(j+1 == ID) continue; // Same molecule, skip
@@ -318,10 +336,9 @@ class Configuration {
 			Vector o= molecule.getOxygen().getPosition();
 			Vector h1= molecule.getHydrogen_1().getPosition();
 			Vector h2= molecule.getHydrogen_2().getPosition();
-			Geometrics::TetrahedronVertices t= Geometrics::getPerfectTetrahedron(o, h1, h2, bounds);
+			vector<Vector> sites= Geometrics::getPerfectTetrahedron(o, h1, h2, bounds).toVector();
 			
 			vector<Real> sum_per_site(4,0.0);
-			vector<Vector> sites= {t.H1, t.H2, t.L1, t.L2};
 
 			bool* water_water_interaction= new bool[4];
 			for(int i= 0; i < 4; i++)
@@ -358,6 +375,53 @@ class Configuration {
 
 			Sorter::sort(sum_per_site, Sorter::Order::Descending);
 			return sum_per_site;
+		}
+
+		/**
+		 * It returns the interactions per site of the molecule specified by its ID, with a flag to know if there is a water-water interaction in each site
+		 * @param ID The ID of the molecule
+		 * @param potential_matrix The matrix with the potential values, default is nullptr
+		 * @param neighbours The neighbours of the molecule, default is nullptr
+		 * @param R_CUT_OFF The cutoff radius, default is 5.
+		 * @param V_CUT_OFF The potential cutoff, default is -12
+		 * @param flag_ww A flag to know if there is a water-water interaction
+		 * @return The interactions per site, sorted in descending order
+		 */
+		vector<Real> getInteractionsPerSite_waterOnly(const int ID, const Real V_CUT_OFF= -12.0, const Real R_CUT_OFF= 5.0) {
+			if(!getMolec(ID).isWater()) throw invalid_argument("The molecule is not a water molecule.");
+			Water& molecule= *static_cast<Water*>(molecs[ID-1]);
+			Vector o= molecule.getOxygen().getPosition();
+			Vector h1= molecule.getHydrogen_1().getPosition();
+			Vector h2= molecule.getHydrogen_2().getPosition();
+			vector<Vector> sites= Geometrics::getPerfectTetrahedron(o, h1, h2, bounds).toVector();
+			
+			vector<Real> sum_per_site(4,0.0);
+			vector<Real> sum_only_water(4,0.0);
+
+			for(int j= 0; j < N_MOLEC; j++) {
+				if(j+1 == ID) continue; // Same molecule, skip
+				
+				if((getMolec(j+1).getNAtoms() == 1) && (getMolec(j+1).getCharge() >= 1 || getMolec(j+1).getCharge() <= -1)) {
+					// We found a ion, consider it always
+					addToSumVector(sites, sum_per_site, molecule, getMolec(j+1).getAtom(1), R_CUT_OFF);
+					continue;
+				}
+				
+				if(molecs[j]->isWater()) { // We found a water molecule
+					Water& other= *static_cast<Water*>(molecs[j]);
+					if(molecule.distanceTo(other,bounds) > R_CUT_OFF+1.1) continue;
+					addToSumVector(sites, sum_per_site, molecule, other, R_CUT_OFF, sum_only_water);
+				} else { // We found another type of molecule, study atom by atom
+					for(int a= 1; a <= getMolec(j+1).getNAtoms(); a++)
+						if(molecule.distanceTo(getMolec(j+1).getAtom(a),bounds) < R_CUT_OFF+1.1) {
+							addToSumVector(sites, sum_per_site, molecule, getMolec(j+1).getAtom(a), R_CUT_OFF);
+						}
+				}
+			}
+
+			vector<int> index_seq= {0,1,2,3};
+			Sorter::cosort(sum_per_site, index_seq, Sorter::Order::Descending);
+			return {sum_only_water[index_seq[0]], sum_only_water[index_seq[1]], sum_only_water[index_seq[2]], sum_only_water[index_seq[3]]};
 		}
 
 		/**

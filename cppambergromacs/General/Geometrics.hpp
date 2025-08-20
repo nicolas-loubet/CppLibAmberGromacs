@@ -36,6 +36,16 @@ namespace Geometrics {
 			output.push_back(L2);
 			return output;
 		}
+
+		friend std::ostream& operator << (std::ostream& os, TetrahedronVertices const& tetra) {
+			os << "draw line " << tetra.H1 << " " << tetra.H2 << std::endl;
+			os << "draw line " << tetra.H1 << " " << tetra.L1 << std::endl;
+			os << "draw line " << tetra.H1 << " " << tetra.L2 << std::endl;
+			os << "draw line " << tetra.H2 << " " << tetra.L1 << std::endl;
+			os << "draw line " << tetra.H2 << " " << tetra.L2 << std::endl;
+			os << "draw line " << tetra.L1 << " " << tetra.L2 << std::endl;
+			return os;
+		}
 	};
 	
 	/**
@@ -206,6 +216,22 @@ namespace Geometrics {
 		Box(const Vector& min, const Vector& max): min_pos(min), max_pos(max) {}
 		Box(const Real min_x, const Real min_y, const Real min_z, const Real max_x, const Real max_y, const Real max_z):
 			min_pos(min_x, min_y, min_z), max_pos(max_x, max_y, max_z) {}
+
+		friend std::ostream& operator<<(std::ostream& os, const Box& box) {
+			os<<"draw line {"<<box.min_pos.x<<" "<< box.min_pos.y<<" "<<box.min_pos.z<<"} {"<<box.max_pos.x<<" "<<box.min_pos.y<<" "<<box.min_pos.z<<"}\n"
+			  <<"draw line {"<<box.min_pos.x<<" "<< box.min_pos.y<<" "<<box.min_pos.z<<"} {"<<box.min_pos.x<<" "<<box.max_pos.y<<" "<<box.min_pos.z<<"}\n"
+			  <<"draw line {"<<box.max_pos.x<<" "<< box.min_pos.y<<" "<<box.min_pos.z<<"} {"<<box.max_pos.x<<" "<<box.max_pos.y<<" "<<box.min_pos.z<<"}\n"
+			  <<"draw line {"<<box.min_pos.x<<" "<< box.max_pos.y<<" "<<box.min_pos.z<<"} {"<<box.max_pos.x<<" "<<box.max_pos.y<<" "<<box.min_pos.z<<"}\n"
+			  <<"draw line {"<<box.min_pos.x<<" "<< box.min_pos.y<<" "<<box.max_pos.z<<"} {"<<box.max_pos.x<<" "<<box.min_pos.y<<" "<<box.max_pos.z<<"}\n"
+			  <<"draw line {"<<box.min_pos.x<<" "<< box.min_pos.y<<" "<<box.max_pos.z<<"} {"<<box.min_pos.x<<" "<<box.max_pos.y<<" "<<box.max_pos.z<<"}\n"
+			  <<"draw line {"<<box.max_pos.x<<" "<< box.min_pos.y<<" "<<box.max_pos.z<<"} {"<<box.max_pos.x<<" "<<box.max_pos.y<<" "<<box.max_pos.z<<"}\n"
+			  <<"draw line {"<<box.min_pos.x<<" "<< box.max_pos.y<<" "<<box.max_pos.z<<"} {"<<box.max_pos.x<<" "<<box.max_pos.y<<" "<<box.max_pos.z<<"}\n"
+			  <<"draw line {"<<box.min_pos.x<<" "<< box.min_pos.y<<" "<<box.min_pos.z<<"} {"<<box.min_pos.x<<" "<<box.min_pos.y<<" "<<box.max_pos.z<<"}\n"
+			  <<"draw line {"<<box.max_pos.x<<" "<< box.min_pos.y<<" "<<box.min_pos.z<<"} {"<<box.max_pos.x<<" "<<box.min_pos.y<<" "<<box.max_pos.z<<"}\n"
+			  <<"draw line {"<<box.min_pos.x<<" "<< box.max_pos.y<<" "<<box.min_pos.z<<"} {"<<box.min_pos.x<<" "<<box.max_pos.y<<" "<<box.max_pos.z<<"}\n"
+			  <<"draw line {"<<box.max_pos.x<<" "<< box.max_pos.y<<" "<<box.min_pos.z<<"} {"<<box.max_pos.x<<" "<<box.max_pos.y<<" "<<box.max_pos.z<<"}\n";
+			return os;
+		}
 	};
 
 	/**
@@ -238,6 +264,19 @@ namespace Geometrics {
 		}
 
 		~SphereList() { delete[] centers; }
+
+		friend std::ostream& operator<<(std::ostream& os, const SphereList& list) {
+			for(int i= 0; i < list.size; i++)
+				os << "draw sphere " << list.centers[i] << " radius 1 resolution 60\n";
+			return os;
+		}
+
+		std::string to_string(const float RADIUS= 1, const float RESOLUTION= 60) const {
+			std::stringstream ss;
+			for(int i= 0; i < size; i++)
+				ss << "draw sphere " << centers[i] << " radius " << RADIUS << " resolution " << RESOLUTION << "\n";
+			return ss.str();
+		}
 	};
 
 	/**
@@ -286,6 +325,17 @@ namespace Geometrics {
 		return pos.x >= box.min_pos.x && pos.x <= box.max_pos.x &&
 			   pos.y >= box.min_pos.y && pos.y <= box.max_pos.y &&
 			   pos.z >= box.min_pos.z && pos.z <= box.max_pos.z;
+	}
+
+	/**
+	 * Checks if a point is inside a 2D box
+	 * @param pos The point to check
+	 * @param box The box to check
+	 * @return true if the point is inside the box, false otherwise
+	 */
+	bool isInBox_2D(Vector pos, Box box) {
+		return pos.x >= box.min_pos.x && pos.x <= box.max_pos.x &&
+			   pos.y >= box.min_pos.y && pos.y <= box.max_pos.y;
 	}
 
 }
