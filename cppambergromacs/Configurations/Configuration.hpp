@@ -23,106 +23,83 @@ class Configuration {
 		int N_MOLEC; //The number of Molecule objects in the array
 		Vector bounds; //The bounds of the system
 
-		/**
-		 * Adds the potential of an atom with a water molecule to the sum_per_site vector, used in getInteractionsPerSite
-		 */
+		// Helper: finds the index of the closest site
+		inline bool closestSiteIndex(const vector<Vector>& sites, const Vector& pos, const Vector& bounds, Real R_CUT_OFF, int& i_close) {
+			i_close= 0;
+			Real d_close= distancePBC(sites[0], pos, bounds);
+			for(int i= 1; i < 4; i++) {
+				Real d_new= distancePBC(sites[i], pos, bounds);
+				if(d_close > d_new) {
+					i_close= i;
+					d_close= d_new;
+				}
+			}
+			return (d_close <= R_CUT_OFF);
+		}
+
+		// Helper: check in the potential matrix the stored value
+		inline Real checkInPotentialMatrix(Water& center_water, Water& other, Real** potential_matrix, ToolKit::ArrInt* neighbours) {
+			int min= (center_water.getID() < other.getID() ? center_water.getID() : other.getID()) - 1;
+			int max= (center_water.getID() > other.getID() ? center_water.getID() : other.getID()) - 1;
+
+			if(potential_matrix[max][min] == NOT_CLASSIFIED)
+				potential_matrix[max][min]= center_water.potentialWith(other, bounds);
+
+			Real pot= potential_matrix[max][min];
+			if(neighbours != nullptr)
+				neighbours[center_water.getID()-1].arr[neighbours[center_water.getID()-1].size++] = other.getID();
+			return pot;
+		}
+
+		// Helper: Adds the potential of an atom with a water molecule to the sum_per_site vector, used in getInteractionsPerSite
 		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Atom& atom, const Real R_CUT_OFF) {
-			int i_close= 0;
-			Real d_close= distancePBC(sites[0],atom.getPosition(),bounds);
-			for(int i= 1; i < 4; i++) {
-				Real d_new= distancePBC(sites[i],atom.getPosition(),bounds);
-				if(d_close > d_new) {
-					i_close= i;
-					d_close= d_new;
-				}
-			}
-			if(d_close <= R_CUT_OFF) {
-				sum_per_site[i_close]+= center_water.potentialWith(atom,bounds);
-			}
+			int i_close;
+			if(closestSiteIndex(sites, atom.getPosition(), bounds, R_CUT_OFF, i_close))
+				sum_per_site[i_close]+= center_water.potentialWith(atom, bounds);
 		}
 
-		/**
-		 * Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite
-		 */
-		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other, Real** potential_matrix, ToolKit::ArrInt* neighbours, const Real R_CUT_OFF) {
-			int i_close= 0;
-			Real d_close= distancePBC(sites[0],other.getPosition(),bounds);
-			for(int i= 1; i < 4; i++) {
-				Real d_new= distancePBC(sites[i],other.getPosition(),bounds);
-				if(d_close > d_new) {
-					i_close= i;
-					d_close= d_new;
-				}
-			}
-			if(d_close > R_CUT_OFF) return;
+		// Helper: Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite
+		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other,
+							Real** potential_matrix, ToolKit::ArrInt* neighbours, const Real R_CUT_OFF) {
+			int i_close;
+			if(!closestSiteIndex(sites, other.getPosition(), bounds, R_CUT_OFF, i_close))
+				return;
 
-			Real pot;
-			if(potential_matrix != nullptr) {
-				int min= (center_water.getID() < other.getID()  ?  center_water.getID() : other.getID()) - 1;
-				int max= (center_water.getID() > other.getID()  ?  center_water.getID() : other.getID()) - 1;
-				if(potential_matrix[max][min] == NOT_CLASSIFIED)
-					potential_matrix[max][min]= center_water.potentialWith(other,bounds);
-				pot= potential_matrix[max][min];
-				if(neighbours != nullptr)
-					neighbours[center_water.getID()-1].arr[
-						neighbours[center_water.getID()-1].size++
-					]= other.getID();
-			} else {
-				pot= center_water.potentialWith(other,bounds);
-			}
-			sum_per_site[i_close]+= pot;
+			sum_per_site[i_close]+= (potential_matrix != nullptr) ?
+									checkInPotentialMatrix(center_water, other, potential_matrix, neighbours) :
+									center_water.potentialWith(other, bounds);
 		}
 
-		/**
-		 * Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite
-		 */
-		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other, const Real R_CUT_OFF, vector<Real>& sum_only_water) {
-			int i_close= 0;
-			Real d_close= distancePBC(sites[0],other.getPosition(),bounds);
-			for(int i= 1; i < 4; i++) {
-				Real d_new= distancePBC(sites[i],other.getPosition(),bounds);
-				if(d_close > d_new) {
-					i_close= i;
-					d_close= d_new;
-				}
-			}
-			if(d_close > R_CUT_OFF) return;
 
-			Real pot= center_water.potentialWith(other,bounds);
+		// Helper: Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite
+		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water,
+							Water& other, const Real R_CUT_OFF, vector<Real>& sum_only_water) {
+			int i_close;
+			if(!closestSiteIndex(sites, other.getPosition(), bounds, R_CUT_OFF, i_close))
+				return;
+
+			Real pot= center_water.potentialWith(other, bounds);
 			sum_per_site[i_close]+= pot;
 			sum_only_water[i_close]+= pot;
 		}
 
-		/**
-		 * Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite flagged with water-water interactions < V_CUT_OFF
-		 */
-		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other, Real** potential_matrix, ToolKit::ArrInt* neighbours, const Real R_CUT_OFF, bool* ww_interaction, const Real V_CUT_OFF) {
-			int i_close= 0;
-			Real d_close= distancePBC(sites[0],other.getPosition(),bounds);
-			for(int i= 1; i < 4; i++) {
-				Real d_new= distancePBC(sites[i],other.getPosition(),bounds);
-				if(d_close > d_new) {
-					i_close= i;
-					d_close= d_new;
-				}
-			}
-			if(d_close > R_CUT_OFF) return;
 
-			Real pot;
-			if(potential_matrix != nullptr) {
-				int min= (center_water.getID() < other.getID()  ?  center_water.getID() : other.getID()) - 1;
-				int max= (center_water.getID() > other.getID()  ?  center_water.getID() : other.getID()) - 1;
-				if(potential_matrix[max][min] == NOT_CLASSIFIED)
-					potential_matrix[max][min]= center_water.potentialWith(other,bounds);
-				pot= potential_matrix[max][min];
-				if(neighbours != nullptr)
-					neighbours[center_water.getID()-1].arr[neighbours[center_water.getID()-1].size++]= other.getID();
-			} else {
-				pot= center_water.potentialWith(other,bounds);
-			}
+		// Helper: Adds the potential of a water molecule with another water molecule to the sum_per_site vector,
+		// used in getInteractionsPerSite flagged with water-water interactions < V_CUT_OFF
+		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other, Real** potential_matrix,
+							ToolKit::ArrInt* neighbours, const Real R_CUT_OFF, bool* ww_interaction, const Real V_CUT_OFF) {
+			int i_close;
+			if(!closestSiteIndex(sites, other.getPosition(), bounds, R_CUT_OFF, i_close))
+				return;
+
+			Real pot= (potential_matrix != nullptr) ?
+					  checkInPotentialMatrix(center_water, other, potential_matrix, neighbours) :
+					  center_water.potentialWith(other, bounds);
+
 			sum_per_site[i_close]+= pot;
 			ww_interaction[i_close]= ww_interaction[i_close] || (pot <= V_CUT_OFF);
 		}
+
 
 	public:
 		//Getters
