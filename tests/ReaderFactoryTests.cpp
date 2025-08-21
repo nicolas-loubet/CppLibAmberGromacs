@@ -1,4 +1,3 @@
-#define CATCH_CONFIG_MAIN // Esto define el main de Catch2
 #include "catch.hpp"
 #include "../cppambergromacs/CppLibAmberGromacs.hpp"
 #include <filesystem>
@@ -318,6 +317,3 @@ TEST_CASE("TopologyReader - Tabla periódica", "[TopologyReader]") {
         REQUIRE_THROWS_AS(reader.getPeriodicTableValue("XX"), std::out_of_range);
     }
 }
-
-#include "MoleculeTests.cpp"
-#include "GeneralTests.cpp"
