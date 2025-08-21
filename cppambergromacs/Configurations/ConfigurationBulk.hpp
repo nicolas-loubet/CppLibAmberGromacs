@@ -92,6 +92,11 @@ class ConfigurationBulk : public Configuration {
 			sum_per_site.assign(4, 0.0);
 		}
 
+		// Helper, try to identify a defect
+		bool isDefect(const int ID_CENTER, const Real threshold=-12.0, const int V_index=4) {
+			return (vI(ID_CENTER, V_index) > threshold);
+		}
+
 	public:
 		static constexpr int CLASSIFICATION_D_MOLECULE= 0;
 		static constexpr int CLASSIFICATION_T0_MOLECULE= 1;
@@ -116,11 +121,10 @@ class ConfigurationBulk : public Configuration {
 			//If it has been classified, it returns that value
 			Water* m= dynamic_cast<Water*>(molecs[ID_CENTER-1]);
 			if(m == nullptr) return false; //If it is not a Water
-			if(m->getClassification() != NOT_CLASSIFIED) return m->getClassification() == CLASSIFICATION_D_MOLECULE;
+			if(m->getClassification() != NOT_CLASSIFIED)
+				return (m->getClassification() == CLASSIFICATION_D_MOLECULE || m->getClassification() == CLASSIFICATION_D3_MOLECULE);
 
-			Real v4= vI(ID_CENTER, V_index);
-
-			if(v4 > threshold) {
+			if(isDefect(ID_CENTER, threshold, V_index)) {
 				m->setClassification(CLASSIFICATION_D_MOLECULE);
 				return true;
 			}
@@ -134,7 +138,17 @@ class ConfigurationBulk : public Configuration {
 		 * @return If the v4 value is higher that the threshold, or false if it is not Water
 		 */
 		bool isD3(const int ID_CENTER, const Real threshold=-12.0) {
-			return isD(ID_CENTER, threshold);
+			//If it has been classified, it returns that value
+			Water* m= dynamic_cast<Water*>(molecs[ID_CENTER-1]);
+			if(m == nullptr) return false; //If it is not a Water
+			if(m->getClassification() != NOT_CLASSIFIED)
+				return (m->getClassification() == CLASSIFICATION_D_MOLECULE || m->getClassification() == CLASSIFICATION_D3_MOLECULE);
+
+			if(isDefect(ID_CENTER, threshold, 4)) {
+				m->setClassification(CLASSIFICATION_D3_MOLECULE);
+				return true;
+			}
+			return false;
 		}
 
 		/**
@@ -144,7 +158,17 @@ class ConfigurationBulk : public Configuration {
 		 * @return If the v5 value is lower that the threshold, or false if it is not Water
 		 */
 		bool isD5(const int ID_CENTER, const Real threshold=-12.0) {
-			return !isD(ID_CENTER, threshold, 5);
+			//If it has been classified, it returns that value
+			Water* m= dynamic_cast<Water*>(molecs[ID_CENTER-1]);
+			if(m == nullptr) return false; //If it is not a Water
+			if(m->getClassification() != NOT_CLASSIFIED)
+				return (m->getClassification() == CLASSIFICATION_D5_MOLECULE);
+
+			if(!isDefect(ID_CENTER, threshold, 5)) {
+				m->setClassification(CLASSIFICATION_D5_MOLECULE);
+				return true;
+			}
+			return false;
 		}
 
 		/**
