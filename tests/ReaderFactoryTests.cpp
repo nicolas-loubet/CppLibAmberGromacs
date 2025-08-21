@@ -52,96 +52,96 @@ void createTestFiles(const std::string& directory, const std::vector<std::string
     }
 }
 
-TEST_CASE("ReaderFactory - Creación de CoordinateReader", "[ReaderFactory][CoordinateReader]") {
-    SECTION("Debería crear un AmberCoordinateReader para el formato AMBER") {
+TEST_CASE("ReaderFactory - CoordinateReader creation", "[ReaderFactory][CoordinateReader]") {
+    SECTION("Should create an AmberCoordinateReader for AMBER format") {
         CoordinateReader* reader = ReaderFactory::createCoordinateReader(ReaderFactory::ProgramFormat::AMBER);
         REQUIRE(dynamic_cast<AmberCoordinateReader*>(reader) != nullptr);
         delete reader;
     }
 
-    SECTION("Debería crear un GromacsCoordinateReader para el formato GROMACS") {
+    SECTION("Should create a GromacsCoordinateReader for GROMACS format") {
         CoordinateReader* reader = ReaderFactory::createCoordinateReader(ReaderFactory::ProgramFormat::GROMACS);
         REQUIRE(dynamic_cast<GromacsCoordinateReader*>(reader) != nullptr);
         delete reader;
     }
 
-    SECTION("Debería crear un LammpsCoordinateReader para el formato LAMMPS") {
+    SECTION("Should create a LammpsCoordinateReader for LAMMPS format") {
         CoordinateReader* reader = ReaderFactory::createCoordinateReader(ReaderFactory::ProgramFormat::LAMMPS);
         REQUIRE(dynamic_cast<LammpsCoordinateReader*>(reader) != nullptr);
         delete reader;
     }
 
-    SECTION("Debería lanzar un error para un formato de coordenada no soportado") {
+    SECTION("Should throw an error for unsupported coordinate format") {
         REQUIRE_THROWS_AS(ReaderFactory::createCoordinateReader(static_cast<ReaderFactory::ProgramFormat>(999)), std::runtime_error);
     }
 }
 
-TEST_CASE("ReaderFactory - Creación de TopologyReader", "[ReaderFactory][TopologyReader]") {
-    SECTION("Debería crear un AmberTopologyReader para el formato AMBER") {
+TEST_CASE("ReaderFactory - TopologyReader creation", "[ReaderFactory][TopologyReader]") {
+    SECTION("Should create an AmberTopologyReader for AMBER format") {
         TopologyReader* reader = ReaderFactory::createTopologyReader(ReaderFactory::ProgramFormat::AMBER);
         REQUIRE(dynamic_cast<AmberTopologyReader*>(reader) != nullptr);
         delete reader;
     }
 
-    SECTION("Debería crear un GromacsTopologyReader para el formato GROMACS") {
+    SECTION("Should create a GromacsTopologyReader for GROMACS format") {
         TopologyReader* reader = ReaderFactory::createTopologyReader(ReaderFactory::ProgramFormat::GROMACS);
         REQUIRE(dynamic_cast<GromacsTopologyReader*>(reader) != nullptr);
         delete reader;
     }
 
-    SECTION("Debería crear un LammpsTopologyReader para el formato LAMMPS") {
+    SECTION("Should create a LammpsTopologyReader for LAMMPS format") {
         TopologyReader* reader = ReaderFactory::createTopologyReader(ReaderFactory::ProgramFormat::LAMMPS);
         REQUIRE(dynamic_cast<LammpsTopologyReader*>(reader) != nullptr);
         delete reader;
     }
 
-    SECTION("Debería lanzar un error para un formato de topología no soportado") {
+    SECTION("Should throw an error for unsupported topology format") {
         REQUIRE_THROWS_AS(ReaderFactory::createTopologyReader(static_cast<ReaderFactory::ProgramFormat>(999)), std::runtime_error);
     }
 }
 
-TEST_CASE("CoordinateReader - Gestión de frames", "[CoordinateReader]") {
+TEST_CASE("CoordinateReader - Frame management", "[CoordinateReader]") {
     MockCoordinateReader reader;
 
-    SECTION("Debería inicializar el frame en 0") {
+    SECTION("Should initialize frame at 0") {
         REQUIRE(reader.getFrame() == 0);
     }
 
-    SECTION("Debería establecer el frame correctamente") {
+    SECTION("Should set frame correctly") {
         reader.setFrame(5);
         REQUIRE(reader.getFrame() == 5);
         reader.setFrame(0);
         REQUIRE(reader.getFrame() == 0);
     }
 
-    SECTION("Debería incrementar el frame correctamente") {
+    SECTION("Should increment frame correctly") {
         REQUIRE(reader.incFrame() == 1);
         REQUIRE(reader.getFrame() == 1);
         REQUIRE(reader.incFrame() == 2);
         REQUIRE(reader.getFrame() == 2);
     }
 
-    SECTION("Debería manejar frames negativos") {
+    SECTION("Should handle negative frames") {
         reader.setFrame(-1);
         REQUIRE(reader.getFrame() == -1);
         REQUIRE(reader.incFrame() == 0);
     }
 
-    SECTION("Debería manejar frames grandes") {
+    SECTION("Should handle large frames") {
         reader.setFrame(std::numeric_limits<int>::max() - 1);
         REQUIRE(reader.getFrame() == std::numeric_limits<int>::max() - 1);
         REQUIRE(reader.incFrame() == std::numeric_limits<int>::max());
     }
 }
 
-TEST_CASE("CoordinateReader - Iterador de archivos", "[CoordinateReader]") {
+TEST_CASE("CoordinateReader - File iterator", "[CoordinateReader]") {
     const std::string test_dir = "test_dir";
     const std::string pattern = "frame*.gro";
     const std::vector<std::string> test_files = {"frame1.gro", "frame2.gro", "frame10.gro"};
 
     std::filesystem::remove_all(test_dir);
 
-    SECTION("Debería encontrar y ordenar archivos correctamente") {
+    SECTION("Should find and sort files correctly") {
         createTestFiles(test_dir, test_files);
         auto files = CoordinateReader::getFileIterator(test_dir, pattern);
         REQUIRE(files.size() == 3);
@@ -153,34 +153,34 @@ TEST_CASE("CoordinateReader - Iterador de archivos", "[CoordinateReader]") {
         REQUIRE(files[2].second == "frame10.gro");
     }
 
-    SECTION("Debería lanzar un error si no se encuentran archivos") {
+    SECTION("Should throw error if no files are found") {
         std::filesystem::create_directory(test_dir);
         REQUIRE_THROWS_AS(CoordinateReader::getFileIterator(test_dir, pattern), std::runtime_error);
     }
 
-    SECTION("Debería manejar patrones sin coincidencias") {
+    SECTION("Should handle patterns with no matches") {
         createTestFiles(test_dir, test_files);
         REQUIRE_THROWS_AS(CoordinateReader::getFileIterator(test_dir, "invalid*.xyz"), std::runtime_error);
     }
 
-    SECTION("Debería ignorar archivos no regulares") {
+    SECTION("Should ignore non-regular files") {
         createTestFiles(test_dir, test_files);
         std::filesystem::create_directory(test_dir + "/subdir");
         auto files = CoordinateReader::getFileIterator(test_dir, pattern);
         REQUIRE(files.size() == 3); // Subdirectory should be ignored
     }
 
-    SECTION("Debería manejar directorio inexistente") {
+    SECTION("Should handle nonexistent directory") {
         REQUIRE_THROWS_AS(CoordinateReader::getFileIterator("nonexistent_dir", pattern), std::filesystem::filesystem_error);
     }
 
-    SECTION("Debería manejar nombres de archivo sin número") {
+    SECTION("Should handle filenames without a number") {
         createTestFiles(test_dir, {"frameX.gro"});
         REQUIRE_THROWS_AS(CoordinateReader::getFileIterator(test_dir, pattern), std::runtime_error);
         REQUIRE_THROWS_WITH(CoordinateReader::getFileIterator(test_dir, pattern), "No files found matching pattern: " + pattern);
     }
 
-    SECTION("Debería lanzar un error para patrón sin asterisco") {
+    SECTION("Should throw error for pattern without asterisk") {
         createTestFiles(test_dir, test_files);
         REQUIRE_THROWS_AS(CoordinateReader::getFileIterator(test_dir, "frame.gro"), std::runtime_error);
         REQUIRE_THROWS_WITH(CoordinateReader::getFileIterator(test_dir, "frame.gro"), "The pattern must contain a *");
@@ -189,36 +189,36 @@ TEST_CASE("CoordinateReader - Iterador de archivos", "[CoordinateReader]") {
     std::filesystem::remove_all(test_dir);
 }
 
-TEST_CASE("CoordinateReader - Lectura de coordenadas", "[CoordinateReader]") {
+TEST_CASE("CoordinateReader - Reading coordinates", "[CoordinateReader]") {
     MockCoordinateReader reader;
     TopolInfo topol_info;
     topol_info.num_molecules = 10;
     std::vector<Molecule*> molecs(10, nullptr);
     Vector bounds;
 
-    SECTION("Debería leer coordenadas con archivo válido") {
+    SECTION("Should read coordinates with valid file") {
         REQUIRE(reader.readCoordinates("valid.gro", topol_info, molecs.data(), bounds) == true);
     }
 
-    SECTION("Debería fallar con archivo vacío") {
+    SECTION("Should fail with empty file") {
         REQUIRE(reader.readCoordinates("", topol_info, molecs.data(), bounds) == false);
     }
 
-    SECTION("Debería manejar topología inválida") {
+    SECTION("Should handle invalid topology") {
         TopolInfo invalid_topol;
         invalid_topol.num_molecules = -1;
         REQUIRE(reader.readCoordinates("valid.gro", invalid_topol, molecs.data(), bounds) == false);
     }
 
-    SECTION("Debería manejar nullptr para molecs") {
+    SECTION("Should handle nullptr for molecs") {
         REQUIRE(reader.readCoordinates("valid.gro", topol_info, nullptr, bounds) == false);
     }
 }
 
-TEST_CASE("TopologyReader - Lectura de topología", "[TopologyReader]") {
+TEST_CASE("TopologyReader - Reading topology", "[TopologyReader]") {
     MockTopologyReader reader;
 
-    SECTION("Debería leer topología correctamente") {
+    SECTION("Should read topology correctly") {
         TopolInfo info = reader.readTopology("dummy.top");
         REQUIRE(info.num_molecules == 100);
         REQUIRE(info.num_solutes == 50);
@@ -234,21 +234,21 @@ TEST_CASE("TopologyReader - Lectura de topología", "[TopologyReader]") {
         REQUIRE(info.special_interaction[{"O", "H"}].second == Approx(2.5));
     }
 
-    SECTION("Debería inicializar default_system_bounds correctamente") {
+    SECTION("Should initialize default_system_bounds correctly") {
         TopolInfo info = reader.readTopology("dummy.top");
         REQUIRE(info.default_system_bounds.x == Approx(0.0));
         REQUIRE(info.default_system_bounds.y == Approx(0.0));
         REQUIRE(info.default_system_bounds.z == Approx(0.0));
     }
 
-    SECTION("Debería manejar archivo vacío") {
+    SECTION("Should handle empty file") {
         TopolInfo info = reader.readTopology("");
         REQUIRE(info.num_molecules == 100); // Mock behavior, adjust if real implementation differs
     }
 }
 
-TEST_CASE("TopolInfo - Constructor y destructor", "[TopolInfo]") {
-    SECTION("Debería inicializar valores por defecto correctamente") {
+TEST_CASE("TopolInfo - Constructor and destructor", "[TopolInfo]") {
+    SECTION("Should initialize default values correctly") {
         TopolInfo info;
         REQUIRE(info.num_molecules == 0);
         REQUIRE(info.num_solutes == 0);
@@ -263,17 +263,17 @@ TEST_CASE("TopolInfo - Constructor y destructor", "[TopolInfo]") {
         REQUIRE(info.special_interaction.empty());
     }
 
-    SECTION("Debería destruir sin errores") {
+    SECTION("Should destruct without errors") {
         TopolInfo* info = new TopolInfo();
         delete info; // Should not crash
     }
 }
 
-TEST_CASE("TopolInfo - Salida a stream", "[TopolInfo]") {
+TEST_CASE("TopolInfo - Stream output", "[TopolInfo]") {
     MockTopologyReader reader;
     TopolInfo info = reader.readTopology("dummy.top");
 
-    SECTION("Debería generar salida de stream con todos los campos") {
+    SECTION("Should generate stream output with all fields") {
         std::ostringstream oss;
         oss << info;
         std::string output = oss.str();
@@ -290,7 +290,7 @@ TEST_CASE("TopolInfo - Salida a stream", "[TopolInfo]") {
         REQUIRE(output.find("(O,H): (0.5,2.5)") != std::string::npos);
     }
 
-    SECTION("Debería manejar TopolInfo vacío") {
+    SECTION("Should handle empty TopolInfo") {
         TopolInfo empty_info;
         std::ostringstream oss;
         oss << empty_info;
@@ -302,10 +302,10 @@ TEST_CASE("TopolInfo - Salida a stream", "[TopolInfo]") {
     }
 }
 
-TEST_CASE("TopologyReader - Tabla periódica", "[TopologyReader]") {
+TEST_CASE("TopologyReader - Periodic table", "[TopologyReader]") {
     MockTopologyReader reader;
 
-    SECTION("Debería contener elementos esperados en la tabla periódica") {
+    SECTION("Should contain expected elements in periodic table") {
         REQUIRE(reader.getPeriodicTableValue("H") == 1);
         REQUIRE(reader.getPeriodicTableValue("O") == 8);
         REQUIRE(reader.getPeriodicTableValue("C") == 6);
@@ -313,7 +313,7 @@ TEST_CASE("TopologyReader - Tabla periódica", "[TopologyReader]") {
         REQUIRE(reader.getPeriodicTableSize() >= 56); // At least 56 elements
     }
 
-    SECTION("Debería lanzar excepción para elemento no existente") {
+    SECTION("Should throw exception for non-existent element") {
         REQUIRE_THROWS_AS(reader.getPeriodicTableValue("XX"), std::out_of_range);
     }
 }

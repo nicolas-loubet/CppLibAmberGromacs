@@ -4,8 +4,8 @@
 #include <cmath>
 #include <limits>
 
-TEST_CASE("Particle - Constructor y getters/setters", "[Particle]") {
-    SECTION("Debería inicializar con valores por defecto") {
+TEST_CASE("Particle - Constructor and getters/setters", "[Particle]") {
+    SECTION("Should initialize with default values") {
         Particle p;
         REQUIRE(p.getPosition().x == Approx(0.0));
         REQUIRE(p.getPosition().y == Approx(0.0));
@@ -15,7 +15,7 @@ TEST_CASE("Particle - Constructor y getters/setters", "[Particle]") {
         REQUIRE(p.getCharge() == Approx(0.0));
     }
 
-    SECTION("Debería inicializar con posición, ID, masa y carga") {
+    SECTION("Should initialize with position, ID, mass and charge") {
         Vector pos(1.0, 2.0, 3.0);
         Particle p(pos, 42, 18.0, 1.0);
         REQUIRE(p.getPosition().x == Approx(1.0));
@@ -26,7 +26,7 @@ TEST_CASE("Particle - Constructor y getters/setters", "[Particle]") {
         REQUIRE(p.getCharge() == Approx(1.0));
     }
 
-    SECTION("Debería copiar correctamente") {
+    SECTION("Should copy correctly") {
         Vector pos(1.0, 2.0, 3.0);
         Particle p1(pos, 42, 18.0, 1.0);
         Particle p2(p1);
@@ -36,7 +36,7 @@ TEST_CASE("Particle - Constructor y getters/setters", "[Particle]") {
         REQUIRE(p2.getCharge() == Approx(1.0));
     }
 
-    SECTION("Debería asignar correctamente") {
+    SECTION("Should assign correctly") {
         Vector pos(1.0, 2.0, 3.0);
         Particle p1(pos, 42, 18.0, 1.0);
         Particle p2;
@@ -47,7 +47,7 @@ TEST_CASE("Particle - Constructor y getters/setters", "[Particle]") {
         REQUIRE(p2.getCharge() == Approx(1.0));
     }
 
-    SECTION("Debería calcular distancia con PBC") {
+    SECTION("Should calculate distance with PBC") {
         Vector pos1(0.0, 0.0, 0.0), pos2(1.0, 1.0, 1.0);
         Vector box(10.0, 10.0, 10.0);
         Particle p1(pos1, 1), p2(pos2, 2);
@@ -55,7 +55,7 @@ TEST_CASE("Particle - Constructor y getters/setters", "[Particle]") {
         REQUIRE(dist == Approx(std::sqrt(3.0))); // Mock distancePBC uses Euclidean distance
     }
 
-    SECTION("Debería inicializar con valores extremos") {
+    SECTION("Should initialize with extreme values") {
         Vector pos(std::numeric_limits<float>::max(), -std::numeric_limits<float>::max(), std::numeric_limits<float>::min());
         Particle p(pos, 9999, std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
         REQUIRE(p.getPosition().x == Approx(std::numeric_limits<float>::max()));
@@ -66,7 +66,7 @@ TEST_CASE("Particle - Constructor y getters/setters", "[Particle]") {
         REQUIRE(p.getCharge() == Approx(std::numeric_limits<float>::max()));
     }
 
-    SECTION("Debería inicializar con valores cercanos a cero") {
+    SECTION("Should initialize with values close to zero") {
         Vector pos(Vector::EPSILON, -Vector::EPSILON, 0.0);
         Particle p(pos, 0, Vector::EPSILON, Vector::EPSILON);
         REQUIRE(p.getPosition().x == Approx(Vector::EPSILON));
@@ -77,7 +77,7 @@ TEST_CASE("Particle - Constructor y getters/setters", "[Particle]") {
         REQUIRE(p.getCharge() == Approx(Vector::EPSILON));
     }
 
-    SECTION("Debería calcular distancia con PBC en múltiples dimensiones") {
+    SECTION("Should calculate distance with PBC in multiple dimensions") {
         Vector pos1(0.0, 0.0, 0.0), pos2(11.0, 12.0, 13.0);
         Vector box(10.0, 10.0, 10.0);
         Particle p1(pos1, 1), p2(pos2, 2);
@@ -85,7 +85,7 @@ TEST_CASE("Particle - Constructor y getters/setters", "[Particle]") {
         REQUIRE(dist == Approx(std::sqrt(1+4+9))); // 1.0, 2.0, 3.0 after PBC
     }
 
-    SECTION("Debería manejar asignación a sí misma") {
+    SECTION("Should handle self-assignment") {
         Vector pos(1.0, 2.0, 3.0);
         Particle p(pos, 42, 18.0, 1.0);
         p = p;
@@ -96,8 +96,8 @@ TEST_CASE("Particle - Constructor y getters/setters", "[Particle]") {
     }
 }
 
-TEST_CASE("Atom - Constructor y getters/setters", "[Atom]") {
-    SECTION("Debería inicializar con valores por defecto") {
+TEST_CASE("Atom - Constructor and getters/setters", "[Atom]") {
+    SECTION("Should initialize with default values") {
         Atom a;
         REQUIRE(a.getPosition().x == Approx(0.0));
         REQUIRE(a.getID() == 0);
@@ -109,7 +109,7 @@ TEST_CASE("Atom - Constructor y getters/setters", "[Atom]") {
         REQUIRE(a.getZ() == 0);
     }
 
-    SECTION("Debería inicializar con parámetros completos") {
+    SECTION("Should initialize with full parameters") {
         Vector pos(1.0, 2.0, 3.0);
         Atom a(pos, 42, 16.0, -0.5, 0.1, 3.5, 8);
         REQUIRE(a.getPosition().x == Approx(1.0));
@@ -122,7 +122,7 @@ TEST_CASE("Atom - Constructor y getters/setters", "[Atom]") {
         REQUIRE(a.getZ() == 8);
     }
 
-    SECTION("Debería establecer is_HAtom correctamente con Z=1") {
+    SECTION("Should set is_HAtom correctly with Z=1") {
         Atom a;
         a.setZ(1);
         REQUIRE(a.getis_Hatom() == true);
@@ -130,7 +130,7 @@ TEST_CASE("Atom - Constructor y getters/setters", "[Atom]") {
         REQUIRE(a.getis_Hatom() == false);
     }
 
-    SECTION("Debería copiar correctamente") {
+    SECTION("Should copy correctly") {
         Vector pos(1.0, 2.0, 3.0);
         Atom a1(pos, 42, 16.0, -0.5, 0.1, 3.5, 8);
         Atom a2(a1);
@@ -144,7 +144,7 @@ TEST_CASE("Atom - Constructor y getters/setters", "[Atom]") {
         REQUIRE(a2.getZ() == 8);
     }
 
-    SECTION("Debería asignar correctamente") {
+    SECTION("Should assign correctly") {
         Vector pos(1.0, 2.0, 3.0);
         Atom a1(pos, 42, 16.0, -0.5, 0.1, 3.5, 8);
         Atom a2;
@@ -159,7 +159,7 @@ TEST_CASE("Atom - Constructor y getters/setters", "[Atom]") {
         REQUIRE(a2.getZ() == 8);
     }
 
-    SECTION("Debería inicializar con valores negativos") {
+    SECTION("Should initialize with negative values") {
         Vector pos(-1.0, -2.0, -3.0);
         Atom a(pos, -1, -16.0, -1.0, -0.1, -3.5, 8);
         REQUIRE(a.getPosition().x == Approx(-1.0));
@@ -172,20 +172,20 @@ TEST_CASE("Atom - Constructor y getters/setters", "[Atom]") {
         REQUIRE(a.getZ() == 8);
     }
 
-    SECTION("Debería inicializar con Z=0") {
+    SECTION("Should initialize with Z=0") {
         Atom a(Vector(0.0, 0.0, 0.0), 0, 0.0, 0.0, 0.0, 0.0, 0);
         REQUIRE(a.getZ() == 0);
         REQUIRE(a.getis_Hatom() == false);
     }
 
-    SECTION("Debería manejar valores extremos para sigma y epsilon") {
+    SECTION("Should handle extreme values for sigma and epsilon") {
         Atom a(Vector(0.0, 0.0, 0.0), 1, 1.0, 1.0, std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), 1);
         REQUIRE(a.getSigma() == Approx(std::numeric_limits<float>::max()));
         REQUIRE(a.getEpsilon() == Approx(std::numeric_limits<float>::max()));
         REQUIRE(a.getis_Hatom() == true);
     }
 
-    SECTION("Debería manejar asignación a sí misma") {
+    SECTION("Should handle self-assignment") {
         Vector pos(1.0, 2.0, 3.0);
         Atom a(pos, 42, 16.0, -0.5, 0.1, 3.5, 8);
         a = a;
@@ -199,7 +199,7 @@ TEST_CASE("Atom - Constructor y getters/setters", "[Atom]") {
         REQUIRE(a.getZ() == 8);
     }
 
-    SECTION("Debería establecer posición correctamente") {
+    SECTION("Should set position correctly") {
         Atom a;
         Vector pos(4.0, 5.0, 6.0);
         a.setPosition(pos);
@@ -212,74 +212,74 @@ TEST_CASE("Atom - Coulomb Potential", "[Atom]") {
     Atom a1(Vector(0.0, 0.0, 0.0), 1, 16.0, 1.0, 0.1, 3.5, 8);
     Atom a2(Vector(1.0, 0.0, 0.0), 2, 1.0, -1.0, 0.2, 2.5, 1);
 
-    SECTION("Debería calcular el potencial de Coulomb correctamente") {
+    SECTION("Should compute Coulomb potential correctly") {
         Real potential = a1.getCoulombPotential(a2, box);
         Real expected = (1389.35458 * 1.0 * -1.0) / 1.0; // K_COULOMB * q1 * q2 / distance
         REQUIRE(potential == Approx(expected));
     }
 
-    SECTION("Debería manejar carga cero") {
+    SECTION("Should handle zero charge") {
         a1.setCharge(0.0);
         Real potential = a1.getCoulombPotential(a2, box);
         REQUIRE(potential == Approx(0.0));
     }
 
-    SECTION("Debería manejar distancia cero con PBC") {
+    SECTION("Should handle zero distance with PBC") {
         Atom a2_same(Vector(10.0, 0.0, 0.0), 2, 1.0, -1.0, 0.2, 2.5, 1);
         Real potential = a1.getCoulombPotential(a2_same, box);
         REQUIRE((std::isinf(potential) || std::isnan(potential))); // Distance 0 after PBC
     }
 
-    SECTION("Debería manejar cargas extremas") {
+    SECTION("Should handle extreme charges") {
         a1.setCharge(std::numeric_limits<float>::max());
         a2.setCharge(-std::numeric_limits<float>::max());
         Real potential = a1.getCoulombPotential(a2, box);
         REQUIRE((std::isinf(potential) || std::isnan(potential)));
     }
 
-    SECTION("Debería manejar caja con dimensiones negativas") {
+    SECTION("Should handle box with negative dimensions") {
         Vector box_neg(-10.0, -10.0, -10.0);
         Real potential = a1.getCoulombPotential(a2, box_neg);
         REQUIRE(potential == Approx((1389.35458 * 1.0 * -1.0) / 1.0)); // Falls back to non-PBC
     }
 }
 
-TEST_CASE("Atom - Formato PDB", "[Atom]") {
+TEST_CASE("Atom - PDB Format", "[Atom]") {
     Atom a(Vector(1.234, 2.345, 3.456), 42, 16.0, -0.5, 0.1, 3.5, 8);
 
-    SECTION("Debería generar formato PDB con valores por defecto") {
+    SECTION("Should generate PDB format with default values") {
         std::string pdb = a.toPDBFormat();
         REQUIRE(pdb.find("ATOM      0 UNK  UNK     0    ") != std::string::npos);
         REQUIRE(pdb.find("   1.234   2.345   3.456  1.00  0.00           O ") != std::string::npos);
     }
 
-    SECTION("Debería generar formato PDB con parámetros personalizados") {
+    SECTION("Should generate PDB format with custom parameters") {
         std::string pdb = a.toPDBFormat(1, 100, "O1", "WAT", "A", 0.95, 1.23);
         REQUIRE(pdb.find("ATOM      1 O1   WAT A 100    ") != std::string::npos);
         REQUIRE(pdb.find("   1.234   2.345   3.456  0.95  1.23           O ") != std::string::npos);
     }
 
-    SECTION("Debería manejar coordenadas negativas en formato PDB") {
+    SECTION("Should handle negative coordinates in PDB format") {
         Atom a_neg(Vector(-1.234, -2.345, -3.456), 42, 16.0, -0.5, 0.1, 3.5, 8);
         std::string pdb = a_neg.toPDBFormat();
         REQUIRE(pdb.find("  -1.234  -2.345  -3.456  1.00  0.00           O ") != std::string::npos);
     }
 
-    SECTION("Debería manejar Z=1 en formato PDB") {
+    SECTION("Should handle Z=1 in PDB format") {
         Atom a_h(Vector(1.234, 2.345, 3.456), 42, 1.0, 0.417, 0.05, 2.5, 1);
         std::string pdb = a_h.toPDBFormat();
         REQUIRE(pdb.find("           H ") != std::string::npos);
     }
 
-    SECTION("Debería manejar valores extremos en formato PDB") {
+    SECTION("Should handle extreme values in PDB format") {
         Atom a_ext(Vector(std::numeric_limits<float>::max(), 0.0, 0.0), 42, 16.0, -0.5, 0.1, 3.5, 8);
         std::string pdb = a_ext.toPDBFormat();
         REQUIRE(pdb.find(" O ") != std::string::npos); // Ensure element symbol persists
     }
 }
 
-TEST_CASE("Molecule - Constructor y getters/setters", "[Molecule]") {
-    SECTION("Debería inicializar con valores por defecto") {
+TEST_CASE("Molecule - Constructor and getters/setters", "[Molecule]") {
+    SECTION("Should initialize with default values") {
         Molecule m;
         REQUIRE(m.getNAtoms() == 0);
         REQUIRE(m.getAtoms() == nullptr);
@@ -288,7 +288,7 @@ TEST_CASE("Molecule - Constructor y getters/setters", "[Molecule]") {
         REQUIRE(m.isClassified() == false);
     }
 
-    SECTION("Debería inicializar con átomos") {
+    SECTION("Should initialize with atoms") {
         Atom* atoms = new Atom[2];
         atoms[0] = Atom(Vector(0.0, 0.0, 0.0), 1, 16.0, -0.417*2, 0.1, 3.5, 8);
         atoms[1] = Atom(Vector(1.0, 0.0, 0.0), 2, 1.0, 0.417, 0.05, 2.5, 1);
@@ -301,7 +301,7 @@ TEST_CASE("Molecule - Constructor y getters/setters", "[Molecule]") {
         REQUIRE(m.isWater() == false);
     }
 
-    SECTION("Debería copiar correctamente") {
+    SECTION("Should copy correctly") {
         Atom* atoms = new Atom[1];
         atoms[0] = Atom(Vector(0.0, 0.0, 0.0), 1, 16.0, -0.834, 0.1, 3.5, 8);
         Molecule m1(42, atoms, 1);
@@ -312,7 +312,7 @@ TEST_CASE("Molecule - Constructor y getters/setters", "[Molecule]") {
         REQUIRE(m2.getAtoms()[0].getZ() == 8);
     }
 
-    SECTION("Debería asignar correctamente") {
+    SECTION("Should assign correctly") {
         Atom* atoms = new Atom[1];
         atoms[0] = Atom(Vector(0.0, 0.0, 0.0), 1, 16.0, -0.834, 0.1, 3.5, 8);
         Molecule m1(42, atoms, 1);
@@ -324,7 +324,7 @@ TEST_CASE("Molecule - Constructor y getters/setters", "[Molecule]") {
         REQUIRE(m2.getAtoms()[0].getZ() == 8);
     }
 
-    SECTION("Debería manejar clasificación") {
+    SECTION("Should handle classification") {
         Molecule m;
         m.setClassification(100);
         REQUIRE(m.getClassification() == 100);
@@ -334,7 +334,7 @@ TEST_CASE("Molecule - Constructor y getters/setters", "[Molecule]") {
         REQUIRE(m.isClassified() == false);
     }
 
-    SECTION("Debería manejar átomo único") {
+    SECTION("Should handle single atom") {
         Atom* atoms = new Atom[1];
         atoms[0] = Atom(Vector(1.0, 2.0, 3.0), 1, 16.0, -0.834, 0.1, 3.5, 8);
         Molecule m(42, atoms, 1);
@@ -344,7 +344,7 @@ TEST_CASE("Molecule - Constructor y getters/setters", "[Molecule]") {
         REQUIRE(m.getPosition() == Vector(1.0, 2.0, 3.0));
     }
 
-    SECTION("Debería manejar asignación a sí misma") {
+    SECTION("Should handle self-assignment") {
         Atom* atoms = new Atom[1];
         atoms[0] = Atom(Vector(0.0, 0.0, 0.0), 1, 16.0, -0.834, 0.1, 3.5, 8);
         Molecule m(42, atoms, 1);
@@ -354,20 +354,10 @@ TEST_CASE("Molecule - Constructor y getters/setters", "[Molecule]") {
         REQUIRE(m.getMass() == Approx(16.0));
         REQUIRE(m.getAtoms()[0].getZ() == 8);
     }
-
-//    SECTION("Debería calcular centro de masa con PBC") {
-//        Atom* atoms = new Atom[2];
-//        atoms[0] = Atom(Vector(9.0, 0.0, 0.0), 1, 16.0, -0.417*2, 0.1, 3.5, 8);
-//        atoms[1] = Atom(Vector(1.0, 0.0, 0.0), 2, 1.0, 0.417, 0.05, 2.5, 1);
-//        Vector box(10.0, 10.0, 10.0);
-//        Molecule m(42, atoms, 2);
-//        Vector pos = m.getPosition();
-//        REQUIRE(pos.x == Approx(0.5).margin(Vector::EPSILON));
-//    }
 }
 
-TEST_CASE("Molecule - Centro de masa", "[Molecule]") {
-    SECTION("Debería calcular el centro de masa correctamente") {
+TEST_CASE("Molecule - Center of Mass", "[Molecule]") {
+    SECTION("Should compute center of mass correctly") {
         Atom atoms[] = {Atom(Vector(0.0, 0.0, 0.0), 1, 16.0, 0.0, 0.1, 3.5, 8),
                         Atom(Vector(2.0, 4.0, 6.0), 2, 1.0, 0.0, 0.05, 2.5, 1)};
         Vector com = Molecule::centerOfMass(atoms, 2);
@@ -376,7 +366,7 @@ TEST_CASE("Molecule - Centro de masa", "[Molecule]") {
         REQUIRE(com.z == Approx(3.0));
     }
 
-    SECTION("Debería calcular centro de masa con un átomo") {
+    SECTION("Should compute center of mass with a single atom") {
         Atom atoms[] = {Atom(Vector(1.0, 2.0, 3.0), 1, 16.0, 0.0, 0.1, 3.5, 8)};
         Vector com = Molecule::centerOfMass(atoms, 1);
         REQUIRE(com.x == Approx(1.0));
@@ -384,24 +374,16 @@ TEST_CASE("Molecule - Centro de masa", "[Molecule]") {
         REQUIRE(com.z == Approx(3.0));
     }
 
-    SECTION("Debería manejar centro de masa con masa cero") {
+    SECTION("Should handle center of mass with zero mass atom") {
         Atom atoms[] = {Atom(Vector(1.0, 2.0, 3.0), 1, 0.0, 0.0, 0.1, 3.5, 8)};
         Vector com = Molecule::centerOfMass(atoms, 1);
         REQUIRE(com.x == Approx(1.0));
         REQUIRE(com.y == Approx(2.0));
         REQUIRE(com.z == Approx(3.0));
     }
-
-//    SECTION("Debería manejar centro de masa con PBC") {
-//        Atom atoms[] = {Atom(Vector(9.0, 0.0, 0.0), 1, 16.0, 0.0, 0.1, 3.5, 8),
-//                        Atom(Vector(1.0, 0.0, 0.0), 2, 1.0, 0.0, 0.05, 2.5, 1)};
-//        Vector box(10.0, 10.0, 10.0);
-//        Vector com = Molecule::centerOfMass(atoms, 2);
-//        REQUIRE(com.x == Approx(0.5).margin(Vector::EPSILON));
-//    }
 }
 
-TEST_CASE("Molecule - Átomos cercanos", "[Molecule]") {
+TEST_CASE("Molecule - Nearby atoms", "[Molecule]") {
     Atom* atoms = new Atom[3];
     atoms[0] = Atom(Vector(0.0, 0.0, 0.0), 1, 16.0, -0.834, 0.1, 3.5, 8);
     atoms[1] = Atom(Vector(1.0, 0.0, 0.0), 2, 1.0, 0.417, 0.05, 2.5, 1);
@@ -409,18 +391,18 @@ TEST_CASE("Molecule - Átomos cercanos", "[Molecule]") {
     Molecule m(42, atoms, 3);
     Vector box(100.0, 100.0, 100.0);
 
-    SECTION("Debería encontrar átomos cercanos") {
+    SECTION("Should find nearby atoms") {
         auto nearby = m.findNearbyAtoms(1, 2.0, box);
         REQUIRE(nearby.size() == 1);
         REQUIRE(nearby[0] == 2);
     }
 
-    SECTION("Debería devolver vector vacío si no hay átomos cercanos") {
+    SECTION("Should return empty vector if no nearby atoms") {
         auto nearby = m.findNearbyAtoms(1, 0.5, box);
         REQUIRE(nearby.empty());
     }
 
-    SECTION("Debería encontrar átomos cercanos con PBC") {
+    SECTION("Should find nearby atoms with PBC") {
         Vector box_small(5.0, 5.0, 5.0);
         auto nearby = m.findNearbyAtoms(1, 12.0, box_small);
         REQUIRE(nearby.size() == 2); // Atom 2 (1.0 away), Atom 3 (0.0 away after PBC)
@@ -428,20 +410,19 @@ TEST_CASE("Molecule - Átomos cercanos", "[Molecule]") {
         REQUIRE(nearby[1] == 3);
     }
 
-    SECTION("Debería manejar distancia cero") {
+    SECTION("Should handle zero distance") {
         auto nearby = m.findNearbyAtoms(1, 0.0, box);
         REQUIRE(nearby.empty());
     }
 }
-
-TEST_CASE("Water - Constructor y getters", "[Water]") {
+TEST_CASE("Water - Constructor and getters", "[Water]") {
     Atom* atoms = new Atom[3];
     atoms[0] = Atom(Vector(0.0, 0.0, 0.0), 1, 16.0, -0.834, 0.1, 3.5, 8);
     atoms[1] = Atom(Vector(1.0, 0.0, 0.0), 2, 1.0, 0.417, 0.05, 2.5, 1);
     atoms[2] = Atom(Vector(10.0, 0.0, 0.0), 3, 1.0, 0.417, 0.05, 2.5, 1);
     Water w(42, atoms, 3);
 
-    SECTION("Debería inicializar correctamente") {
+    SECTION("Should initialize correctly") {
         REQUIRE(w.getNAtoms() == 3);
         REQUIRE(w.getID() == 42);
         REQUIRE(w.isWater() == true);
@@ -450,7 +431,7 @@ TEST_CASE("Water - Constructor y getters", "[Water]") {
         REQUIRE(w.getHydrogen_2().getZ() == 1);
     }
 
-    SECTION("Debería copiar correctamente") {
+    SECTION("Should copy correctly") {
         Water w2(w);
         REQUIRE(w2.getNAtoms() == 3);
         REQUIRE(w2.getID() == 42);
@@ -458,7 +439,7 @@ TEST_CASE("Water - Constructor y getters", "[Water]") {
         REQUIRE(w2.getOxygen().getZ() == 8);
     }
 
-    SECTION("Debería asignar correctamente") {
+    SECTION("Should assign correctly") {
         Water w2;
         w2 = w;
         REQUIRE(w2.getNAtoms() == 3);
@@ -468,7 +449,7 @@ TEST_CASE("Water - Constructor y getters", "[Water]") {
     }
 }
 
-TEST_CASE("Water - Enlace de hidrógeno", "[Water]") {
+TEST_CASE("Water - Hydrogen bond", "[Water]") {
     Atom* atoms1 = new Atom[3];
     atoms1[0] = Atom(Vector(38.69, 38.95, 20.04), 1, 16.0, -0.834, 0.1, 3.5, 8);
     atoms1[1] = Atom(Vector(39.54, 39.38, 20.05), 2, 1.0, 0.417, 0.05, 2.5, 1);
@@ -483,11 +464,11 @@ TEST_CASE("Water - Enlace de hidrógeno", "[Water]") {
     Water w2(2, atoms2, 3);
     Vector box(100.0, 100.0, 100.0);
 
-    SECTION("Debería detectar enlace de hidrógeno") {
+    SECTION("Should detect hydrogen bond") {
         REQUIRE(w1.isHB(w2, box, 3.5, 30.0) == true); // Mock getAngle returns 0.1 rad (~5.73 deg)
     }
 
-    SECTION("Debería no detectar enlace de hidrógeno si la distancia es demasiado grande") {
+    SECTION("Should not detect hydrogen bond if distance is too large") {
         Atom* atoms3 = new Atom[3];
         atoms3[0] = Atom(Vector(48.01, 40.49, 19.97), 4, 16.0, -0.834, 0.1, 3.5, 8);
         atoms3[1] = Atom(Vector(48.29, 40.68, 19.08), 5, 1.0, 0.417, 0.05, 2.5, 1);
@@ -496,7 +477,7 @@ TEST_CASE("Water - Enlace de hidrógeno", "[Water]") {
         REQUIRE(w1.isHB(w3, box, 3.5, 30.0) == false); // Distance > 3.5
     }
 
-    SECTION("Debería no detectar enlace de hidrógeno si el ángulo es demasiado grande") {
+    SECTION("Should not detect hydrogen bond if angle is too large") {
         Atom* atoms4 = new Atom[3];
         atoms4[0] = Atom(Vector(41.01, 40.49, 19.97), 4, 16.0, -0.834, 0.1, 3.5, 8);
         atoms4[1] = Atom(Vector(41.29, 40.68, 19.08), 5, 1.0, 0.417, 0.05, 2.5, 1);
@@ -505,7 +486,7 @@ TEST_CASE("Water - Enlace de hidrógeno", "[Water]") {
         REQUIRE(w1.isHB(w4, box, 3.5, 0.1) == false); // Angle > 0.1 rad
     }
 
-    SECTION("Debería manejar distancia cero en enlace de hidrógeno") {
+    SECTION("Should handle zero distance in hydrogen bond") {
         Atom* atoms5 = new Atom[3];
         atoms5[0] = Atom(Vector(38.69, 38.95, 20.04), 4, 16.0, -0.834, 0.1, 3.5, 8);
         atoms5[1] = Atom(Vector(39.54, 39.38, 20.05), 5, 1.0, 0.417, 0.05, 2.5, 1);
@@ -515,14 +496,14 @@ TEST_CASE("Water - Enlace de hidrógeno", "[Water]") {
     }
 }
 
-TEST_CASE("Water - Potencial Lennard-Jones y total", "[Water]") {
+TEST_CASE("Water - Lennard-Jones and total potential", "[Water]") {
     Atom* atoms = new Atom[2];
     atoms[0] = Atom(Vector(0.0, 0.0, 0.0), 1, 16.0, -0.834, 0.1, 3.5, 8);
     atoms[1] = Atom(Vector(0.757, 0.586, 0.0), 2, 1.0, 0.417, 0.05, 2.5, 1);
     Water w(1, atoms, 2);
     Vector box(10.0, 10.0, 10.0);
 
-    SECTION("Debería calcular potencial Lennard-Jones") {
+    SECTION("Should compute Lennard-Jones potential") {
         Atom a(Vector(1.0, 0.0, 0.0), 3, 1.0, 0.417, 0.05, 2.5, 1);
         Real s = (3.5 + 2.5) / 2.0; // Lorentz-Berthelot
         Real e = std::sqrt(0.1 * 0.05);
@@ -531,7 +512,7 @@ TEST_CASE("Water - Potencial Lennard-Jones y total", "[Water]") {
         REQUIRE(w.getLJPotential(a, s, e, box) == Approx(expected));
     }
 
-    SECTION("Debería calcular potencial total con otra molécula de agua") {
+    SECTION("Should compute total potential with another water molecule") {
         Atom* atoms2 = new Atom[2];
         atoms2[0] = Atom(Vector(1.0, 0.0, 0.0), 3, 16.0, -0.834, 0.1, 3.5, 8);
         atoms2[1] = Atom(Vector(1.757, 0.586, 0.0), 4, 1.0, 0.417, 0.05, 2.5, 1);
@@ -547,7 +528,7 @@ TEST_CASE("Water - Potencial Lennard-Jones y total", "[Water]") {
         REQUIRE(w.potentialWith(w2, box) == Approx(lj + coulomb));
     }
 
-    SECTION("Debería calcular potencial total con átomo") {
+    SECTION("Should compute total potential with an atom") {
         Atom a(Vector(1.0, 0.0, 0.0), 3, 1.0, 0.417, 0.05, 2.5, 1);
         Real s = (3.5 + 2.5) / 2.0;
         Real e = std::sqrt(0.1 * 0.05);
@@ -559,7 +540,7 @@ TEST_CASE("Water - Potencial Lennard-Jones y total", "[Water]") {
         REQUIRE(w.potentialWith(a, box) == Approx(lj + coulomb));
     }
 
-    SECTION("Debería manejar potencial Lennard-Jones con sigma cero") {
+    SECTION("Should handle Lennard-Jones potential with zero sigma") {
         Atom a(Vector(1.0, 0.0, 0.0), 3, 1.0, 0.417, 0.0, 0.0, 1);
         Real s = (3.5 + 0.0) / 2.0;
         Real e = std::sqrt(0.1 * 0.0);
@@ -567,7 +548,7 @@ TEST_CASE("Water - Potencial Lennard-Jones y total", "[Water]") {
         REQUIRE(lj == Approx(0.0));
     }
 
-    SECTION("Debería manejar potencial Lennard-Jones con distancia cero") {
+    SECTION("Should handle Lennard-Jones potential with zero distance") {
         Atom a(Vector(0.0, 0.0, 0.0), 3, 1.0, 0.417, 0.05, 2.5, 1);
         Real s = (3.5 + 2.5) / 2.0;
         Real e = std::sqrt(0.1 * 0.05);
@@ -575,7 +556,7 @@ TEST_CASE("Water - Potencial Lennard-Jones y total", "[Water]") {
         REQUIRE((std::isinf(lj) || std::isnan(lj)));
     }
 
-    SECTION("Debería manejar potencial total con molécula idéntica") {
+    SECTION("Should handle total potential with identical molecule") {
         Water w2(w);
         Real lj = 4 * 0.1 * (std::pow(3.5 / 0.0, 12) - std::pow(3.5 / 0.0, 6));
         Real coulomb = 0.0;
@@ -585,7 +566,7 @@ TEST_CASE("Water - Potencial Lennard-Jones y total", "[Water]") {
         REQUIRE((std::isinf(w.potentialWith(w2, box)) || std::isnan(w.potentialWith(w2, box))));
     }
 
-    SECTION("Debería manejar potencial total con PBC") {
+    SECTION("Should handle total potential with PBC") {
         Atom* atoms2 = new Atom[2];
         atoms2[0] = Atom(Vector(11.0, 0.0, 0.0), 3, 16.0, -0.834, 0.1, 3.5, 8);
         atoms2[1] = Atom(Vector(11.757, 0.586, 0.0), 4, 1.0, 0.417, 0.05, 2.5, 1);
