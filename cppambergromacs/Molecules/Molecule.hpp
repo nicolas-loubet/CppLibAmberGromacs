@@ -110,21 +110,21 @@ class Molecule : public Particle{
 		bool isClassified() const { return classif != NOT_CLASSIFIED; }
 		void setIsWater(bool is_water) { this->is_water= is_water; }
 
-        /**
-         * This function find the nearest atoms to the parameter, being par of the same molecule
-         * @param ID_CENTER ID of the atom center to search
-         * @param D_MAX_NEI Real that indicate maximum bond distanece to search
+		/**
+		 * This function find the nearest atoms to the parameter, being par of the same molecule
+		 * @param ID_CENTER ID of the atom center to search
+		 * @param D_MAX_NEI Real that indicate maximum bond distanece to search
 		 * @param bounds Vector with the size of the box for PBC
-         * @return A vector<int> with the IDs of the atoms
-         */
-        inline std::vector<int> findNearbyAtoms(const int ID_CENTER, const Real D_MAX_NEI, const Vector& bounds) const {
+		 * @return A vector<int> with the IDs of the atoms
+		 */
+		inline std::vector<int> findNearbyAtoms(const int ID_CENTER, const Real D_MAX_NEI, const Vector& bounds) const {
 			std::vector<int> i_nearby;
 			int counter= 0;
 
 			for(int i= 1; i <= n_atoms; i++) {
 				if(i == ID_CENTER) continue;
 				if(atoms[ID_CENTER-1].distanceTo(atoms[i-1], bounds) <= D_MAX_NEI)
-                    i_nearby.push_back(i);
+					i_nearby.push_back(i);
 			}
 			return i_nearby;
 		}

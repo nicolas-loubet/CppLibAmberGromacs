@@ -4,11 +4,11 @@
 #include <string>
 
 #ifdef USE_DOUBLE_PRECISION
-    using Real= double;
-    double RealParser(const std::string& s) { return std::stod(s); }
+	using Real= double;
+	double RealParser(const std::string& s) { return std::stod(s); }
 #else
-    using Real= float;
-    float RealParser(const std::string& s) { return std::stof(s); }
+	using Real= float;
+	float RealParser(const std::string& s) { return std::stof(s); }
 #endif
 
 #include "ReaderFactory.hpp"

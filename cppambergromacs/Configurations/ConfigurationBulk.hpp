@@ -29,7 +29,7 @@ class ConfigurationBulk : public Configuration {
 
 		// Helper function to process interactions with an ion
 		void processIonInteraction(Water& molecule, const Molecule& ion, vector<Vector>& sites, const Vector& bounds, Real R_CUT_OFF, Real V_CUT_OFF,
-			                       vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances, vector<vector<int>>& ww_indices, vector<Real>& sum_per_site) {
+								   vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances, vector<vector<int>>& ww_indices, vector<Real>& sum_per_site) {
 			auto [closest_idx, closest_dist]= findClosestSite(sites, ion.getAtom(1).getPosition(), bounds);
 			if(closest_dist > R_CUT_OFF) return;
 			Real pot= molecule.potentialWith(ion.getAtom(1), bounds);
@@ -43,7 +43,7 @@ class ConfigurationBulk : public Configuration {
 
 		// Helper function to process interactions with another water molecule
 		void processWaterInteraction(Water& molecule, Water& other, vector<Vector>& sites, const Vector& bounds, Real R_CUT_OFF, Real V_CUT_OFF,
-			                         vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances, vector<vector<int>>& ww_indices, vector<Real>& sum_per_site) {
+									 vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances, vector<vector<int>>& ww_indices, vector<Real>& sum_per_site) {
 			Real d_ww= molecule.distanceTo(other, bounds);
 			if(d_ww > R_CUT_OFF + 1.1) return;
 
@@ -60,7 +60,7 @@ class ConfigurationBulk : public Configuration {
 
 		// Helper function to process interactions with a non-water molecule
 		void processSoluteInteraction(Water& molecule, const Molecule& solute, vector<Vector>& sites, const Vector& bounds, Real R_CUT_OFF, Real V_CUT_OFF,
-			                          vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances, vector<vector<int>>& ww_indices, vector<Real>& sum_per_site) {
+									  vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances, vector<vector<int>>& ww_indices, vector<Real>& sum_per_site) {
 			vector<Real> total_potential(4, 0.0);
 			vector<Real> min_distance(4, numeric_limits<Real>::infinity());
 
@@ -107,8 +107,8 @@ class ConfigurationBulk : public Configuration {
 		static constexpr int CLASSIFICATION_TA_MOLECULE= 2;
 		static constexpr int CLASSIFICATION_TB_MOLECULE= 3;
 
-        ConfigurationBulk(CoordinateReader* coord_reader, const string& filename, TopolInfo& topol_info) :
-            Configuration(coord_reader, filename, topol_info) {}
+		ConfigurationBulk(CoordinateReader* coord_reader, const string& filename, TopolInfo& topol_info) :
+			Configuration(coord_reader, filename, topol_info) {}
 
 		/**
 		 * It indicates if the molecule is a D_MOLECULE (and also assigns this value to the classification so you don't have to use this function two times)
@@ -375,17 +375,17 @@ class ConfigurationBulk : public Configuration {
 			}
 		};
 		/**
-         * It indicates if the molecule is DJ according to per-site counts:
-         * DJ if there exists at least one site with 0 neighbours (D3-like)
-         * and at least one site with >=2 neighbours (D5-like),
-         * where neighbours are waters whose potential with the center is <= V_CUT_OFF.
-         *
-         * @param ID int The ID of the Molecule to check
-         * @param R_CUT_OFF Cutoff radius to consider neighbours (default 5)
-         * @param V_CUT_OFF Potential threshold to count neighbours (default -12)
-         * @return DJInfo: is_DJ, sum_per_site, bifurcated_individual_potentials, bifurcated_indivisual_distances, bifurcated_site_potential, lacking_site_potential, lacking_site_position, bifurcated_site_position
-         */
-        DJInfo isDJ(const int ID, const Real R_CUT_OFF = 5.0, const Real V_CUT_OFF = -12.0) {
+		 * It indicates if the molecule is DJ according to per-site counts:
+		 * DJ if there exists at least one site with 0 neighbours (D3-like)
+		 * and at least one site with >=2 neighbours (D5-like),
+		 * where neighbours are waters whose potential with the center is <= V_CUT_OFF.
+		 *
+		 * @param ID int The ID of the Molecule to check
+		 * @param R_CUT_OFF Cutoff radius to consider neighbours (default 5)
+		 * @param V_CUT_OFF Potential threshold to count neighbours (default -12)
+		 * @return DJInfo: is_DJ, sum_per_site, bifurcated_individual_potentials, bifurcated_indivisual_distances, bifurcated_site_potential, lacking_site_potential, lacking_site_position, bifurcated_site_position
+		 */
+		DJInfo isDJ(const int ID, const Real R_CUT_OFF = 5.0, const Real V_CUT_OFF = -12.0) {
 			DJInfo output;
 			if(!getMolec(ID).isWater()) throw invalid_argument("The molecule is not a water molecule.");
 
