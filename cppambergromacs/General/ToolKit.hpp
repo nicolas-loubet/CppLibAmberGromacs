@@ -12,6 +12,9 @@
 #include <thread>
 #include <vector>
 #include <algorithm>
+#include <mutex>
+
+static std::mutex mtx;
 
 namespace ToolKit {
 	constexpr Real k_B= -1.380649*6.02214076*0.001; // Boltzmann constant in kJ/(mol*K)
@@ -145,19 +148,21 @@ namespace ToolKit {
 	 * @param total_pos The total number of positions
 	 * @param symbol The symbol to print
 	 */
-	void printPercentageParallel(int i, int N, int pos, int total_pos, const char symbol= '=') {
-		const int bar_width= CONSOLE_WIDTH/total_pos - 1;
+	void printPercentageParallel(int i, int N, int pos, int total_pos, const char symbol = '=') {
+		const int bar_width= CONSOLE_WIDTH/total_pos -1;
 
 		static std::vector<std::string> bars(total_pos, std::string(bar_width, ' '));
 		int filled= (i * (bar_width-2)) / N;
 
-		bars[pos]= "[" + std::string(filled, symbol) + std::string(bar_width-2 - filled,' ') + "]";
-		
+		bars[pos]= "[" + std::string(filled, symbol) + std::string(bar_width-2 - filled, ' ') + "]";
+
+		std::lock_guard<std::mutex> lock(mtx);
 		std::cout << "\r";
-		for (int p = 0; p < total_pos; ++p)
+		for(int p= 0; p < total_pos; p++)
 			std::cout << bars[p];
 		std::cout.flush();
 	}
+
 
 }
 
