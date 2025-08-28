@@ -1038,15 +1038,12 @@ TEST_CASE("CSVWriter", "[CSVWriter]") {
 			CSVWriter csv(fname);
 			csv.writeHeader({"A", "B", "C", "D"});
 
-			// Probar con std::vector<float>
 			std::vector<float> row_float = {1.5f, 2.0f, 3.1416f, 4.0f};
 			csv.writeRow(row_float);
 
-			// Probar con std::vector<int>
 			std::vector<int> row_int = {10, 20, 30, 40};
 			csv.writeRow(row_int);
 
-			// Probar con std::vector<std::string>
 			std::vector<std::string> row_string = {"uno", "dos", "tres", "cuatro"};
 			csv.writeRow(row_string);
 		}
@@ -1065,8 +1062,8 @@ TEST_CASE("CSVWriter", "[CSVWriter]") {
 		int N_BINS = 3;
 		Real MIN_BINS = 0.0, MAX_BINS = 3.0;
 
-		Real* col1 = new Real[N_BINS]{1.0, 1.0, 2.0}; // sum = 4
-		Real* col2 = new Real[N_BINS]{0.0, 2.0, 2.0}; // sum = 4
+		Real* col1= new Real[N_BINS]{1.0, 1.0, 2.0};
+		Real* col2= new Real[N_BINS]{0.0, 2.0, 2.0};
 
 		{
 			CSVWriter csv(fname);
@@ -1093,7 +1090,7 @@ TEST_CASE("CSVWriter", "[CSVWriter]") {
 		Real* col1 = new Real[N_BINS]{1.0, 3.0};
 		Real* col2 = new Real[N_BINS]{2.0, 2.0};
 
-		vector<Real> totals = {10.0, 5.0}; // normalizadores externos
+		vector<Real> totals= {10.0, 5.0};
 
 		{
 			CSVWriter csv(fname);
@@ -1137,5 +1134,78 @@ TEST_CASE("CSVWriter", "[CSVWriter]") {
 		for(int i=0; i<nRows; i++) delete[] table[i];
 		delete[] table;
 		REQUIRE(std::remove(fname.c_str()) == 0);
+	}
+
+	SECTION("appendColumn") {
+		string fname = "test_output_append.csv";
+		{
+			CSVWriter csv(fname);
+			csv.writeHeader({"ID","Name"});
+			csv.writeRow(1,"Juan");
+			csv.writeRow(2,"Ana");
+			csv.writeRow(3,"Pedro");
+		}
+
+		{
+			CSVWriter csv(fname, false); // no backup
+			csv.appendColumn(std::vector<std::string>{"M","F","M"}, "Gender", 3);
+		}
+
+		string expected =
+			"ID,Name,Gender\n"
+			"1,Juan,M\n"
+			"2,Ana,F\n"
+			"3,Pedro,M\n";
+		REQUIRE(readFile(fname) == expected);
+		REQUIRE(std::remove(fname.c_str()) == 0);
+	}
+
+	SECTION("appendColumns") {
+		string fname = "test_output_append_multi.csv";
+		{
+			CSVWriter csv(fname);
+			csv.writeHeader({"ID","City"});
+			csv.writeRow(1,"Bahía Blanca");
+			csv.writeRow(2,"Buenos Aires");
+		}
+
+		{
+			CSVWriter csv(fname, false);
+			vector<vector<string>> cols = {
+				{"Argentina","Argentina"},
+				{"M","F"}
+			};
+			vector<string> titles = {"Country","Gender"};
+			csv.appendColumns(cols, titles, 2);
+		}
+
+		string expected =
+			"ID,City,Country,Gender\n"
+			"1,Bahía Blanca,Argentina,M\n"
+			"2,Buenos Aires,Argentina,F\n";
+		REQUIRE(readFile(fname) == expected);
+		REQUIRE(std::remove(fname.c_str()) == 0);
+	}
+
+	SECTION("backup file when overwriting") {
+		string fname = "test_output_backup.csv";
+		{
+			CSVWriter csv(fname);
+			csv.writeHeader({"A"});
+			csv.writeRow(1);
+		}
+		REQUIRE(std::filesystem::exists(fname));
+
+		{
+			CSVWriter csv(fname); // should create a backup file fname.1
+			csv.writeHeader({"B"});
+			csv.writeRow(2);
+		}
+
+		REQUIRE(std::filesystem::exists(fname + string(".1")));
+		REQUIRE(readFile(fname) == "B\n2\n");
+
+		REQUIRE(std::remove(fname.c_str()) == 0);
+		REQUIRE(std::remove((fname + string(".1")).c_str()) == 0);
 	}
 }

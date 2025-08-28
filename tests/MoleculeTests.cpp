@@ -249,26 +249,26 @@ TEST_CASE("Atom - PDB Format", "[Atom]") {
 
 	SECTION("Should generate PDB format with default values") {
 		std::string pdb = a.toPDBFormat();
-		REQUIRE(pdb.find("ATOM	  0 UNK  UNK	 0	") != std::string::npos);
-		REQUIRE(pdb.find("   1.234   2.345   3.456  1.00  0.00		   O ") != std::string::npos);
+		REQUIRE(pdb.find("ATOM      0 UNK  UNK     0    ") != std::string::npos);
+		REQUIRE(pdb.find("   1.234   2.345   3.456  1.00  0.00           O ") != std::string::npos);
 	}
 
 	SECTION("Should generate PDB format with custom parameters") {
 		std::string pdb = a.toPDBFormat(1, 100, "O1", "WAT", "A", 0.95, 1.23);
-		REQUIRE(pdb.find("ATOM	  1 O1   WAT A 100	") != std::string::npos);
-		REQUIRE(pdb.find("   1.234   2.345   3.456  0.95  1.23		   O ") != std::string::npos);
+		REQUIRE(pdb.find("ATOM      1 O1   WAT A 100    ") != std::string::npos);
+		REQUIRE(pdb.find("   1.234   2.345   3.456  0.95  1.23           O ") != std::string::npos);
 	}
 
 	SECTION("Should handle negative coordinates in PDB format") {
 		Atom a_neg(Vector(-1.234, -2.345, -3.456), 42, 16.0, -0.5, 0.1, 3.5, 8);
 		std::string pdb = a_neg.toPDBFormat();
-		REQUIRE(pdb.find("  -1.234  -2.345  -3.456  1.00  0.00		   O ") != std::string::npos);
+		REQUIRE(pdb.find("  -1.234  -2.345  -3.456  1.00  0.00           O ") != std::string::npos);
 	}
 
 	SECTION("Should handle Z=1 in PDB format") {
 		Atom a_h(Vector(1.234, 2.345, 3.456), 42, 1.0, 0.417, 0.05, 2.5, 1);
 		std::string pdb = a_h.toPDBFormat();
-		REQUIRE(pdb.find("		   H ") != std::string::npos);
+		REQUIRE(pdb.find("           H ") != std::string::npos);
 	}
 
 	SECTION("Should handle extreme values in PDB format") {

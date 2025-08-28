@@ -11,10 +11,13 @@
 #include <vector>
 #include <fstream>
 #include <numeric>
+#include <iostream>
+#include <filesystem>
 
 class CSVWriter {
-	std::ofstream file;
-	char sep;
+    std::ofstream file;
+	std::string filename;
+    char sep;
 
 	private:
 		// Generic conversion to string
@@ -25,12 +28,33 @@ class CSVWriter {
 			return oss.str();
 		}
 
-	public:
-		CSVWriter(const std::string& filename, char separator= ','): sep(separator) {
-			file.open(filename, std::ios::out);
-			if(!file.is_open()) {
-				throw std::runtime_error("Error: cannot open file " + filename);
+		// Backup existing file
+		void backupExistingFile(const std::string& filename) {
+			if(std::filesystem::exists(filename)) {
+				std::cout << "Warning: File " << filename << " already exists. Backing up existing content." << std::endl;
+				
+				int backupNum= 1;
+				std::string backupFilename;
+				do {
+					backupFilename= filename + "." + std::to_string(backupNum);
+					backupNum++;
+				} while(std::filesystem::exists(backupFilename));
+				
+				try {
+					std::filesystem::rename(filename, backupFilename);
+					std::cout << "Previous content backed up to " << backupFilename << std::endl;
+				} catch(const std::filesystem::filesystem_error& e) {
+					throw std::runtime_error("Error creating backup: " + std::string(e.what()));
+				}
 			}
+		}
+
+	public:
+		CSVWriter(const std::string& filename, bool backup= true, char separator= ','): filename(filename), sep(separator) {
+			if(!backup) return;
+			backupExistingFile(filename);
+			file.open(filename, std::ios::out | std::ios::trunc);
+			if(!file.is_open()) throw std::runtime_error("Error: cannot open file " + filename);
 		}
 
 		~CSVWriter() {
@@ -88,7 +112,7 @@ class CSVWriter {
 		 * @param totals (optional) normalizers by column. If empty, they are calculated by summing bins.
 		 */
 		void writeDistribution(const std::vector<Real*>& bins, int N_BINS, Real MIN_BINS, Real MAX_BINS,
-							const std::vector<std::string>& titles, const std::vector<Real>& totals= {}) {
+							   const std::vector<std::string>& titles, const std::vector<Real>& totals= {}) {
 			if(titles.size() != bins.size()+1) throw std::runtime_error("writeDistribution: titles.size() must be bins.size()+1");
 
 			std::vector<Real> norm(bins.size());
@@ -134,6 +158,84 @@ class CSVWriter {
 					file << sep << table[i][j];
 				file << "\n";
 			}
+		}
+
+		/**
+		 * Appends a single column to the right of an existing CSV file
+		 * @param column vector containing the column values
+		 * @param columnTitle title of the new column
+		 * @param nRows expected number of rows
+		 * @tparam T type of the elements in the column
+		 */
+		template<typename T>
+		void appendColumn(const std::vector<T>& column, const std::string& columnTitle, size_t nRows) {
+			if(column.size() != nRows) throw std::runtime_error("appendColumn: column.size() must equal nRows");
+
+			std::ifstream inFile(filename, std::ios::in);
+			if(!inFile.is_open()) throw std::runtime_error("Error: cannot read file " + filename);
+
+			std::vector<std::string> lines;
+			std::string line;
+			while(std::getline(inFile, line))
+				lines.push_back(line);
+			inFile.close();
+
+			if(lines.empty()) throw std::runtime_error("appendColumn: file is empty (no header to extend)");
+			if(lines.size()-1 != nRows) throw std::runtime_error("appendColumn: nRows does not match number of data rows in file");
+			if(file.is_open()) file.close();
+
+			std::ofstream out(filename, std::ios::out | std::ios::trunc);
+			if(!out.is_open()) throw std::runtime_error("Error: cannot open file " + filename);
+
+			out << lines[0] << sep << columnTitle << "\n";
+			for(size_t i= 1; i < lines.size(); i++)
+				out << lines[i] << sep << toString(column[i-1]) << "\n";
+			out.close();
+		}
+
+		/**
+		 * Appends multiple columns to the right of an existing CSV file
+		 * @param columns vector of vectors containing the column values
+		 * @param columnTitles titles of the new columns
+		 * @param nRows expected number of rows
+		 * @tparam T type of the elements in the columns
+		 */
+		template<typename T>
+		void appendColumns(const std::vector<std::vector<T>>& columns, const std::vector<std::string>& columnTitles, size_t nRows) {
+			if(columns.size() != columnTitles.size()) throw std::runtime_error("appendColumns: columns.size() must equal columnTitles.size()");
+			for(const auto& column: columns) {
+				if(column.size() != nRows) throw std::runtime_error("appendColumns: each column.size() must equal nRows");
+			}
+
+			std::ifstream inFile(filename, std::ios::in);
+			if(!inFile.is_open()) throw std::runtime_error("Error: cannot read file " + filename);
+
+			std::vector<std::string> lines;
+			std::string line;
+			while(std::getline(inFile, line))
+				lines.push_back(line);
+			inFile.close();
+
+			if(lines.empty()) throw std::runtime_error("appendColumns: file is empty (no header to extend)");
+			if(lines.size()-1 != nRows) throw std::runtime_error("appendColumns: nRows does not match number of data rows in file");
+			if(file.is_open()) file.close();
+
+			std::ofstream out(filename, std::ios::out | std::ios::trunc);
+			if(!out.is_open()) throw std::runtime_error("Error: cannot open file " + filename);
+
+			out << lines[0];
+			for(const auto& title: columnTitles)
+				out << sep << title;
+			out << "\n";
+
+			for(size_t i= 1; i < lines.size(); i++) {
+				out << lines[i];
+				for(const auto& column: columns)
+					out << sep << toString(column[i-1]);
+				out << "\n";
+			}
+
+			out.close();
 		}
 
 };
