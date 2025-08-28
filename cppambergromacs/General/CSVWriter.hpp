@@ -240,4 +240,4 @@ class CSVWriter {
 
 };
 
-#endif
+#endif // CSVWRITER_HPP

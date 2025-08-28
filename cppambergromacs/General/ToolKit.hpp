@@ -137,7 +137,7 @@ namespace ToolKit {
 	}
 
 	#ifndef CONSOLE_WIDTH
-		#define CONSOLE_WIDTH 180
+		#define CONSOLE_WIDTH 150
 	#endif
 
 	/**
@@ -149,18 +149,22 @@ namespace ToolKit {
 	 * @param symbol The symbol to print
 	 */
 	void printPercentageParallel(int i, int N, int pos, int total_pos, const char symbol = '=') {
-		const int bar_width= CONSOLE_WIDTH/total_pos -1;
+		#ifdef NOHUP
+			std::cout << "Progress: "+to_string(i)+"/"+to_string(N)+" of process "+to_string(pos+1)+"/"+to_string(total_pos)+"\n" << std::flush();
+		#else
+			const int bar_width= CONSOLE_WIDTH/total_pos -1;
 
-		static std::vector<std::string> bars(total_pos, std::string(bar_width, ' '));
-		int filled= (i * (bar_width-2)) / N;
+			static std::vector<std::string> bars(total_pos, std::string(bar_width, ' '));
+			int filled= (i * (bar_width-2)) / N;
 
-		bars[pos]= "[" + std::string(filled, symbol) + std::string(bar_width-2 - filled, ' ') + "]";
+			bars[pos]= "[" + std::string(filled, symbol) + std::string(bar_width-2 - filled, ' ') + "]";
 
-		std::lock_guard<std::mutex> lock(mtx);
-		std::cout << "\r";
-		for(int p= 0; p < total_pos; p++)
-			std::cout << bars[p];
-		std::cout.flush();
+			std::lock_guard<std::mutex> lock(mtx);
+			std::cout << "\r";
+			for(int p= 0; p < total_pos; p++)
+				std::cout << bars[p];
+			std::cout.flush();
+		#endif
 	}
 
 
