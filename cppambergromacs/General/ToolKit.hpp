@@ -150,7 +150,7 @@ namespace ToolKit {
 	 */
 	void printPercentageParallel(int i, int N, int pos, int total_pos, const char symbol = '=') {
 		#ifdef NOHUP
-			std::cout << "Progress: "+to_string(i)+"/"+to_string(N)+" of process "+to_string(pos+1)+"/"+to_string(total_pos)+"\n" << std::flush();
+			std::cout << "Progress: "+std::to_string(i)+"/"+std::to_string(N)+" of process "+std::to_string(pos+1)+"/"+std::to_string(total_pos)+"\n" << std::flush;
 		#else
 			const int bar_width= CONSOLE_WIDTH/total_pos -1;
 
