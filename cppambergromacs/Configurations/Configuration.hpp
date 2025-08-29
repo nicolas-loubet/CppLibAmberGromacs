@@ -231,8 +231,8 @@ class Configuration {
 		/**
 		 * Finds the water molecules nearby the specified one in terms of potential energy
 		 * @param m *Water that is the center of the search
-		 * @param pots *Real To return the potential
-		 * @param identificators *ToolKit::ArrInt (use &) To return the ids of the molecules for each potential
+		 * @param pots vector<Real> To return the potential
+		 * @param identificators vector<int> To return the ids of the molecules for each potential
 		 * @param potential_matrix **Real where to register the potentials to avoid two times search
 		 */
 		void getNeighboursByPotential(Water* m, vector<Real>& pots, vector<int>& identificators, Real** potential_matrix) {
@@ -257,12 +257,13 @@ class Configuration {
 		/**
 		 * It returns the interactions per site of the molecule specified by its ID
 		 * @param ID The ID of the molecule
+		 * @param R_CUT_OFF The cutoff radius, default is 5.
 		 * @param potential_matrix The matrix with the potential values, default is nullptr
 		 * @param neighbours The neighbours of the molecule, default is nullptr
-		 * @param R_CUT_OFF The cutoff radius, default is 5.
+		 * @param labels Identification of the sorted list, default is nullptr. If you need it, declare it ass "new float[4]", result would be 0-3
 		 * @return The interactions per site, sorted in descending order
 		 */
-		vector<Real> getInteractionsPerSite(const int ID, const Real R_CUT_OFF= 5.0, Real** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr) {
+		vector<Real> getInteractionsPerSite(const int ID, const Real R_CUT_OFF= 5.0, Real** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr, int* labels= nullptr) {
 			if(!getMolec(ID).isWater()) throw invalid_argument("The molecule is not a water molecule.");
 			Water& molecule= *static_cast<Water*>(molecs[ID-1]);
 			Vector o= molecule.getOxygen().getPosition();
@@ -293,18 +294,24 @@ class Configuration {
 				}
 			}
 
-			Sorter::sort(sum_per_site, Sorter::Order::Ascending);
+			if(labels == nullptr) {
+				Sorter::sort(sum_per_site, Sorter::Order::Ascending);
+			} else {
+				vector<int> vector_labels= {0,1,2,3};
+				Sorter::cosort(sum_per_site, vector_labels, Sorter::Order::Ascending);
+				for(int i= 0; i < 4; i++) labels[i]= vector_labels[i];
+			}
 			return sum_per_site;
 		}
 
 		/**
 		 * It returns the interactions per site of the molecule specified by its ID, with a flag to know if there is a water-water interaction in each site
 		 * @param ID The ID of the molecule
+		 * @param flag_ww A flag to know if there is a water-water interaction
+		 * @param V_CUT_OFF The potential cutoff, default is -12
+		 * @param R_CUT_OFF The cutoff radius, default is 5.
 		 * @param potential_matrix The matrix with the potential values, default is nullptr
 		 * @param neighbours The neighbours of the molecule, default is nullptr
-		 * @param R_CUT_OFF The cutoff radius, default is 5.
-		 * @param V_CUT_OFF The potential cutoff, default is -12
-		 * @param flag_ww A flag to know if there is a water-water interaction
 		 * @return The interactions per site, sorted in descending order
 		 */
 		vector<Real> getInteractionsPerSite(const int ID, bool& flag_ww, const Real V_CUT_OFF= -12.0, const Real R_CUT_OFF= 5.0, Real** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr) {
@@ -355,13 +362,10 @@ class Configuration {
 		}
 
 		/**
-		 * It returns the interactions per site of the molecule specified by its ID, with a flag to know if there is a water-water interaction in each site
+		 * It returns the interactions per site of the molecule specified by its ID, but it only considers water-water interactions
 		 * @param ID The ID of the molecule
-		 * @param potential_matrix The matrix with the potential values, default is nullptr
-		 * @param neighbours The neighbours of the molecule, default is nullptr
-		 * @param R_CUT_OFF The cutoff radius, default is 5.
 		 * @param V_CUT_OFF The potential cutoff, default is -12
-		 * @param flag_ww A flag to know if there is a water-water interaction
+		 * @param R_CUT_OFF The cutoff radius, default is 5.
 		 * @return The interactions per site, sorted in descending order
 		 */
 		vector<Real> getInteractionsPerSite_waterOnly(const int ID, const Real V_CUT_OFF= -12.0, const Real R_CUT_OFF= 5.0) {
