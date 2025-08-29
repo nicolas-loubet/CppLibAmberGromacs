@@ -73,7 +73,7 @@ class LammpsTopologyReader : public TopologyReader {
 				}
 
 				if(line_after_comment.at(0) == ' ') line_after_comment= line_after_comment.substr(1);
-				string atom_name= "Atom"+line_after_comment.substr(0,line_after_comment.find(" "));
+				string atom_name= "Atom"+line_after_comment.substr(0,line_after_comment.find(" "))+"_"+to_string(atom_type_id);
 				masses[type_name]= make_pair(mass_val,atom_name);
 			}
 			return masses;
@@ -290,6 +290,7 @@ class LammpsTopologyReader : public TopologyReader {
 				// Remove numeric digits
 				string key_without_digits= key;
 				key_without_digits.erase(remove_if(key_without_digits.begin(), key_without_digits.end(), ::isdigit), key_without_digits.end());
+				key_without_digits.erase(remove(key_without_digits.begin(), key_without_digits.end(), '_'), key_without_digits.end());
 				if(periodic_table.count(key_without_digits)) {
 					Z_values[map_name_type.at("Atom"+key)]= periodic_table.at(key_without_digits);
 					continue;
