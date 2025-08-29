@@ -260,7 +260,7 @@ class Configuration {
 		 * @param R_CUT_OFF The cutoff radius, default is 5.
 		 * @param potential_matrix The matrix with the potential values, default is nullptr
 		 * @param neighbours The neighbours of the molecule, default is nullptr
-		 * @param labels Identification of the sorted list, default is nullptr. If you need it, declare it ass "new float[4]", result would be 0-3
+		 * @param labels Identification of the sorted list, default is nullptr. If you need it, declare it ass "new int[4]", result would be 0-3
 		 * @return The interactions per site, sorted in descending order
 		 */
 		vector<Real> getInteractionsPerSite(const int ID, const Real R_CUT_OFF= 5.0, Real** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr, int* labels= nullptr) {
