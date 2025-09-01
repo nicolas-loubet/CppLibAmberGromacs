@@ -313,7 +313,7 @@ TEST_CASE("ConfigurationBulk - classification, potentials matrix, arrays and DJ/
 
 	SECTION("isDJ returns consistent structure (sum_per_site sorted, flags coherent)") {
 		int mol_id = 1000;
-		auto dj = conf.isDJ(mol_id, /*R_CUT*/5.0, /*V_CUT*/-12.0);
+		auto dj = conf.classifyDefect(mol_id, /*R_CUT*/5.0, /*V_CUT*/-12.0);
 
 		// sum_per_site must be sorted Descending (per implementation)
 		checkNonIncreasing(dj.sum_per_site);
@@ -412,4 +412,98 @@ TEST_CASE("ConfigurationBulk - LAMMPS: core methods sanity and v4 hand-check", "
 
 	delete top_reader;
 	delete coord_reader;
+}
+
+// ===================== DEFECT INFO TESTS =======================
+
+TEST_CASE("Configuration - DefectInfo classification", "[Configuration][DefectInfo]") {
+    std::string prmtop = "../files/control_bulk_amber.prmtop";
+    std::string pdb    = "../files/control_bulk_amber.pdb";
+
+    REQUIRE(std::filesystem::exists(prmtop));
+    REQUIRE(std::filesystem::exists(pdb));
+
+    TopologyReader* top_reader = ReaderFactory::createTopologyReader(ReaderFactory::ProgramFormat::AMBER);
+    TopolInfo topol = top_reader->readTopology(prmtop);
+
+    CoordinateReader* coord_reader = ReaderFactory::createCoordinateReader(ReaderFactory::ProgramFormat::AMBER);
+    Configuration conf(coord_reader, pdb, topol);
+
+    SECTION("DefectInfo flags are mutually consistent") {
+        int mol_id = 1000; // pick arbitrary molecule
+        auto info = conf.classifyDefect(mol_id, /*R_CUT*/5.0, /*V_CUT*/-12.0);
+
+        // Flags must be coherent
+        if (info.is_DJ) {
+            REQUIRE_FALSE(info.is_D3);
+            REQUIRE_FALSE(info.is_D5);
+            REQUIRE(info.lacking_sites > 0);
+            REQUIRE(info.bifurcated_sites > 0);
+        } else if (info.is_D3) {
+            REQUIRE(info.lacking_sites > 0);
+            REQUIRE(info.bifurcated_sites == 0);
+        } else if (info.is_D5) {
+            REQUIRE(info.lacking_sites == 0);
+            REQUIRE(info.bifurcated_sites > 0);
+        } else {
+            REQUIRE(info.lacking_sites == 0);
+            REQUIRE(info.bifurcated_sites == 0);
+        }
+
+        // Potentials must be finite
+        for (auto v : info.sum_per_site) {
+            REQUIRE(std::isfinite(v));
+        }
+
+        if (info.bifurcated_sites > 0) {
+            REQUIRE(std::isfinite(info.bifurcated_site_potential));
+            REQUIRE(std::isfinite(info.bifurcated_individual_potentials.first));
+            REQUIRE(std::isfinite(info.bifurcated_individual_potentials.second));
+        }
+
+        if (info.lacking_sites > 0) {
+            REQUIRE(std::isfinite(info.lacking_site_potential));
+        }
+    }
+
+    SECTION("Population check: some molecules must be D3, D5, and DJ") {
+        int countD3 = 0, countD5 = 0, countDJ = 0;
+        for (int i = 1; i <= conf.getNMolec(); i++) {
+            const Molecule& m = conf.getMolec(i);
+            if (!m.isWater()) continue;
+
+            auto info = conf.classifyDefect(i);
+
+            if (info.is_DJ) countDJ++;
+            else if (info.is_D3) countD3++;
+            else if (info.is_D5) countD5++;
+        }
+        REQUIRE(countD3 > 0);
+        REQUIRE(countD5 > 0);
+        REQUIRE(countDJ > 0);
+    }
+
+    SECTION("Known defect examples must be correctly identified") {
+        int id_D3 = 732;
+        int id_D5 = 731;
+        int id_DJ = 733;
+
+        auto d3_info = conf.classifyDefect(id_D3);
+        REQUIRE(d3_info.is_D3);
+        REQUIRE_FALSE(d3_info.is_D5);
+        REQUIRE_FALSE(d3_info.is_DJ);
+
+        auto d5_info = conf.classifyDefect(id_D5);
+        REQUIRE(d5_info.is_D5);
+        REQUIRE_FALSE(d5_info.is_D3);
+        REQUIRE_FALSE(d5_info.is_DJ);
+
+        auto dj_info = conf.classifyDefect(id_DJ);
+        REQUIRE(dj_info.is_DJ);
+        REQUIRE_FALSE(dj_info.is_D3);
+        REQUIRE_FALSE(dj_info.is_D5);
+    }
+
+    delete top_reader;
+    delete coord_reader;
 }
