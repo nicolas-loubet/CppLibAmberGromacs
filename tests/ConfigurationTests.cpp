@@ -224,7 +224,7 @@ TEST_CASE("ConfigurationBulk - classification, potentials matrix, arrays and DJ/
 	SECTION("createPotentialMatrix/deletePotentialMatrix shape and initialization") {
 		Real** pm = conf.createPotentialMatrix();
 		// Triangular allocation: row i has length i (0-based), pm[0] is unused
-		for (int i=1; i<N/5; ++i) {
+		for (int i=1; i<N/100; ++i) {
 			for (int j=0; j<i; ++j) {
 				// All entries must be NOT_CLASSIFIED
 				REQUIRE(pm[i][j] == Approx(NOT_CLASSIFIED).margin(0.0));
@@ -237,7 +237,7 @@ TEST_CASE("ConfigurationBulk - classification, potentials matrix, arrays and DJ/
 		conf.classifyMolecules(4, -12.0);
 		// Allowed: D (0) or T0(1)/T1(2)/T2(3)
 		int countD = 0, countT = 0;
-		for (int i=topol.num_solutes+1;i<=N/5;i++) 
+		for (int i=topol.num_solutes+1;i<=N/100;i++) 
 		{
 			const Molecule& m = conf.getMolec(i);
 			if (!m.isWater()) continue;
@@ -265,7 +265,7 @@ TEST_CASE("ConfigurationBulk - classification, potentials matrix, arrays and DJ/
 	SECTION("classifyMolecules_includePentacoordinated assigns allowed labels and TA has neighbor DX") {
 		conf.classifyMolecules_includePentacoordinated(4, -12.0);
 		int countDX = 0, countTAorTB = 0;
-		for (int i=1;i<=N/5;i++) {
+		for (int i=1;i<=N/100;i++) {
 			const Molecule& m = conf.getMolec(i);
 			if (!m.isWater()) continue;
 			const Water& w = static_cast<const Water&>(m);

@@ -530,6 +530,7 @@ TEST_CASE("Toolkit - String and Array Utilities", "[Toolkit]") {
 
 	SECTION("Take time measures execution time") {
 		auto func = []() { std::this_thread::sleep_for(std::chrono::milliseconds(1000)); };
+		std::cout << " ===== Should take at least 1s: ===== " << std::endl;
 		long int elapsed = ToolKit::takeTime(func);
 		REQUIRE(elapsed >= 1);
 	}
@@ -1004,6 +1005,30 @@ TEST_CASE("Toolkit - Structs", "[Toolkit]") {
 		REQUIRE(arr.flag == false);
 		delete[] data;
 	}
+
+	SECTION("Parallel execution with visual progress bar (phantom load)") {
+		std::vector<int> list(5, 0);
+		std::vector<int> res(5, 0);
+
+		std::cout << " ===== Please check the progress bar: ===== " << std::endl;
+
+		auto func= [](int id, int n, int x, int& r) {
+			for(int step = 1; step <= 50/id; ++step) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(200));
+				ToolKit::printPercentageBar(step, 50/id, id, n);
+			}
+			r= id;
+		};
+
+		ToolKit::parallel(func, list, res);
+
+		for(size_t i= 0; i < res.size(); ++i) {
+			REQUIRE(res[i] == static_cast<int>(i+1));
+		}
+
+		std::cout << std::endl;
+	}
+
 }
 
 /// Helper: reads a file and returns its contents
@@ -1188,6 +1213,7 @@ TEST_CASE("CSVWriter", "[CSVWriter]") {
 	}
 
 	SECTION("backup file when overwriting") {
+		std::cout << " ===== Should appear a warning message: ===== " << std::endl;
 		string fname = "test_output_backup.csv";
 		{
 			CSVWriter csv(fname);

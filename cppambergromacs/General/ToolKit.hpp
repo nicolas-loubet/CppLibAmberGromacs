@@ -119,6 +119,7 @@ namespace ToolKit {
 			threads.emplace_back(  [&,i]() { f(i+1, list.size(), list[i], res[i], args...); }  );
 		for(std::thread& thread: threads)
 			thread.join();
+		std::cout << std::endl;
 	}
 
 	/**
@@ -136,6 +137,7 @@ namespace ToolKit {
 	void serialExecution(Func f, std::vector<T>& list, std::vector<Res>& res, Args... args) {
 		for(size_t i= 0; i < list.size(); i++)
 			f(i+1, list.size(), list[i], res[i], args...);
+		std::cout << std::endl;
 	}
 
 	#ifndef CONSOLE_WIDTH
@@ -179,8 +181,6 @@ namespace ToolKit {
 			std::cout.flush();
 		#endif
 	}
-
-
 
 }
 
