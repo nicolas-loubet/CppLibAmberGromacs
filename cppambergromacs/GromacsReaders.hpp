@@ -169,13 +169,13 @@ class GromacsTopologyReader : public TopologyReader {
 
 				ss >> type1 >> type2 >> mass >> q >> ptype >> sigma >> epsilon;
 				if(!ss.fail()) {
-					parameters[type1]= make_tuple(mass,q,epsilon,sigma);
+					parameters[type1]= make_tuple(mass,q,epsilon,sigma*10);
 					continue;
 				}
 				
 				ss >> type1 >> mass >> q >> ptype >> sigma >> epsilon;
 				if(!ss.fail()) {
-					parameters[type1]= make_tuple(mass,q,epsilon,sigma);
+					parameters[type1]= make_tuple(mass,q,epsilon,sigma*10);
 					continue;
 				}
 				throw runtime_error("Error reading LJ parameters from GROMACS topology file.");
