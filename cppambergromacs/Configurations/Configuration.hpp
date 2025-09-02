@@ -435,7 +435,7 @@ class Configuration {
 				}
 			}
 
-			Sorter::sort(sum_per_site, Sorter::Order::Descending);
+			Sorter::sort(sum_per_site, Sorter::Order::Ascending);
 			return sum_per_site;
 		}
 
@@ -479,7 +479,7 @@ class Configuration {
 			}
 
 			vector<int> index_seq= {0,1,2,3};
-			Sorter::cosort(sum_per_site, index_seq, Sorter::Order::Descending);
+			Sorter::cosort(sum_per_site, index_seq, Sorter::Order::Ascending);
 			return {sum_only_water[index_seq[0]], sum_only_water[index_seq[1]], sum_only_water[index_seq[2]], sum_only_water[index_seq[3]]};
 		}
 
