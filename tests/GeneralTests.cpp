@@ -537,7 +537,7 @@ TEST_CASE("Toolkit - String and Array Utilities", "[Toolkit]") {
 	SECTION("Parallel execution") {
 		std::vector<int> list = {1, 2, 3};
 		std::vector<int> res(3, 0);
-		auto func = [](int x, int& r) { r = x * 2; };
+		auto func = [](int id, int n, int x, int& r) { r = x * 2; };
 		ToolKit::parallel(func, list, res);
 		REQUIRE(res[0] == 2);
 		REQUIRE(res[1] == 4);
@@ -547,7 +547,7 @@ TEST_CASE("Toolkit - String and Array Utilities", "[Toolkit]") {
 	SECTION("Serial execution") {
 		std::vector<int> list = {1, 2, 3};
 		std::vector<int> res(3, 0);
-		auto func = [](int x, int& r) { r = x * 2; };
+		auto func = [](int id, int n, int x, int& r) { r = x * 2; };
 		ToolKit::serialExecution(func, list, res);
 		REQUIRE(res[0] == 2);
 		REQUIRE(res[1] == 4);
@@ -577,7 +577,7 @@ TEST_CASE("Toolkit - String and Array Utilities", "[Toolkit]") {
 	SECTION("Parallel execution with empty list") {
 		std::vector<int> list;
 		std::vector<int> res;
-		auto func = [](int x, int& r) { r = x * 2; };
+		auto func = [](int id, int n, int x, int& r) { r = x * 2; };
 		ToolKit::parallel(func, list, res);
 		REQUIRE(res.empty());
 	}
@@ -585,7 +585,7 @@ TEST_CASE("Toolkit - String and Array Utilities", "[Toolkit]") {
 	SECTION("Serial execution with single element") {
 		std::vector<int> list = {1};
 		std::vector<int> res(1, 0);
-		auto func = [](int x, int& r) { r = x * 2; };
+		auto func = [](int id, int n, int x, int& r) { r = x * 2; };
 		ToolKit::serialExecution(func, list, res);
 		REQUIRE(res[0] == 2);
 	}
@@ -603,7 +603,7 @@ TEST_CASE("Toolkit - String and Array Utilities", "[Toolkit]") {
 		std::vector<int> list(1000);
 		std::vector<int> res(1000, 0);
 		for (size_t i = 0; i < list.size(); ++i) list[i] = i;
-		auto func = [](int x, int& r) { r = x * 2; };
+		auto func = [](int id, int n, int x, int& r) { r = x * 2; };
 		ToolKit::parallel(func, list, res);
 		for (size_t i = 0; i < res.size(); ++i) {
 			REQUIRE(res[i] == 2 * i);
@@ -614,7 +614,7 @@ TEST_CASE("Toolkit - String and Array Utilities", "[Toolkit]") {
 		std::vector<int> list(1000);
 		std::vector<int> res(1000, 0);
 		for (size_t i = 0; i < list.size(); ++i) list[i] = i;
-		auto func = [](int x, int& r) { r = x * 2; };
+		auto func = [](int id, int n, int x, int& r) { r = x * 2; };
 		ToolKit::serialExecution(func, list, res);
 		for (size_t i = 0; i < res.size(); ++i) {
 			REQUIRE(res[i] == 2 * i);

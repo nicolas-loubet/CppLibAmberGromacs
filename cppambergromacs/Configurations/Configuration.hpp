@@ -582,7 +582,7 @@ class Configuration {
 				}
 			}
 
-			Sorter::sort(sum_per_site, Sorter::Order::Descending);
+			Sorter::sort(sum_per_site, Sorter::Order::Ascending);
 			output.chargeData(sites, sum_per_site, ww_interactions, ww_distances, ww_indices);
 			return output;
 		}

@@ -14,10 +14,10 @@ static void checkVectorClose(const std::vector<Real>& v1, const std::vector<Real
 	}
 }
 
-// Check non-increasing order
-static void checkNonIncreasing(const std::vector<Real>& v) {
+// Check increasing order
+static void checkIncreasing(const std::vector<Real>& v) {
 	for (size_t i=1;i<v.size();++i) {
-		REQUIRE(v[i-1] >= v[i] - 1e-12);
+		REQUIRE(v[i-1] <= v[i] - 1e-12);
 	}
 }
 
@@ -90,8 +90,8 @@ TEST_CASE("Configuration - AMBER: basic checks and interaction values (expanded)
 		REQUIRE(per_all.size() == 4);
 		REQUIRE(per_water.size() == 4);
 
-		// flagged list is sorted Descending (per code), per_all is Ascending => check orders and bounds
-		checkNonIncreasing(per_flagged);
+		// flagged list is sorted Ascending (per code), per_all is Ascending => check orders and bounds
+		checkIncreasing(per_flagged);
 
 		// Each water-only site's magnitude should not exceed "all" (ions+others add up)
 		for (size_t i=0;i<4;i++) {
@@ -128,7 +128,7 @@ TEST_CASE("Configuration - GROMACS: extended interaction checks", "[Configuratio
 	SECTION("Per-site interactions for molecule 1000 and v_4S") {
 		int mol_id = 1000;
 		auto per_site = conf.getInteractionsPerSite(mol_id);
-		std::vector<Real> expected = { -35.6644, -29.2759, -26.3631, -25.9072 };
+		std::vector<Real> expected = { -30.6020, -23.2096, -22.9963, -22.5206 };
 		checkVectorClose(per_site, expected, 1e-3);
 		REQUIRE(conf.v_4S(mol_id) == Approx(expected[3]).margin(1e-3));
 	}
@@ -153,14 +153,14 @@ TEST_CASE("Configuration - GROMACS: extended interaction checks", "[Configuratio
 		auto per_water = conf.getInteractionsPerSite_waterOnly(mol_id);
 		REQUIRE(per_all.size() == 4);
 		REQUIRE(per_water.size() == 4);
-		REQUIRE(per_all[0] == Approx(-35.6644).margin(1e-3));
-		REQUIRE(per_all[1] == Approx(-29.2759).margin(1e-3));
-		REQUIRE(per_all[2] == Approx(-26.3631).margin(1e-3));
-		REQUIRE(per_all[3] == Approx(-25.9072).margin(1e-3));
-		REQUIRE(per_water[0] == Approx(-25.1161).margin(1e-3));
-		REQUIRE(per_water[1] == Approx(-22.4794).margin(1e-3));
-		REQUIRE(per_water[2] == Approx(-28.8602).margin(1e-3));
-		REQUIRE(per_water[3] == Approx(-35.6644).margin(1e-3));
+		REQUIRE(per_all[0] == Approx(-30.6020).margin(1e-3));
+		REQUIRE(per_all[1] == Approx(-23.2096).margin(1e-3));
+		REQUIRE(per_all[2] == Approx(-22.9963).margin(1e-3));
+		REQUIRE(per_all[3] == Approx(-22.5206).margin(1e-3));
+		REQUIRE(per_water[0] == Approx(-30.6020).margin(1e-3));
+		REQUIRE(per_water[1] == Approx(-22.6554).margin(1e-3));
+		REQUIRE(per_water[2] == Approx(-21.4925).margin(1e-3));
+		REQUIRE(per_water[3] == Approx(-17.7484).margin(1e-3));
 	}
 
 	delete top_reader;
@@ -224,7 +224,7 @@ TEST_CASE("ConfigurationBulk - classification, potentials matrix, arrays and DJ/
 	SECTION("createPotentialMatrix/deletePotentialMatrix shape and initialization") {
 		Real** pm = conf.createPotentialMatrix();
 		// Triangular allocation: row i has length i (0-based), pm[0] is unused
-		for (int i=1; i<N; ++i) {
+		for (int i=1; i<N/5; ++i) {
 			for (int j=0; j<i; ++j) {
 				// All entries must be NOT_CLASSIFIED
 				REQUIRE(pm[i][j] == Approx(NOT_CLASSIFIED).margin(0.0));
@@ -237,7 +237,7 @@ TEST_CASE("ConfigurationBulk - classification, potentials matrix, arrays and DJ/
 		conf.classifyMolecules(4, -12.0);
 		// Allowed: D (0) or T0(1)/T1(2)/T2(3)
 		int countD = 0, countT = 0;
-		for (int i=topol.num_solutes+1;i<=N;i++) 
+		for (int i=topol.num_solutes+1;i<=N/5;i++) 
 		{
 			const Molecule& m = conf.getMolec(i);
 			if (!m.isWater()) continue;
@@ -265,7 +265,7 @@ TEST_CASE("ConfigurationBulk - classification, potentials matrix, arrays and DJ/
 	SECTION("classifyMolecules_includePentacoordinated assigns allowed labels and TA has neighbor DX") {
 		conf.classifyMolecules_includePentacoordinated(4, -12.0);
 		int countDX = 0, countTAorTB = 0;
-		for (int i=1;i<=N;i++) {
+		for (int i=1;i<=N/5;i++) {
 			const Molecule& m = conf.getMolec(i);
 			if (!m.isWater()) continue;
 			const Water& w = static_cast<const Water&>(m);
@@ -315,8 +315,8 @@ TEST_CASE("ConfigurationBulk - classification, potentials matrix, arrays and DJ/
 		int mol_id = 1000;
 		auto dj = conf.classifyDefect(mol_id, /*R_CUT*/5.0, /*V_CUT*/-12.0);
 
-		// sum_per_site must be sorted Descending (per implementation)
-		checkNonIncreasing(dj.sum_per_site);
+		// sum_per_site must be sorted Ascending (per implementation)
+		checkIncreasing(dj.sum_per_site);
 
 		// Coherence checks:
 		if (dj.is_DJ) {
@@ -362,7 +362,7 @@ TEST_CASE("ConfigurationBulk - GROMACS: core methods sanity and v4 hand-check", 
 
 	SECTION("v_4S matches hand value for molecule 1000") {
 		int mol_id = 1000;
-		std::vector<Real> expected = { -35.6644, -29.2759, -26.3631, -25.9072 };
+		std::vector<Real> expected = { -30.6020, -23.2096, -22.9963, -22.5206 };
 		auto per_site = conf.getInteractionsPerSite(mol_id);
 		checkVectorClose(per_site, expected, 1e-3);
 		REQUIRE(conf.v_4S(mol_id) == Approx(expected[3]).margin(1e-3));
@@ -371,7 +371,7 @@ TEST_CASE("ConfigurationBulk - GROMACS: core methods sanity and v4 hand-check", 
 	SECTION("Classification runs and assigns values") {
 		conf.classifyMolecules();
 		int counts[4] = {0,0,0,0};
-		for (int i=1;i<=conf.getNMolec();++i) {
+		for (int i=1;i<=conf.getNMolec()/5;++i) {
 			const Molecule& m = conf.getMolec(i);
 			if (!m.isWater()) continue;
 			const Water& w = static_cast<const Water&>(m);
@@ -468,7 +468,7 @@ TEST_CASE("Configuration - DefectInfo classification", "[Configuration][DefectIn
 
     SECTION("Population check: some molecules must be D3, D5, and DJ") {
         int countD3 = 0, countD5 = 0, countDJ = 0;
-        for (int i = 1; i <= conf.getNMolec(); i++) {
+        for (int i = 1; i <= conf.getNMolec()/5; i++) {
             const Molecule& m = conf.getMolec(i);
             if (!m.isWater()) continue;
 

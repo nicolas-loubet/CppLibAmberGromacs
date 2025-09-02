@@ -97,13 +97,14 @@ namespace ToolKit {
 		auto end_time= std::chrono::high_resolution_clock::now();
 
 		long int elapsed= std::chrono::duration_cast<std::chrono::seconds> (end_time - init_time).count();
-		std::cout << "Finished execution in " << ((int) elapsed/3600) << "h:" << ((int) (elapsed%3600)/60) << "min:" << elapsed%60 << "s (" << elapsed << "s)" << std::endl;
+		std::cout << "\nFinished execution in " << ((int) elapsed/3600) << "h:" << ((int) (elapsed%3600)/60) << "min:" << elapsed%60 << "s (" << elapsed << "s)" << std::endl;
 		return elapsed;
 	}
 
 	/**
 	 * Function that executes a function in parallel for each element of a list
-	 * @param f The function to execute (first argument must be one of the elements of the list, type T; second argument must be a reference to the result of the function, type Res)
+	 * @param f The function to execute (first and second arguments must be integers for controlling the ID;
+	 * the third must be one of the elements of the list, type T; the fourth argument must be a reference to the result of the function, type Res)
 	 * @param list The list of elements (for example, the directories to be analyzed)
 	 * @param args The arguments of the function
 	 * @tparam Func The type of the function to execute
@@ -115,14 +116,15 @@ namespace ToolKit {
 	void parallel(Func f, std::vector<T>& list, std::vector<Res>& res, Args... args) {
 		std::vector<std::thread> threads;
 		for(size_t i= 0; i < list.size(); i++)
-			threads.emplace_back(  [&,i]() { f(list[i], res[i], args...); }  );
+			threads.emplace_back(  [&,i]() { f(i+1, list.size(), list[i], res[i], args...); }  );
 		for(std::thread& thread: threads)
 			thread.join();
 	}
 
 	/**
 	 * Function that executes a function for each element of a list, one after the other
-	 * @param f The function to execute (first argument must be one of the elements of the list, type T; second argument must be a reference to the result of the function, type Res)
+	 * @param f The function to execute (first and second arguments must be integers for controlling the ID;
+	 * the third must be one of the elements of the list, type T; the fourth argument must be a reference to the result of the function, type Res)
 	 * @param list The list of elements (for example, the directories to be analyzed)
 	 * @param args The arguments of the function
 	 * @tparam Func The type of the function to execute
@@ -133,7 +135,7 @@ namespace ToolKit {
 	template<typename Func, typename T, typename Res, typename... Args>
 	void serialExecution(Func f, std::vector<T>& list, std::vector<Res>& res, Args... args) {
 		for(size_t i= 0; i < list.size(); i++)
-			f(list[i], res[i], args...);
+			f(i+1, list.size(), list[i], res[i], args...);
 	}
 
 	#ifndef CONSOLE_WIDTH
@@ -148,16 +150,27 @@ namespace ToolKit {
 	 * @param total_pos The total number of positions
 	 * @param symbol The symbol to print
 	 */
-	void printPercentageParallel(int i, int N, int pos, int total_pos, const char symbol = '=') {
+	void printPercentageBar(int i, int N, int pos, int total_pos, const char symbol= '=') {
 		#ifdef NOHUP
-			std::cout << "Progress: "+std::to_string(i)+"/"+std::to_string(N)+" of process "+std::to_string(pos+1)+"/"+std::to_string(total_pos)+"\n" << std::flush;
+			std::cout << "Progress: " + std::to_string(i) + "/" + std::to_string(N) +
+						 " of process " + std::to_string(pos) + "/" + std::to_string(total_pos) + "\n" << std::flush;
 		#else
-			const int bar_width= CONSOLE_WIDTH/total_pos -1;
+			const int bar_width= CONSOLE_WIDTH / total_pos -1;
 
 			static std::vector<std::string> bars(total_pos, std::string(bar_width, ' '));
 			int filled= (i * (bar_width-2)) / N;
+			int percent= (100*i) / N;
 
-			bars[pos]= "[" + std::string(filled, symbol) + std::string(bar_width-2 - filled, ' ') + "]";
+			std::ostringstream oss;
+			oss << std::setw(3) << std::setfill(' ') << percent << "%";
+			std::string perc_str = oss.str();
+
+			int free_space= bar_width - 2 - filled;
+
+			int cut= std::max(0, (int)perc_str.size()-free_space);
+			std::string visible_perc= perc_str.substr(cut);
+
+			bars[pos-1] = "[" + std::string(filled, symbol) + std::string(std::max(0, free_space - (int)visible_perc.size()), ' ') + visible_perc + "]";
 
 			std::lock_guard<std::mutex> lock(mtx);
 			std::cout << "\r";
@@ -168,6 +181,19 @@ namespace ToolKit {
 	}
 
 
+
 }
 
-#endif
+/**
+ * Overload of the << operator for vectors
+ */
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
+	os << "[";
+	for(size_t i= 0; i < v.size(); i++)
+		os << v[i] << (i < v.size()-1 ? ", " : "");
+	os << "]";
+	return os;
+}
+
+#endif // TOOLKIT_HPP
