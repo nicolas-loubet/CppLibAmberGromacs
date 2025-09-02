@@ -589,4 +589,4 @@ class Configuration {
 
 };
 
-#endif
+#endif // CONFIGURATION_HPP

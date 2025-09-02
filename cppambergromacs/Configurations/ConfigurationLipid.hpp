@@ -208,4 +208,4 @@ class ConfigurationLipid : public Configuration {
 		
 };
 
-#endif
+#endif // CONFIGURATIONLIPID_HPP

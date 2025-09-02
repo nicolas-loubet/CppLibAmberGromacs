@@ -131,4 +131,4 @@ class Molecule : public Particle{
 
 };
 
-#endif
+#endif // MOLECULE_HPP

@@ -53,4 +53,4 @@ class ReaderFactory {
 		}
 };
 
-#endif
+#endif // READER_FACTORY_HPP

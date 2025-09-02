@@ -467,4 +467,4 @@ inline std::string lineVMD(const Vector& a, const Vector& b) {
 	return "draw line " + a.toVMD() + " " + b.toVMD();
 }
 
-#endif
+#endif // VECTOR_HPP

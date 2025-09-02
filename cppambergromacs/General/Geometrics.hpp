@@ -340,4 +340,4 @@ namespace Geometrics {
 
 }
 
-#endif
+#endif // GEOMETRICS_HPP

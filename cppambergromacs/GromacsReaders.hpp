@@ -418,4 +418,4 @@ class GromacsCoordinateReader : public CoordinateReader {
 		}
 };
 
-#endif
+#endif // GROMACS_READERS_HPP

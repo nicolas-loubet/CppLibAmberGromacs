@@ -332,4 +332,4 @@ class ConfigurationBulk : public Configuration {
 
 };
 
-#endif
+#endif // CONFIGURATIONBULK_HPP

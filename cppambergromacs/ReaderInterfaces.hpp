@@ -152,4 +152,4 @@ std::ostream& operator<<(std::ostream& os, const TopolInfo& info) {
 	return os;
 }
 
-#endif
+#endif // READER_INTERFACES_HPP

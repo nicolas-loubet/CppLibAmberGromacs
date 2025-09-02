@@ -56,4 +56,4 @@ class Particle{
 			}
 };
 
-#endif // PARTICLE_H
+#endif // PARTICLE_HPP

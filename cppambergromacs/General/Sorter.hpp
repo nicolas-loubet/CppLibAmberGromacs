@@ -126,4 +126,4 @@ namespace Sorter {
 
 }
 
-#endif
+#endif // SORTER_HPP
