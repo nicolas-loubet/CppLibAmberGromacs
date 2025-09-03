@@ -201,10 +201,25 @@ class CSVWriter {
 		 * @tparam T type of the elements in the columns
 		 */
 		template<typename T>
-		void appendColumns(const std::vector<std::vector<T>>& columns, const std::vector<std::string>& columnTitles, size_t nRows) {
-			if(columns.size() != columnTitles.size()) throw std::runtime_error("appendColumns: columns.size() must equal columnTitles.size()");
-			for(const auto& column: columns) {
-				if(column.size() != nRows) throw std::runtime_error("appendColumns: each column.size() must equal nRows");
+		void appendColumns(std::vector<std::vector<T>> columns, const std::vector<std::string>& columnTitles, size_t nRows) {
+			bool isColumns= (columns.size() == columnTitles.size());
+			bool isRows= (columns.size() == nRows && !columns.empty() && columns[0].size() == columnTitles.size());
+
+			if(isColumns) {
+				for(const auto& column: columns) {
+					if(column.size() != nRows) throw std::runtime_error("appendColumns: each column.size() must equal nRows");
+				}
+			} else if(isRows) {
+				std::vector<std::vector<T>> transposed(columnTitles.size(), std::vector<T>(nRows));
+				for(size_t i= 0; i < nRows; i++) {
+					if(columns[i].size() != columnTitles.size()) throw std::runtime_error("appendColumns: row size mismatch with columnTitles");
+					for(size_t j= 0; j < columnTitles.size(); j++) {
+						transposed[j][i]= columns[i][j];
+					}
+				}
+				columns= std::move(transposed);
+			} else {
+				throw std::runtime_error("appendColumns: dimensions do not match either (nCols x nRows) or (nRows x nCols)");
 			}
 
 			std::ifstream inFile(filename, std::ios::in);
