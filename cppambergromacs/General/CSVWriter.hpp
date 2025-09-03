@@ -120,7 +120,7 @@ class CSVWriter {
 				for(size_t c= 0; c < bins.size(); c++)
 					norm[c]= std::accumulate(bins[c], bins[c]+N_BINS, 0.0);
 			} else {
-				norm = totals;
+				norm= totals;
 			}
 
 			writeHeader(titles);
@@ -196,56 +196,58 @@ class CSVWriter {
 		/**
 		 * Appends multiple columns to the right of an existing CSV file
 		 * @param columns vector of vectors containing the column values
-		 * @param columnTitles titles of the new columns
-		 * @param nRows expected number of rows
+		 * @param column_titles titles of the new columns
 		 * @tparam T type of the elements in the columns
 		 */
 		template<typename T>
-		void appendColumns(std::vector<std::vector<T>> columns, const std::vector<std::string>& columnTitles, size_t nRows) {
-			bool isColumns= (columns.size() == columnTitles.size());
-			bool isRows= (columns.size() == nRows && !columns.empty() && columns[0].size() == columnTitles.size());
+		void appendColumns(std::vector<std::vector<T>> columns, const std::vector<std::string>& column_titles) {
+			std::ifstream in_file(filename, std::ios::in);
+			if(!in_file.is_open()) throw std::runtime_error("Error: cannot read file " + filename);
 
-			if(isColumns) {
-				for(const auto& column: columns) {
-					if(column.size() != nRows) throw std::runtime_error("appendColumns: each column.size() must equal nRows");
+			std::vector<std::string> lines;
+			std::string line;
+			while(std::getline(in_file, line))
+				lines.push_back(line);
+			in_file.close();
+
+			if(lines.empty()) throw std::runtime_error("append_columns: file is empty (no header to extend)");
+
+			size_t n_rows= lines.size() - 1;
+
+			bool is_columns= (columns.size() == column_titles.size());
+			bool is_rows= (columns.size() == n_rows && !columns.empty() && columns[0].size() == column_titles.size());
+
+			if(is_columns) {
+				for(const auto& column : columns) {
+					if(column.size() != n_rows) throw std::runtime_error("append_columns: each column.size() must equal number of rows in file");
 				}
-			} else if(isRows) {
-				std::vector<std::vector<T>> transposed(columnTitles.size(), std::vector<T>(nRows));
-				for(size_t i= 0; i < nRows; i++) {
-					if(columns[i].size() != columnTitles.size()) throw std::runtime_error("appendColumns: row size mismatch with columnTitles");
-					for(size_t j= 0; j < columnTitles.size(); j++) {
+			} else if(is_rows) {
+				std::vector<std::vector<T>> transposed(column_titles.size(), std::vector<T>(n_rows));
+				for(size_t i= 0; i < n_rows; i++) {
+					if(columns[i].size() != column_titles.size())
+						throw std::runtime_error("append_columns: row size mismatch with column_titles");
+					for(size_t j= 0; j < column_titles.size(); j++) {
 						transposed[j][i]= columns[i][j];
 					}
 				}
 				columns= std::move(transposed);
 			} else {
-				throw std::runtime_error("appendColumns: dimensions do not match either (nCols x nRows) or (nRows x nCols)");
+				throw std::runtime_error("append_columns: dimensions do not match either (nCols x nRows) or (nRows x nCols)");
 			}
 
-			std::ifstream inFile(filename, std::ios::in);
-			if(!inFile.is_open()) throw std::runtime_error("Error: cannot read file " + filename);
-
-			std::vector<std::string> lines;
-			std::string line;
-			while(std::getline(inFile, line))
-				lines.push_back(line);
-			inFile.close();
-
-			if(lines.empty()) throw std::runtime_error("appendColumns: file is empty (no header to extend)");
-			if(lines.size()-1 != nRows) throw std::runtime_error("appendColumns: nRows does not match number of data rows in file");
 			if(file.is_open()) file.close();
 
 			std::ofstream out(filename, std::ios::out | std::ios::trunc);
 			if(!out.is_open()) throw std::runtime_error("Error: cannot open file " + filename);
 
 			out << lines[0];
-			for(const auto& title: columnTitles)
+			for(const auto& title : column_titles)
 				out << sep << title;
 			out << "\n";
 
 			for(size_t i= 1; i < lines.size(); i++) {
 				out << lines[i];
-				for(const auto& column: columns)
+				for(const auto& column : columns)
 					out << sep << toString(column[i-1]);
 				out << "\n";
 			}

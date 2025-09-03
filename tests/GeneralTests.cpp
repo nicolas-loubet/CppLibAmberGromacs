@@ -1201,7 +1201,7 @@ TEST_CASE("CSVWriter", "[CSVWriter]") {
 				{"M","F"}
 			};
 			vector<string> titles = {"Country","Gender"};
-			csv.appendColumns(cols, titles, 2);
+			csv.appendColumns(cols, titles);
 		}
 
 		string expected =
