@@ -54,8 +54,9 @@ class Configuration {
 		// Helper: Adds the potential of an atom with a water molecule to the sum_per_site vector, used in getInteractionsPerSite
 		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Atom& atom, const Real R_CUT_OFF) {
 			int i_close;
-			if(closestSiteIndex(sites, atom.getPosition(), bounds, R_CUT_OFF, i_close))
+			if(closestSiteIndex(sites, atom.getPosition(), bounds, R_CUT_OFF, i_close)) {
 				sum_per_site[i_close]+= center_water.potentialWith(atom, bounds);
+			}
 		}
 
 		// Helper: Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite
