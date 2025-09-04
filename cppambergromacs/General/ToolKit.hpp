@@ -152,11 +152,13 @@ namespace ToolKit {
 	 * @param total_pos The total number of positions
 	 * @param symbol The symbol to print
 	 */
-	void printPercentageBar(int i, int N, int pos, int total_pos, const char symbol= '=') {
-		#ifdef NOHUP
+	#ifdef NOHUP
+		void printPercentageBar(int i, int N, int pos, int total_pos, const char symbol= '=') {
 			std::cout << "Progress: " + std::to_string(i) + "/" + std::to_string(N) +
 						 " of process " + std::to_string(pos) + "/" + std::to_string(total_pos) + "\n" << std::flush;
-		#else
+		}
+	#else
+		void printPercentageBar(int i, int N, int pos, int total_pos, const char symbol= '=') {
 			const int bar_width= CONSOLE_WIDTH / total_pos -1;
 
 			static std::vector<std::string> bars(total_pos, std::string(bar_width, ' '));
@@ -179,8 +181,8 @@ namespace ToolKit {
 			for(int p= 0; p < total_pos; p++)
 				std::cout << bars[p];
 			std::cout.flush();
-		#endif
-	}
+		}
+	#endif
 
 }
 
