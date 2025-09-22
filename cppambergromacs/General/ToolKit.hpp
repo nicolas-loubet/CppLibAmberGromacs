@@ -17,7 +17,7 @@
 static std::mutex mtx;
 
 namespace ToolKit {
-	constexpr Real k_B= -1.380649*6.02214076*0.001; // Boltzmann constant in kJ/(mol*K)
+	constexpr Real k_B= 1.380649*6.02214076*0.001; // Boltzmann constant in kJ/(mol*K)
 
 	/**
 	 * STRUCT that contains the pointer to an array of int and the size of that array
