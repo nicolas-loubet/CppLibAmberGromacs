@@ -84,7 +84,7 @@ TEST_CASE("Configuration - AMBER: basic checks and interaction values (expanded)
 		bool ww_flag = false;
 		auto per_flagged = conf.getInteractionsPerSite(mol_id, ww_flag);
 		auto per_all	 = conf.getInteractionsPerSite(mol_id);
-		auto per_water   = conf.getInteractionsPerSite_waterOnly(mol_id);
+		auto per_water   = conf.getInteractionsPerSite_waterOnly(mol_id).second;
 
 		REQUIRE(per_flagged.size() == 4);
 		REQUIRE(per_all.size() == 4);
@@ -150,7 +150,7 @@ TEST_CASE("Configuration - GROMACS: extended interaction checks", "[Configuratio
 	SECTION("waterOnly vs all sites sanity") {
 		int mol_id = 1000;
 		auto per_all   = conf.getInteractionsPerSite(mol_id);
-		auto per_water = conf.getInteractionsPerSite_waterOnly(mol_id);
+		auto per_water = conf.getInteractionsPerSite_waterOnly(mol_id).second;
 		REQUIRE(per_all.size() == 4);
 		REQUIRE(per_water.size() == 4);
 		REQUIRE(per_all[0] == Approx(-30.6020).margin(1e-3));

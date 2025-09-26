@@ -340,7 +340,7 @@ class Configuration {
 		 * @param potential_matrix The matrix with the potential values, default is nullptr
 		 * @param neighbours The neighbours of the molecule, default is nullptr
 		 * @param labels Identification of the sorted list, default is nullptr. If you need it, declare it ass "new int[4]", result would be 0-3
-		 * @return The interactions per site, sorted in descending order
+		 * @return The interactions per site, sorted in ascending order
 		 */
 		vector<Real> getInteractionsPerSite(const int ID, const Real R_CUT_OFF= 5.0, Real** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr, int* labels= nullptr) {
 			if(!getMolec(ID).isWater()) throw invalid_argument("The molecule is not a water molecule.");
@@ -391,7 +391,7 @@ class Configuration {
 		 * @param R_CUT_OFF The cutoff radius, default is 5.
 		 * @param potential_matrix The matrix with the potential values, default is nullptr
 		 * @param neighbours The neighbours of the molecule, default is nullptr
-		 * @return The interactions per site, sorted in descending order
+		 * @return The interactions per site, sorted in ascending			 order
 		 */
 		vector<Real> getInteractionsPerSite(const int ID, bool& flag_ww, const Real V_CUT_OFF= -12.0, const Real R_CUT_OFF= 5.0, Real** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr) {
 			if(!getMolec(ID).isWater()) throw invalid_argument("The molecule is not a water molecule.");
@@ -445,9 +445,9 @@ class Configuration {
 		 * @param ID The ID of the molecule
 		 * @param V_CUT_OFF The potential cutoff, default is -12
 		 * @param R_CUT_OFF The cutoff radius, default is 5.
-		 * @return The interactions per site, sorted in descending order
+		 * @return The interactions per site, sorted in ascending order. The first element is the V_iS list (normal), the second element is the V_iS list with the interactions only due to water-water
 		 */
-		vector<Real> getInteractionsPerSite_waterOnly(const int ID, const Real V_CUT_OFF= -12.0, const Real R_CUT_OFF= 5.0) {
+		pair<vector<Real>,vector<Real>> getInteractionsPerSite_waterOnly(const int ID, const Real V_CUT_OFF= -12.0, const Real R_CUT_OFF= 5.0) {
 			if(!getMolec(ID).isWater()) throw invalid_argument("The molecule is not a water molecule.");
 			Water& molecule= *static_cast<Water*>(molecs[ID-1]);
 			Vector o= molecule.getOxygen().getPosition();
@@ -481,7 +481,8 @@ class Configuration {
 
 			vector<int> index_seq= {0,1,2,3};
 			Sorter::cosort(sum_per_site, index_seq, Sorter::Order::Ascending);
-			return {sum_only_water[index_seq[0]], sum_only_water[index_seq[1]], sum_only_water[index_seq[2]], sum_only_water[index_seq[3]]};
+			vector<Real> sum_per_site_only_water_sorted= {sum_only_water[index_seq[0]], sum_only_water[index_seq[1]], sum_only_water[index_seq[2]], sum_only_water[index_seq[3]]};
+			return make_pair(sum_per_site,sum_per_site_only_water_sorted);
 		}
 
 		/**
