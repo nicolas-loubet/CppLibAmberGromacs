@@ -316,6 +316,8 @@ class GromacsCoordinateReader : public CoordinateReader {
 		 */
 		static void checkIfNewMolecule(int i_molec, string molec_name, Atom*& atom_list, int& number_of_atom_in_list, const TopolInfo& topol_info, Molecule** molecs, string& previous_molec_name, int& previous_different_molec_id, int& previous_molec_id) {
 			if(atom_list != nullptr) {
+				if(i_molec < previous_molec_id)
+					i_molec= previous_molec_id+1;
 				createNewMolecule(previous_molec_name, i_molec-1, molecs, atom_list, number_of_atom_in_list);
 				number_of_atom_in_list= 0;
 			}
@@ -350,7 +352,7 @@ class GromacsCoordinateReader : public CoordinateReader {
 			Real y= RealParser(line.substr(28,8));
 			Real z= RealParser(line.substr(36,8));
 
-			if(i_molec != previous_molec_id)
+			if(i_molec != previous_molec_id%100000)
 				checkIfNewMolecule(i_molec, molec_name, atom_list, number_of_atom_in_list, topol_info, molecs, previous_molec_name, previous_different_molec_id, previous_molec_id);
 
 			string type, name; Real q, mass, e, s;
