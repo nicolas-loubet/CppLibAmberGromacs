@@ -186,7 +186,7 @@ class LammpsTopologyReader : public TopologyReader {
 			} else {
 				topology.num_solutes++;
 				// If I find a molecule that is not a water, I use the ID as a molecule type
-				topology.number_of_each_different_molecule[to_string(mol_id)]= 1;
+				topology.number_of_each_different_molecule[to_string(mol_id+1)]= 1;
 				topology.name_type["Mol"+to_string(mol_id+1)]= "mt"+to_string(mol_id);
 				topology.number_of_atoms_per_different_molecule["mt"+to_string(mol_id)]= atom_in_molecule_counter;
 			}
