@@ -79,7 +79,7 @@ namespace ToolKit {
 			return std::max(0, std::min(N_BINS-1,pos));
 		} else {
 			if(pos < 0 || pos >= N_BINS)
-				throw std::out_of_range("The calculated position is out of bounds");
+				throw std::out_of_range("The calculated position is out of bounds. The range is ["+std::to_string(LIMIT_MIN)+","+std::to_string(LIMIT_MAX)+"], and the value is "+std::to_string(value));
 			return pos;
 		}
 	}

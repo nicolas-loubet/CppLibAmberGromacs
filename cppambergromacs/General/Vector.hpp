@@ -454,7 +454,9 @@ inline Real getAngle(Vector c1, Vector c2, Vector c3, Vector bounds) {
 	Real b= distancePBC(c1,c2,bounds);
 	Real c= distancePBC(c2,c3,bounds);
 	//Law of cosines
-	return std::fabs(acos((pow(b,2)+pow(c,2)-pow(a,2))/(2*b*c)));
+	Real cos_angle= (pow(b,2)+pow(c,2)-pow(a,2))/(2*b*c);
+	cos_angle= std::fmax(-1.0f, std::fmin(1.0f, cos_angle)); // Clamp value to [-1, 1] to avoid NaNs due to floating point errors
+	return std::fabs(acos(cos_angle));
 }
 
 /**
