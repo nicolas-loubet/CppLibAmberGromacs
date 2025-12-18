@@ -22,7 +22,7 @@ class GromacsTopologyReader : public TopologyReader {
 			string line= "";
 			while(getline(file, line))
 				if(line[0] != ';')
-					return ToolKit::strip(line.substr(0,8));
+					return ToolKit::strip(line.substr(0,6));
 			return "ERROR";
 		}
 

@@ -59,6 +59,7 @@ namespace ToolKit {
 	std::string strip(std::string _s)
 	{
 		_s.erase(std::remove(_s.begin(), _s.end(), ' '), _s.end());
+		_s.erase(std::remove(_s.begin(), _s.end(), '\t'), _s.end());
 		return(_s);
 	}
 
