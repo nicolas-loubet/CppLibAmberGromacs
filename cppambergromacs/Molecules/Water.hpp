@@ -104,15 +104,19 @@ class Water : public Molecule {
 		 */
 		Real potentialWith(const Molecule& m, const Vector& bounds) const {
 			Atom* arr_other= m.getAtoms();
-			//Combination rules: Lorentz-Berthelot
-			Real s= .5*(atoms[0].getSigma() + arr_other[0].getSigma());
-			Real e= sqrt(atoms[0].getEpsilon() * arr_other[0].getEpsilon());
+			Real Vtot= 0.0;
 
-			Real Vtot= getLJPotential(m, s, e, bounds);
+			for(int j= 0; j < m.getNAtoms(); j++) {
+				// Combination rules: Lorentz-Berthelot
+				Real s,e;
+				s= .5*(atoms[0].getSigma() + arr_other[j].getSigma());
+				e= sqrt(atoms[0].getEpsilon() * arr_other[j].getEpsilon());
+				// Here I have to check if there is a special interaction
+				Vtot+= getLJPotential(m.getAtom(j+1), s, e, bounds);
 
-			for(int i= 0; i < n_atoms; i++)
-				for(int j= 0; j < m.getNAtoms(); j++)
+				for(int i= 0; i < n_atoms; i++)
 					Vtot+= atoms[i].getCoulombPotential(arr_other[j],bounds);
+			}
 					
 			return Vtot;
 		}
