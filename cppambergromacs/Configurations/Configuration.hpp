@@ -22,6 +22,7 @@ class Configuration {
 		Molecule** molecs; //Array of molecule pointers
 		int N_MOLEC; //The number of Molecule objects in the array
 		Vector bounds; //The bounds of the system
+		const std::map<std::pair<string,string>, std::pair<Real,Real>>& special_interactions; // LJ special interactions from TopolInfo
 
 		// Helper: finds the index of the closest site
 		inline bool closestSiteIndex(const vector<Vector>& sites, const Vector& pos, const Vector& bounds, Real R_CUT_OFF, int& i_close) {
@@ -55,7 +56,7 @@ class Configuration {
 		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Atom& atom, const Real R_CUT_OFF) {
 			int i_close;
 			if(closestSiteIndex(sites, atom.getPosition(), bounds, R_CUT_OFF, i_close)) {
-				sum_per_site[i_close]+= center_water.potentialWith(atom, bounds);
+				sum_per_site[i_close]+= center_water.potentialWith(atom, bounds, special_interactions);
 			}
 		}
 
@@ -118,13 +119,13 @@ class Configuration {
 		// Helper function to process interactions with an ion
 		void processIonInteraction(Water& molecule, const Molecule& ion, vector<Vector>& sites, const Vector& bounds, Real R_CUT_OFF, Real V_CUT_OFF,
 								   vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances, vector<vector<int>>& ww_indices, vector<Real>& sum_per_site) {
-			auto [closest_idx, closest_dist]= findClosestSite(sites, ion.getAtom(1).getPosition(), bounds);
+			auto [closest_idx, closest_dist]= findClosestSite(sites, ion.getPosition(), bounds);
 			if(closest_dist > R_CUT_OFF) return;
-			Real pot= molecule.potentialWith(ion.getAtom(1), bounds);
+			Real pot= molecule.potentialWith(ion, bounds);
 			sum_per_site[closest_idx]+= pot;
 			if(pot <= V_CUT_OFF) {
 				ww_interactions[closest_idx].push_back(pot);
-				ww_distances[closest_idx].push_back(molecule.distanceTo(ion, bounds));
+				ww_distances[closest_idx].push_back(molecule.distanceTo(ion, bounds, special_interactions));
 				ww_indices[closest_idx].push_back(ion.getID());
 			}
 		}
@@ -157,7 +158,7 @@ class Configuration {
 
 				auto [closest_idx, closest_dist]= findClosestSite(sites, solute.getAtom(a).getPosition(), bounds);
 				if(closest_dist > R_CUT_OFF) return;
-				Real pot= molecule.potentialWith(solute.getAtom(a), bounds);
+				Real pot= molecule.potentialWith(solute.getAtom(a), bounds, special_interactions);
 				sum_per_site[closest_idx]+= pot;
 				total_potential[closest_idx]+= pot;
 				if(closest_dist < min_distance[closest_idx]) min_distance[closest_idx]= closest_dist;
@@ -209,6 +210,7 @@ class Configuration {
 	
 			if(!coord_reader->readCoordinates(filename, topol_info, molecs, bounds))
 				throw runtime_error("Failed to read coordinates");
+			special_interactions= topol_info.special_interaction;
 		}
 
 		/**

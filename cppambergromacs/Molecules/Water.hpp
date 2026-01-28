@@ -100,20 +100,28 @@ class Water : public Molecule {
 		 * Calculates the potential of this molecule with another specified
 		 * @param m Molecule the other molecule
 		 * @param bounds The coordinate of the last point, so the components are the width, height and length
+		 * @param special_interactions Map of special interactions
 		 * @return the potential energy in kJ/mol of the interaction between this two molecules
 		 */
-		Real potentialWith(const Molecule& m, const Vector& bounds) const {
+		Real potentialWith(const Molecule& m, const Vector& bounds, const std::map<std::pair<string,string>, std::pair<Real,Real>>& special_interactions) const {
 			Atom* arr_other= m.getAtoms();
 			Real Vtot= 0.0;
 
 			for(int j= 0; j < m.getNAtoms(); j++) {
-				// Combination rules: Lorentz-Berthelot
 				Real s,e;
-				s= .5*(atoms[0].getSigma() + arr_other[j].getSigma());
-				e= sqrt(atoms[0].getEpsilon() * arr_other[j].getEpsilon());
-				// Here I have to check if there is a special interaction
-				Vtot+= getLJPotential(m.getAtom(j+1), s, e, bounds);
 
+				// Check for special interaction
+				std::pair<string,string> key= make_pair(atoms[0].getType(), arr_other[j].getType());
+				if(special_interactions.find(key) != special_interactions.end()) {
+					s= special_interactions[key].first;
+					e= special_interactions[key].second;
+				} else {
+					// Combination rules: Lorentz-Berthelot
+					s= .5*(atoms[0].getSigma() + arr_other[j].getSigma());
+					e= sqrt(atoms[0].getEpsilon() * arr_other[j].getEpsilon());
+				}
+				
+				Vtot+= getLJPotential(m.getAtom(j+1), s, e, bounds);
 				for(int i= 0; i < n_atoms; i++)
 					Vtot+= atoms[i].getCoulombPotential(arr_other[j],bounds);
 			}
@@ -125,14 +133,25 @@ class Water : public Molecule {
 		 * Calculates the potential of this molecule with an atom
 		 * @param atom Atom interacting with this molecule
 		 * @param bounds The coordinate of the last point, so the components are the width, height and length
+		 * @param special_interactions Map of special interactions
 		 * @return the potential energy in kJ/mol of the interaction between this two molecules
 		 */
-		Real potentialWith(const Atom& atom, const Vector& bounds) {
-			Real s= .5*(atoms[0].getSigma() + atom.getSigma());
-			Real e= sqrt(atoms[0].getEpsilon() * atom.getEpsilon());
+		Real potentialWith(const Atom& atom, const Vector& bounds, const std::map<std::pair<string,string>, std::pair<Real,Real>>& special_interactions) const {
+			Real s,e;
+
+			// Check for special interaction
+			std::pair<string,string> key= make_pair(atoms[0].getType(), atom.getType());
+			if(special_interactions.find(key) != special_interactions.end()) {
+				s= special_interactions[key].first;
+				e= special_interactions[key].second;
+			} else {
+				// Combination rules: Lorentz-Berthelot
+				s= .5*(atoms[0].getSigma() + atom.getSigma());
+				e= sqrt(atoms[0].getEpsilon() * atom.getEpsilon());
+			}
+				
 
 			Real Vtot= getLJPotential(atom, s, e, bounds);
-
 			for(int i= 0; i < n_atoms; i++)
 				Vtot+= atoms[i].getCoulombPotential(atom,bounds);
 					
