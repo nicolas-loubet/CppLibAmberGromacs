@@ -18,6 +18,15 @@
 
 class LammpsTopologyReader : public TopologyReader {
 	private:
+
+		/**
+		 * Accumulates the masses of the atoms in the LAMMPS data file.
+		 */
+		struct MolAccumulator {
+			vector<Real> masses;
+			int atom_count= 0;
+		};
+
 		/**
 		 * Finds the positions of the sections in the LAMMPS data file.
 		 * @param file The LAMMPS data file.
@@ -140,120 +149,85 @@ class LammpsTopologyReader : public TopologyReader {
 		}
 
 		/**
-		 * Check if the previous molecule was a water molecule.
-		 * @param topology The topology information.
-		 * @param atom_id The ID of the first atom of the next molecule
-		 * @param atom_in_molecule_counter The number of atoms in the molecule.
+		 * Check if a molecule is a water molecule.
+		 * @param mol The molecule information.
 		 * @return True if the molecule was a water molecule, false otherwise.
 		 */
-		inline static bool isWater(TopolInfo& topology, int atom_id, int atom_in_molecule_counter) {
-			if(atom_in_molecule_counter > 5) return false;
-			for(int i_ox= 0; i_ox < 3; i_ox++) {
-				// Searching for 3-atom water to 5-atom water
-				tuple<string,string,Real,Real> atom_data= topology.atom_type_name_charge_mass[0][atom_id-5+i_ox];
-				Real mass_val= get<3>(atom_data);
-				if(int(mass_val+.2) != 16) continue; // Ox
+		inline static bool isWaterMolecule(const MolAccumulator& mol) {
+			if(mol.atom_count < 3 || mol.atom_count > 5) return false;
 
-				atom_data= topology.atom_type_name_charge_mass[0][atom_id-4+i_ox];
-				mass_val= get<3>(atom_data);
-				if(int(mass_val) != 1) continue; // H1
-
-				atom_data= topology.atom_type_name_charge_mass[0][atom_id-3+i_ox];
-				mass_val= get<3>(atom_data);
-				if(int(mass_val) == 1) return true; // H2
+			int nO= 0, nH= 0;
+			for(Real m: mol.masses) {
+				if(int(m + 0.2) == 16)
+					nO++;
+				else if(int(m + 0.2) == 1)
+					nH++;
 			}
-			return false;
-		}
-
-		/**
-		 * Add information corresponding to a new molecule to the topology information.
-		 * @param topology The topology information.
-		 * @param atom_id The ID of the first atom in the molecule.
-		 * @param atom_in_molecule_counter The number of atoms in the molecule.
-		 * @param water_molecule_type The type of the water molecule (to be updated).
-		 * @param mol_id The ID of the molecule (bejore changing).
-		 */
-		inline static void incrementMolecule(TopolInfo& topology, int atom_id, int atom_in_molecule_counter, string& water_molecule_type, int mol_id) {
-			topology.num_molecules++;
-
-			if(isWater(topology,atom_id,atom_in_molecule_counter)) {
-				if(water_molecule_type == "!") { // Define the molecule type as WAT
-					water_molecule_type= "mtWAT";
-					topology.number_of_each_different_molecule[water_molecule_type]= 0;
-					topology.number_of_atoms_per_different_molecule[water_molecule_type]= atom_in_molecule_counter;
-				}
-				topology.num_solvents++;
-				topology.number_of_each_different_molecule[water_molecule_type]++;
-				topology.name_type["Mol"+to_string(mol_id)]= water_molecule_type;
-			} else {
-				topology.num_solutes++;
-				// If I find a molecule that is not a water, I use the ID as a molecule type
-				topology.number_of_each_different_molecule[to_string(mol_id)]= 1;
-				topology.name_type["Mol"+to_string(mol_id)]= "mt"+to_string(mol_id);
-				topology.number_of_atoms_per_different_molecule["mt"+to_string(mol_id)]= atom_in_molecule_counter;
-			}
-		}
-
-		/**
-		 * Check if a new molecule has been found.
-		 * @param previous_molecule_id The ID of the previous molecule.
-		 * @param atom_in_molecule_counter The number of atoms in the molecule.
-		 * @param water_molecule_type The type of the water molecule (to be updated).
-		 * @param mol_id The ID of the molecule.
-		 * @param topology The topology information.
-		 * @param atom_id The ID of the first atom in the molecule.
-		 */
-		inline static void checkIfNewMolecule(int& previous_molecule_id, int& atom_in_molecule_counter, string& water_molecule_type, int mol_id, TopolInfo& topology, int atom_id) {
-			if(mol_id != previous_molecule_id) {
-				if(previous_molecule_id != -1) {
-					incrementMolecule(topology, atom_id, atom_in_molecule_counter, water_molecule_type, previous_molecule_id);
-					previous_molecule_id= mol_id;
-					atom_in_molecule_counter= 0;
-				}
-				previous_molecule_id= mol_id;
-			}
+			return (nO == 1 && nH == 2);
 		}
 
 		/**
 		 * Read the atoms from the 'Atoms' section of the LAMMPS data file.
-		 * @param file The LAMMPS data file.
-		 * @param position The position of the 'Atoms' section in the file.
-		 * @param masses_map A map of atom type IDs to their masses.
-		 * @return A map of atom IDs to their type, name, charge, and mass.
+		 * @param file The file stream to read from.
+		 * @param position The position in the file to start reading from.
+		 * @param atomtype_mass_name A map of atom type IDs to their masses and names.
+		 * @return The topology information.
 		 */
 		inline TopolInfo readAtoms(ifstream& file, streampos position, const map<string,pair<Real,string>>& atomtype_mass_name) const {
+			int internal_mol_id= 1; // internal mol_id, starts at 1 and increments with each new molecule
+
 			file.clear();
 			file.seekg(position);
 			string line;
-			getline(file,line); // Comment
+			getline(file,line); // comment
 
-			int previous_molecule_id= -1;
-			int atom_in_molecule_counter= 0;
-			string water_molecule_type= "!";
-			
 			TopolInfo topology= initTopology();
-			
-			while(getline(file,line)) {
-				if(ToolKit::strip(line) == "") {
-					// Save last molecule
-					checkIfNewMolecule(previous_molecule_id, atom_in_molecule_counter, water_molecule_type, previous_molecule_id+1, topology, topology.total_number_of_atoms+1);
-					break;
-				}
 
-				int atom_id, mol_id, atom_type_int; Real q, x, y, z;
+			map<int,MolAccumulator> mol_acc; // Accumulates the masses of the atoms in each molecule
+			map<int,int> mol_atom_counter; // Counts the number of atoms in each molecule
+
+			while(getline(file,line)) {
+				if(ToolKit::strip(line).empty()) break;
+
+				int atom_id, mol_id, atom_type_int;
+				Real q, x, y, z;
 				tie(atom_id,mol_id,atom_type_int,q,x,y,z)= readAtomData(line);
 
-				string type_str, atom_name_str; Real mass;
+				string type_str, atom_name_str;
+				Real mass;
 				tie(type_str,atom_name_str,mass)= findAtomNameMass(atom_type_int, atomtype_mass_name);
 
-				checkIfNewMolecule(previous_molecule_id, atom_in_molecule_counter, water_molecule_type, mol_id, topology, atom_id);
-
-				// LAMMPS does not distinguish molecule types, so I am using only the first position of the vector
 				topology.atom_type_name_charge_mass[0][atom_id]= make_tuple(type_str, atom_name_str, q, mass);
-				topology.name_type[atom_name_str]= type_str; // Overwriting the type name, I think it's faster than checking every time
-				
+				topology.name_type[atom_name_str]= type_str;
 				topology.total_number_of_atoms++;
-				atom_in_molecule_counter++;
+
+				mol_acc[mol_id].masses.push_back(mass);
+				mol_acc[mol_id].atom_count++;
+			}
+
+			string water_molecule_type= "mtWAT";
+			bool water_type_defined= false;
+
+			for(const auto& [mol_id, mol]: mol_acc) {
+				topology.num_molecules++;
+
+				if(isWaterMolecule(mol)) {
+					if(!water_type_defined) {
+						topology.number_of_each_different_molecule[water_molecule_type]= 0;
+						topology.number_of_atoms_per_different_molecule[water_molecule_type]= mol.atom_count;
+						water_type_defined= true;
+					}
+					topology.num_solvents++;
+					topology.number_of_each_different_molecule[water_molecule_type]++;
+					topology.name_type["Mol"+to_string(internal_mol_id++)]= water_molecule_type;
+				}
+				else {
+					topology.num_solutes++;
+					string mt= "mt"+to_string(mol_id);
+					topology.number_of_each_different_molecule[mt]= 1;
+					topology.number_of_atoms_per_different_molecule[mt]= mol.atom_count;
+					topology.name_type["Mol"+to_string(internal_mol_id++)]= mt;
+				}
 			}
 			return topology;
 		}
