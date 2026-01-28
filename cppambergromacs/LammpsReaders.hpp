@@ -36,6 +36,8 @@ class LammpsTopologyReader : public TopologyReader {
 					section_positions["Atoms"]= file.tellg();
 				} else if(line.find("Pair Coeff") != string::npos) {
 					section_positions["Pair Coeff"]= file.tellg();
+				} else if(line.find("Special Interactions") != string::npos) {
+					section_positions["Special Interactions"]= file.tellg();
 				} else if(line.find("xlo xhi") != string::npos) {
 					section_positions["BoxDimensions"]= file.tellg();
 				}
@@ -182,12 +184,12 @@ class LammpsTopologyReader : public TopologyReader {
 				}
 				topology.num_solvents++;
 				topology.number_of_each_different_molecule[water_molecule_type]++;
-				topology.name_type["Mol"+to_string(mol_id+1)]= water_molecule_type;
+				topology.name_type["Mol"+to_string(mol_id)]= water_molecule_type;
 			} else {
 				topology.num_solutes++;
 				// If I find a molecule that is not a water, I use the ID as a molecule type
-				topology.number_of_each_different_molecule[to_string(mol_id+1)]= 1;
-				topology.name_type["Mol"+to_string(mol_id+1)]= "mt"+to_string(mol_id);
+				topology.number_of_each_different_molecule[to_string(mol_id)]= 1;
+				topology.name_type["Mol"+to_string(mol_id)]= "mt"+to_string(mol_id);
 				topology.number_of_atoms_per_different_molecule["mt"+to_string(mol_id)]= atom_in_molecule_counter;
 			}
 		}
@@ -292,7 +294,7 @@ class LammpsTopologyReader : public TopologyReader {
 				key_without_digits.erase(remove_if(key_without_digits.begin(), key_without_digits.end(), ::isdigit), key_without_digits.end());
 				key_without_digits.erase(remove(key_without_digits.begin(), key_without_digits.end(), '_'), key_without_digits.end());
 				if(periodic_table.count(key_without_digits)) {
-					Z_values[map_name_type.at("Atom"+key)]= periodic_table.at(key_without_digits);
+					Z_values[map_name_type.at("Atom"+k)]= periodic_table.at(key_without_digits);
 					continue;
 				}
 
@@ -328,6 +330,38 @@ class LammpsTopologyReader : public TopologyReader {
 				lj_params["at"+to_string(atom_type_id)]= make_pair(epsilon,sigma);
 			}
 			return lj_params;
+		}
+
+		/**
+		 * Reads the LJ parameters from the 'Special Interactions' section of the LAMMPS data file.
+		 * @param file The LAMMPS data file.
+		 * @param position The position of the 'Special Interactions' section in the file.
+		 * @return A map of atom type IDs (two types) to their epsilon and sigma values.
+		 */
+		inline map<pair<string,string>,pair<Real,Real>> readSpecialInteractions(ifstream &file, int position) const {
+			map<pair<string,string>,pair<Real,Real>> special_interactions;
+			file.clear();
+			file.seekg(position);
+			string line;
+
+			while(getline(file,line)) {
+				if(ToolKit::strip(line) == "") break;
+
+				string line_without_comment= line.substr(1,line.find("##")-1);
+				stringstream ss(line_without_comment);
+				string type1,type2;
+				int func;
+				Real sigma,epsilon;
+
+				ss >> type1 >> type2 >> func >> epsilon >> sigma;
+				if(!ss.fail()) {
+					special_interactions[make_pair("at"+type1,"at"+type2)]= make_pair(epsilon,sigma);
+					special_interactions[make_pair("at"+type2,"at"+type1)]= make_pair(epsilon,sigma);
+					continue;
+				}
+				throw runtime_error("Error reading LJ special parameters from LAMMPS data file.");
+			}
+			return special_interactions;
 		}
 
 		/**
@@ -394,7 +428,8 @@ class LammpsTopologyReader : public TopologyReader {
 			if(positions_of_sections.count("Pair Coeff"))
 				topology.type_LJparam= readLJParameters(file, positions_of_sections["Pair Coeff"]);
 			
-			// Special interactions pending, not used for the moment
+			if(positions_of_sections.count("Special Interactions"))
+				topology.special_interaction= readSpecialInteractions(file, positions_of_sections["Special Interactions"]);
 
 			if(positions_of_sections.count("BoxDimensions"))
 				topology.default_system_bounds= readBoxDimensions(file);

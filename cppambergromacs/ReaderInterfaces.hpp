@@ -147,7 +147,7 @@ std::ostream& operator<<(std::ostream& os, const TopolInfo& info) {
 
 	os << "  Special interactions:\n";
 	for(const auto& [pair, params]: info.special_interaction)
-		os << "	(" << pair.first << "," << pair.second << "): (" << params.first << "," << params.second << ")\n";
+		os << "	(" << pair.first << "," << pair.second << "): (e=" << params.first << ", s=" << params.second << ")\n";
 
 	return os;
 }
