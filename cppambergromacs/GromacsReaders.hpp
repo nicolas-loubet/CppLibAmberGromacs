@@ -360,7 +360,7 @@ class GromacsCoordinateReader : public CoordinateReader {
 			int Z= topol_info.type_Z.at(type);
 			tie(e,s)= topol_info.type_LJparam.at(type);
 
-			return Atom(Vector(x*10,y*10,z*10), i_atom, mass, q, e, s, Z);
+			return Atom(Vector(x*10,y*10,z*10), i_atom, mass, q, e, s, Z, type);
 		}
 
 		/**
