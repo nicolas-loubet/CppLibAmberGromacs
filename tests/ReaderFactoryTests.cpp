@@ -287,7 +287,7 @@ TEST_CASE("TopolInfo - Stream output", "[TopolInfo]") {
 		REQUIRE(output.find("O: Oxygen") != std::string::npos);
 		REQUIRE(output.find("Oxygen: 8") != std::string::npos);
 		REQUIRE(output.find("Oxygen: (e=1, s=3.5)") != std::string::npos);
-		REQUIRE(output.find("(O,H): (0.5,2.5)") != std::string::npos);
+		REQUIRE(output.find("(O,H): (e=0.5, s=2.5)") != std::string::npos);
 	}
 
 	SECTION("Should handle empty TopolInfo") {

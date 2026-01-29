@@ -882,7 +882,7 @@ class AmberCoordinateReader : public CoordinateReader {
 					const auto& [epsilon,sigma]= topol_info.type_LJparam.at(type);
 
 					int Z=topol_info.type_Z.at(type);
-					atoms[j]= Atom(coords[(atoms_each_order_molecule[mol_pair.first][j])-1], atom_idx+1, mass, charge, epsilon, sigma, Z);
+					atoms[j]= Atom(coords[(atoms_each_order_molecule[mol_pair.first][j])-1], atom_idx+1, mass, charge, epsilon, sigma, Z, type);
 					atom_idx+=1;
 				}
 				
@@ -945,7 +945,7 @@ class AmberCoordinateReader : public CoordinateReader {
 						const auto& [epsilon,sigma]= topol_info.type_LJparam.at(type);
 						int Z=topol_info.type_Z.at(type);
 
-						atoms[number_of_atoms]= Atom(Vector(x,y,z), number_of_atoms+1, mass, charge, epsilon, sigma, Z);
+						atoms[number_of_atoms]= Atom(Vector(x,y,z), number_of_atoms+1, mass, charge, epsilon, sigma, Z, type);
 						number_of_atoms+=1;
 					}
 				}

@@ -470,6 +470,8 @@ class LammpsCoordinateReader : public CoordinateReader {
 				int num_atoms_per_molecule= topol_info.number_of_atoms_per_different_molecule.at(topol_info.name_type.at("Mol"+to_string(i+1)));
 				Atom* atoms_array_for_molecule= new Atom[num_atoms_per_molecule];
 
+				bool is_water= topol_info.name_type.at("Mol"+to_string(i+1)) == "mtWAT";
+
 				for(int j= 0; j < num_atoms_per_molecule; j++,global_atom_idx++) {
 					const auto& [type,atom_name,q,mass]= topol_info.atom_type_name_charge_mass[0].at(global_atom_idx+1);
 
@@ -490,14 +492,15 @@ class LammpsCoordinateReader : public CoordinateReader {
 						throw runtime_error("Error: Z value not found for type " + type);
 					}
 
-					atoms_array_for_molecule[j]= Atom(coords[global_atom_idx], j+1, mass, q, e, s, Z);
+					atoms_array_for_molecule[j]= Atom(coords[global_atom_idx], j+1, mass, q, e, s, Z, type);
 				}
 				
-				if(i < topol_info.num_solutes) {
-					molecs[i]= new Molecule(i+1, atoms_array_for_molecule, num_atoms_per_molecule);
-				} else {
+				if(is_water) {
 					molecs[i]= new Water(i+1, atoms_array_for_molecule, num_atoms_per_molecule);
+				} else {
+					molecs[i]= new Molecule(i+1, atoms_array_for_molecule, num_atoms_per_molecule);
 				}
+
 			}
 
 			f.close();
