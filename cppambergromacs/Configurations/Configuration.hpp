@@ -2,7 +2,7 @@
 #define CONFIGURATION_HPP
 
 /**
- * Version: July 2025
+ * Version: January 2026
  * Author: Nicolás Loubet
  */
 
@@ -22,7 +22,7 @@ class Configuration {
 		Molecule** molecs; //Array of molecule pointers
 		int N_MOLEC; //The number of Molecule objects in the array
 		Vector bounds; //The bounds of the system
-		const std::map<std::pair<string,string>, std::pair<Real,Real>>& special_interactions; // LJ special interactions from TopolInfo
+		std::map<std::pair<string,string>, std::pair<Real,Real>> special_interactions; // LJ special interactions from TopolInfo
 
 		// Helper: finds the index of the closest site
 		inline bool closestSiteIndex(const vector<Vector>& sites, const Vector& pos, const Vector& bounds, Real R_CUT_OFF, int& i_close) {
@@ -121,11 +121,11 @@ class Configuration {
 								   vector<vector<Real>>& ww_interactions, vector<vector<Real>>& ww_distances, vector<vector<int>>& ww_indices, vector<Real>& sum_per_site) {
 			auto [closest_idx, closest_dist]= findClosestSite(sites, ion.getPosition(), bounds);
 			if(closest_dist > R_CUT_OFF) return;
-			Real pot= molecule.potentialWith(ion, bounds);
+			Real pot= molecule.potentialWith(ion, bounds, special_interactions);
 			sum_per_site[closest_idx]+= pot;
 			if(pot <= V_CUT_OFF) {
 				ww_interactions[closest_idx].push_back(pot);
-				ww_distances[closest_idx].push_back(molecule.distanceTo(ion, bounds, special_interactions));
+				ww_distances[closest_idx].push_back(molecule.distanceTo(ion, bounds));
 				ww_indices[closest_idx].push_back(ion.getID());
 			}
 		}
@@ -216,7 +216,7 @@ class Configuration {
 		/**
 		 * Copy constructor
 		 */
-		Configuration(const Configuration& other) : N_MOLEC(other.N_MOLEC), bounds(other.bounds), molecs(nullptr) {
+		Configuration(const Configuration& other) : N_MOLEC(other.N_MOLEC), bounds(other.bounds), molecs(nullptr), special_interactions(other.special_interactions) {
 			molecs= new Molecule*[N_MOLEC];
 			for(int i= 0; i < N_MOLEC; i++)
 				molecs[i]= other.molecs[i] ? new Molecule(*other.molecs[i]) : nullptr;
@@ -236,6 +236,7 @@ class Configuration {
 			molecs= new Molecule*[N_MOLEC];
 			for(int i= 0; i < N_MOLEC; i++)
 				molecs[i]= other.molecs[i] ? new Molecule(*other.molecs[i]) : nullptr;
+			special_interactions= other.special_interactions;
 			return *this;
 		}
 	

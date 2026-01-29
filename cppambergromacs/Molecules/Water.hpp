@@ -2,7 +2,7 @@
 #define WATER_HPP
 
 /**
- * Version: June 2025
+ * Version: January 2026
  * Author: Nicolás Loubet
  */
 
@@ -103,7 +103,7 @@ class Water : public Molecule {
 		 * @param special_interactions Map of special interactions
 		 * @return the potential energy in kJ/mol of the interaction between this two molecules
 		 */
-		Real potentialWith(const Molecule& m, const Vector& bounds, const std::map<std::pair<string,string>, std::pair<Real,Real>>& special_interactions) const {
+		Real potentialWith(const Molecule& m, const Vector& bounds, const std::map<std::pair<std::string,std::string>, std::pair<Real,Real>>& special_interactions) const {
 			Atom* arr_other= m.getAtoms();
 			Real Vtot= 0.0;
 
@@ -111,10 +111,10 @@ class Water : public Molecule {
 				Real s,e;
 
 				// Check for special interaction
-				std::pair<string,string> key= make_pair(atoms[0].getType(), arr_other[j].getType());
+				std::pair<std::string,std::string> key= std::make_pair(atoms[0].getAtomType(), arr_other[j].getAtomType());
 				if(special_interactions.find(key) != special_interactions.end()) {
-					s= special_interactions[key].first;
-					e= special_interactions[key].second;
+					s= special_interactions.at(key).first;
+					e= special_interactions.at(key).second;
 				} else {
 					// Combination rules: Lorentz-Berthelot
 					s= .5*(atoms[0].getSigma() + arr_other[j].getSigma());
@@ -136,14 +136,14 @@ class Water : public Molecule {
 		 * @param special_interactions Map of special interactions
 		 * @return the potential energy in kJ/mol of the interaction between this two molecules
 		 */
-		Real potentialWith(const Atom& atom, const Vector& bounds, const std::map<std::pair<string,string>, std::pair<Real,Real>>& special_interactions) const {
+		Real potentialWith(const Atom& atom, const Vector& bounds, const std::map<std::pair<std::string,std::string>, std::pair<Real,Real>>& special_interactions) const {
 			Real s,e;
 
 			// Check for special interaction
-			std::pair<string,string> key= make_pair(atoms[0].getType(), atom.getType());
+			std::pair<std::string,std::string> key= make_pair(atoms[0].getAtomType(), atom.getAtomType());
 			if(special_interactions.find(key) != special_interactions.end()) {
-				s= special_interactions[key].first;
-				e= special_interactions[key].second;
+				s= special_interactions.at(key).first;
+				e= special_interactions.at(key).second;
 			} else {
 				// Combination rules: Lorentz-Berthelot
 				s= .5*(atoms[0].getSigma() + atom.getSigma());

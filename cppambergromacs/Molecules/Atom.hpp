@@ -2,7 +2,7 @@
 #define ATOM_HPP
 
 /**
- * Version: May 2025
+ * Version: January 2026
  * Author: Ezequiel Cuenca
  */
 
@@ -15,7 +15,7 @@ class Atom : public Particle{
 		Real sigma;
 		Real epsilon;
 		int Z;
-		string type;
+		std::string type;
 
 	public:
 		void setis_Hatom(bool Hatom){is_HAtom=Hatom;}
@@ -27,14 +27,14 @@ class Atom : public Particle{
 		Real getEpsilon() const {return(epsilon);}
 		void setZ(int atom_type){Z=atom_type;is_HAtom= Z==1;}
 		int getZ() const {return(Z);}
-		void setAtomType(string type){this->type=type;}
-		string getAtomType() const {return(type);}
+		void setAtomType(std::string type){this->type=type;}
+		std::string getAtomType() const {return(type);}
 
 		Atom(): Particle(), is_HAtom(false), Z(0), epsilon(0), sigma(0) {}
 
 		Atom(Vector pos, int id): Particle(pos, id, 0), type("UNK") {}
 		
-		Atom(Vector pos, int id, Real mass, Real charge, Real e, Real s, int Z, string type):
+		Atom(Vector pos, int id, Real mass, Real charge, Real e, Real s, int Z, std::string type):
 			Particle(pos, id, mass, charge), Z(Z), epsilon(e), sigma(s), type(type), is_HAtom(Z==1) {}
 		
 		Atom(const Atom& other) : Particle(other), is_HAtom(other.is_HAtom), sigma(other.sigma), epsilon(other.epsilon), Z(other.Z), type(other.type) {}
