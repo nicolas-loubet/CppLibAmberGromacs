@@ -7,6 +7,7 @@
  */
 
 #include "Molecule.hpp"
+#include <string>
 
 /**
  * This class creates a Water molecule object, with the 3 atoms: H2O
@@ -138,7 +139,80 @@ class Water : public Molecule {
 					
 			return Vtot;
 		}
+	/**
+		 * Calculates the potential of this molecule with an atom
+		 * @param atom Atom interacting with this molecule
+		 * @param bounds The coordinate of the last point, so the components are the width, height and length
+		 * @return the potential energy in kJ/mol of the interaction between this two molecules
+		 */
+		Real potentialWith_discriminated(const Atom& atom, const Vector& bounds,
+										std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>& atom_mapnames_quantity_atoms_completo,
+										std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_Coulomb_atoms_completo,
+										std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_VLJ_atoms_completo,
+										std::string& atom_name,int i_close,const int ID) {
+			Real s= .5*(atoms[0].getSigma() + atom.getSigma());
+			Real e= sqrt(atoms[0].getEpsilon() * atom.getEpsilon());
+			Real Vtot=0;
+			Real V_LJ= getLJPotential(atom, s, e, bounds);
+			Real V_Coulomb=0;
+			for(int i= 0; i < n_atoms; i++)
+				V_Coulomb+= atoms[i].getCoulombPotential(atom,bounds);
+			Vtot=V_LJ+V_Coulomb;
+			
+			std::vector<int> quantity(4, 0);
+			quantity[i_close] += 1;
+			std::get<2>(atom_mapnames_quantity_atoms_completo)[atom_name].push_back(quantity);
 
+			std::vector<Real> Coulomb(4, 0.0);
+			Coulomb[i_close] += V_Coulomb;
+			std::get<2>(atom_mapnames_Coulomb_atoms_completo)[atom_name].push_back(Coulomb);
+
+
+			std::vector<Real> LJ(4, 0.0);
+			LJ[i_close] += V_LJ;
+			std::get<2>(atom_mapnames_VLJ_atoms_completo)[atom_name].push_back(LJ);
+		
+			return Vtot;  
+		}
+
+		/**
+		 * Calculates the potential of this molecule with another specified
+		 * @param m Water the other molecule
+		 * @param bounds The coordinate of the last point, so the components are the width, height and length
+		 * @return the potential energy in kJ/mol of the interaction between this two molecules
+		 */
+		Real potentialWith_discriminated(const Water& m, const Vector& bounds,
+			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>& atom_mapnames_quantity_atoms_completo,
+			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_Coulomb_atoms_completo,
+			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_VLJ_atoms_completo,
+			std::string& atom_name,int i_close,const int ID) const {
+
+			Real Vtot=0;
+			Real V_LJ= getLJPotential(m, atoms[0].getSigma(), atoms[0].getEpsilon(), bounds);
+			Real V_Coulomb=0;
+			Atom* arr_other= m.getAtoms();
+			for(int i= 0; i < n_atoms; i++){
+				for(int j= 0; j < m.getNAtoms(); j++){
+					V_Coulomb+= atoms[i].getCoulombPotential(arr_other[j],bounds);
+				}
+			}
+			Vtot=V_LJ+V_Coulomb;
+
+			std::vector<int> quantity(4, 0);
+			quantity[i_close] += 1;
+			std::get<2>(atom_mapnames_quantity_atoms_completo)[atom_name].push_back(quantity);
+
+			std::vector<Real> Coulomb(4, 0.0);
+			Coulomb[i_close] += V_Coulomb;
+			std::get<2>(atom_mapnames_Coulomb_atoms_completo)[atom_name].push_back(Coulomb);
+
+
+			std::vector<Real> LJ(4, 0.0);
+			LJ[i_close] += V_LJ;
+			std::get<2>(atom_mapnames_VLJ_atoms_completo)[atom_name].push_back(LJ);
+
+			return Vtot;
+		}
 };
 
 #endif // WATER_HPP

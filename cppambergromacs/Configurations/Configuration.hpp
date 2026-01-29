@@ -332,6 +332,165 @@ class Configuration {
 				identificators.push_back(i+1);
 			}
 		}
+		/**
+		 * It returns the interactions per site of the molecule specified by its ID
+		 * @param ID The ID of the molecule
+		 * @param R_CUT_OFF The cutoff radius, default is 5.
+		 * @param potential_matrix The matrix with the potential values, default is nullptr
+		 * @param neighbours The neighbours of the molecule, default is nullptr
+		 * @param labels Identification of the sorted list, default is nullptr. If you need it, declare it ass "new int[4]", result would be 0-3
+		 * @return The interactions per site, sorted in ascending order
+		 */
+		vector<Real> getInteractionsPerSite_discriminated(const int ID, const TopolInfo& ti, 
+														std::vector<std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>>& atom_mapnames_quantity_completo,
+														std::vector<std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>>& atom_mapnames_Coulomb_completo,
+														std::vector<std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>>& atom_mapnames_VLJ_completo,
+													    std::vector<std::tuple<int,Real,std::vector<int>>>& V4S_preferencia,const float MIN_BINS, const float MAX_BINS, const int N_BINS) {
+			const Real R_CUT_OFF= 5.0;
+			Real** potential_matrix= nullptr;
+			 ToolKit::ArrInt* neighbours= nullptr;
+			int* labels= nullptr;
+
+			if(!getMolec(ID).isWater()) throw invalid_argument("The molecule is not a water molecule.");
+			Water& molecule= *static_cast<Water*>(molecs[ID-1]);
+			Vector o= molecule.getOxygen().getPosition();
+			Vector h1= molecule.getHydrogen_1().getPosition();
+			Vector h2= molecule.getHydrogen_2().getPosition();
+			vector<Vector> sites= Geometrics::getPerfectTetrahedron(o, h1, h2, bounds).toVector();
+			
+			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>> atom_mapnames_quantity_atoms_completo;
+			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>> atom_mapnames_Coulomb_atoms_completo;
+			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>> atom_mapnames_VLJ_atoms_completo;
+			std::tuple<int,Real,std::vector<int>> V4S_preferencia_completo;
+			
+			vector<Real> sum_per_site(4,0.0);
+			for(int j= 0; j < N_MOLEC; j++) {
+				if(j+1 == ID) continue; // Same molecule, skip
+				
+				if((getMolec(j+1).getNAtoms() == 1) && (getMolec(j+1).getCharge() >= 1 || getMolec(j+1).getCharge() <= -1)) {
+					// We found a ion, consider it always
+					addToSumVector(sites, sum_per_site, molecule, getMolec(j+1).getAtom(1), R_CUT_OFF);
+					continue;
+				}
+				if(molecs[j]->isWater()) { // We found a water molecule
+					Water& other= *static_cast<Water*>(molecs[j]);
+					if(molecule.distanceTo(other,bounds) > R_CUT_OFF+1.1) continue;
+					string name="O";//get<1>(ti.atom_type_name_charge_mass[other.getID()].at(0));
+					addToSumVector_discriminated(sites, sum_per_site, molecule, other, potential_matrix, neighbours, R_CUT_OFF,atom_mapnames_quantity_atoms_completo,atom_mapnames_Coulomb_atoms_completo,atom_mapnames_VLJ_atoms_completo,name,ID);
+				} else { // We found another type of molecule, study atom by atom
+					for(int a= 1; a <= getMolec(j+1).getNAtoms(); a++)
+						if(molecule.distanceTo(getMolec(j+1).getAtom(a),bounds) < R_CUT_OFF+1.1) {
+							string name=get<1>(ti.atom_type_name_charge_mass[molecs[j]->getID()].at(a-1));
+							addToSumVector_discriminated(sites, sum_per_site, molecule, getMolec(j+1).getAtom(a), R_CUT_OFF,atom_mapnames_quantity_atoms_completo,atom_mapnames_Coulomb_atoms_completo,atom_mapnames_VLJ_atoms_completo,name,ID);
+						}
+				}
+			}
+			vector<int> vector_labels= {0,1,2,3};
+			Sorter::cosort(sum_per_site, vector_labels, Sorter::Order::Ascending);
+			if(sum_per_site[3]<=MAX_BINS && sum_per_site[3]>=MIN_BINS)
+			{
+				std::vector<int> sitio_V4S(4,0);
+				sitio_V4S[vector_labels[3]]=1;
+				V4S_preferencia_completo=std::make_tuple(ID,sum_per_site[3],sitio_V4S);
+				V4S_preferencia.push_back(V4S_preferencia_completo);
+				
+				Real total_Coulomb=0.0;
+				Real total_LJ=0.0;
+				Real total=0.0;
+
+				std::map<std::string, std::vector<std::vector<int>>>& mapa1=get<2>(atom_mapnames_quantity_atoms_completo);
+				std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>> adjuntar_tupla1;
+				std::map<std::string, std::vector<std::vector<int>>> adjuntar_mapa1;
+				for (const auto& [key, values] : mapa1) {
+					if (!values.empty()) {
+						for(int i=0;i<values.size();i++)
+							{
+							std::vector<int> par1 = values[i];
+							std::vector<int> adjuntar_vector(4,0);
+							adjuntar_vector[0]=par1[vector_labels[0]];
+							adjuntar_vector[1]=par1[vector_labels[1]];
+							adjuntar_vector[2]=par1[vector_labels[2]];
+							adjuntar_vector[3]=par1[vector_labels[3]];
+							adjuntar_mapa1[key].push_back(adjuntar_vector);				
+							}
+					}
+				}
+				adjuntar_tupla1=std::make_tuple(ID,sum_per_site[3],adjuntar_mapa1);
+				atom_mapnames_quantity_completo.push_back(adjuntar_tupla1);
+
+				std::map<std::string, std::vector<std::vector<Real>>>& mapa2=get<2>(atom_mapnames_Coulomb_atoms_completo);
+				std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>> adjuntar_tupla2;
+				std::map<std::string, std::vector<std::vector<Real>>> adjuntar_mapa2;
+				for (const auto& [key, values] : mapa2) {
+					if (!values.empty()) {
+						for(int i=0;i<values.size();i++)
+							{
+							std::vector<Real> par1 = values[i];
+							std::vector<Real> adjuntar_vector(4,0.0);
+							adjuntar_vector[0]=par1[vector_labels[0]];
+							adjuntar_vector[1]=par1[vector_labels[1]];
+							adjuntar_vector[2]=par1[vector_labels[2]];
+							adjuntar_vector[3]=par1[vector_labels[3]];
+							adjuntar_mapa2[key].push_back(adjuntar_vector);				
+							}
+					}
+				}
+				adjuntar_tupla2=std::make_tuple(ID,sum_per_site[3],adjuntar_mapa2);
+				atom_mapnames_Coulomb_completo.push_back(adjuntar_tupla2);
+
+				std::map<std::string, std::vector<std::vector<Real>>>& mapa3=get<2>(atom_mapnames_VLJ_atoms_completo);
+				std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>> adjuntar_tupla3;
+				std::map<std::string, std::vector<std::vector<Real>>> adjuntar_mapa3;
+				for (const auto& [key, values] : mapa3) {
+					if (!values.empty()) {
+						for(int i=0;i<values.size();i++)
+							{
+							std::vector<Real> par1 = values[i];
+							std::vector<Real> adjuntar_vector(4,0.0);
+							adjuntar_vector[0]=par1[vector_labels[0]];
+							adjuntar_vector[1]=par1[vector_labels[1]];
+							adjuntar_vector[2]=par1[vector_labels[2]];
+							adjuntar_vector[3]=par1[vector_labels[3]];
+							adjuntar_mapa3[key].push_back(adjuntar_vector);	
+							}
+					}
+				}
+				adjuntar_tupla3=std::make_tuple(ID,sum_per_site[3],adjuntar_mapa3);
+				atom_mapnames_VLJ_completo.push_back(adjuntar_tupla3);
+				
+				
+			}
+			
+			return sum_per_site;
+		}
+
+		// Helper: Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite
+		void addToSumVector_discriminated(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other,
+							Real** potential_matrix, ToolKit::ArrInt* neighbours, const Real R_CUT_OFF,
+							std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>& atom_mapnames_quantity_atoms_completo,
+							std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_Coulomb_atoms_completo,
+							std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_VLJ_atoms_completo,std::string& atom_name,const int ID) {
+			int i_close;
+			if(!closestSiteIndex(sites, other.getPosition(), bounds, R_CUT_OFF, i_close))
+				return;
+
+			sum_per_site[i_close]+= (potential_matrix != nullptr) ?
+									checkInPotentialMatrix(center_water, other, potential_matrix, neighbours) :
+									center_water.potentialWith_discriminated(other, bounds,atom_mapnames_quantity_atoms_completo,atom_mapnames_Coulomb_atoms_completo,atom_mapnames_VLJ_atoms_completo,atom_name,i_close,ID);
+		}
+
+		// Helper: Adds the potential of an atom with a water molecule to the sum_per_site vector, used in getInteractionsPerSite
+		void addToSumVector_discriminated(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Atom& atom, const Real R_CUT_OFF,
+											std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>& atom_mapnames_quantity_atoms_completo,
+											std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_Coulomb_atoms_completo,
+											std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_VLJ_atoms_completo,std::string& atom_name,const int ID) {
+			int i_close;
+			
+			if(closestSiteIndex(sites, atom.getPosition(), bounds, R_CUT_OFF, i_close)) {
+				 sum_per_site[i_close]+= center_water.potentialWith_discriminated(atom, bounds,atom_mapnames_quantity_atoms_completo ,atom_mapnames_Coulomb_atoms_completo,atom_mapnames_VLJ_atoms_completo,atom_name,i_close,ID); 
+			}
+		}
+		
 
 		/**
 		 * It returns the interactions per site of the molecule specified by its ID
