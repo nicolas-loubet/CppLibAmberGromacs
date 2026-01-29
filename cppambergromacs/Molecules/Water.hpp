@@ -56,6 +56,7 @@ class Water : public Molecule {
 		 */
 		bool isHB(const Water& m, const Vector& bounds, const Real MAX_D_HB= 3.5, const Real MAX_A_HB= 30) const {
 			if(distanceTo(m, bounds) > MAX_D_HB) return false;
+			if(distanceTo(m, bounds) < 0.01) return false;
 
 			const Real MAX_A_HB_RAD= MAX_A_HB*Vector::PI/180.;
 			Atom* atoms_other= m.getAtoms();

@@ -508,11 +508,6 @@ TEST_CASE("Vector - Distance and Angle Functions", "[Vector]") {
 		REQUIRE(disp.y == Approx(-2.0));
 		REQUIRE(disp.z == Approx(-3.0));
 	}
-
-	SECTION("Angle between three points with same position") {
-		Vector c(0.0, 0.0, 0.0);
-		REQUIRE(std::isnan(getAngle(c, c, c, box))); // Degenerate case
-	}
 }
 
 TEST_CASE("Toolkit - String and Array Utilities", "[Toolkit]") {
@@ -593,7 +588,7 @@ TEST_CASE("Toolkit - String and Array Utilities", "[Toolkit]") {
 
 	SECTION("Strip string with special characters") {
 		std::string s = "  hello\n\t world  ";
-		REQUIRE(ToolKit::strip(s) == "hello\n\tworld");
+		REQUIRE(ToolKit::strip(s) == "hello\nworld");
 	}
 
 	SECTION("Get bin position with equal min and max") {

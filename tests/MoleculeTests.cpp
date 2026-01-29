@@ -537,7 +537,8 @@ TEST_CASE("Water - Lennard-Jones and total potential", "[Water]") {
 		Real coulomb = 0.0;
 		for (int i = 0; i < 2; i++)
 			coulomb += atoms[i].getCoulombPotential(a, box);
-		REQUIRE(w.potentialWith(a, box) == Approx(lj + coulomb));
+		map<pair<string, string>, pair<Real, Real>> special_interactions;
+		REQUIRE(w.potentialWith(a, box, special_interactions) == Approx(lj + coulomb));
 	}
 
 	SECTION("Should handle Lennard-Jones potential with zero sigma") {

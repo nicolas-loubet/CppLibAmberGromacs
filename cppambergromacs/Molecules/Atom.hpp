@@ -34,7 +34,7 @@ class Atom : public Particle{
 
 		Atom(Vector pos, int id): Particle(pos, id, 0), type("UNK") {}
 		
-		Atom(Vector pos, int id, Real mass, Real charge, Real e, Real s, int Z, std::string type):
+		Atom(Vector pos, int id, Real mass, Real charge, Real e, Real s, int Z, std::string type="UNK"):
 			Particle(pos, id, mass, charge), Z(Z), epsilon(e), sigma(s), type(type), is_HAtom(Z==1) {}
 		
 		Atom(const Atom& other) : Particle(other), is_HAtom(other.is_HAtom), sigma(other.sigma), epsilon(other.epsilon), Z(other.Z), type(other.type) {}
