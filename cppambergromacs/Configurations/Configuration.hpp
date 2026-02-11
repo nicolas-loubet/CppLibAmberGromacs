@@ -141,6 +141,33 @@ class Configuration {
 			ww_interaction[i_close]= ww_interaction[i_close] || (pot <= V_CUT_OFF);
 		}
 
+		// Helper: Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite
+		void addToSumVector_discriminated(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other,
+							Real** potential_matrix, ToolKit::ArrInt* neighbours, const Real R_CUT_OFF,
+							std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>& atom_mapnames_quantity_atoms_completo,
+							std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_Coulomb_atoms_completo,
+							std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_VLJ_atoms_completo,std::string& atom_name,const int ID) {
+			int i_close;
+			if(!closestSiteIndex(sites, other.getPosition(), bounds, R_CUT_OFF, i_close))
+				return;
+
+			sum_per_site[i_close]+= (potential_matrix != nullptr) ?
+									checkInPotentialMatrix(center_water, other, potential_matrix, neighbours) :
+									center_water.potentialWith_discriminated(other, bounds,atom_mapnames_quantity_atoms_completo,atom_mapnames_Coulomb_atoms_completo,atom_mapnames_VLJ_atoms_completo,atom_name,i_close,ID);
+		}
+
+		// Helper: Adds the potential of an atom with a water molecule to the sum_per_site vector, used in getInteractionsPerSite
+		void addToSumVector_discriminated(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Atom& atom, const Real R_CUT_OFF,
+											std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>& atom_mapnames_quantity_atoms_completo,
+											std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_Coulomb_atoms_completo,
+											std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_VLJ_atoms_completo,std::string& atom_name,const int ID) {
+			int i_close;
+			
+			if(closestSiteIndex(sites, atom.getPosition(), bounds, R_CUT_OFF, i_close)) {
+				 sum_per_site[i_close]+= center_water.potentialWith_discriminated(atom, bounds,atom_mapnames_quantity_atoms_completo ,atom_mapnames_Coulomb_atoms_completo,atom_mapnames_VLJ_atoms_completo,atom_name,i_close,ID); 
+			}
+		}
+		
 		// Helper function to find the closest site and its distance
 		pair<int,Real> findClosestSite(vector<Vector>& sites, const Vector& target, const Vector& bounds) {
 			int closest_idx= 0;
@@ -411,7 +438,7 @@ class Configuration {
 				
 				if((getMolec(j+1).getNAtoms() == 1) && (getMolec(j+1).getCharge() >= 1 || getMolec(j+1).getCharge() <= -1)) {
 					// We found a ion, consider it always
-					addToSumVector(sites, sum_per_site, molecule, getMolec(j+1).getAtom(1), R_CUT_OFF);
+					addToSumVector_atom(sites, sum_per_site, molecule, getMolec(j+1).getAtom(1), R_CUT_OFF);
 					continue;
 				}
 				if(molecs[j]->isWater()) { // We found a water molecule
@@ -505,34 +532,6 @@ class Configuration {
 			
 			return sum_per_site;
 		}
-
-		// Helper: Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite
-		void addToSumVector_discriminated(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other,
-							Real** potential_matrix, ToolKit::ArrInt* neighbours, const Real R_CUT_OFF,
-							std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>& atom_mapnames_quantity_atoms_completo,
-							std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_Coulomb_atoms_completo,
-							std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_VLJ_atoms_completo,std::string& atom_name,const int ID) {
-			int i_close;
-			if(!closestSiteIndex(sites, other.getPosition(), bounds, R_CUT_OFF, i_close))
-				return;
-
-			sum_per_site[i_close]+= (potential_matrix != nullptr) ?
-									checkInPotentialMatrix(center_water, other, potential_matrix, neighbours) :
-									center_water.potentialWith_discriminated(other, bounds,atom_mapnames_quantity_atoms_completo,atom_mapnames_Coulomb_atoms_completo,atom_mapnames_VLJ_atoms_completo,atom_name,i_close,ID);
-		}
-
-		// Helper: Adds the potential of an atom with a water molecule to the sum_per_site vector, used in getInteractionsPerSite
-		void addToSumVector_discriminated(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Atom& atom, const Real R_CUT_OFF,
-											std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>& atom_mapnames_quantity_atoms_completo,
-											std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_Coulomb_atoms_completo,
-											std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_VLJ_atoms_completo,std::string& atom_name,const int ID) {
-			int i_close;
-			
-			if(closestSiteIndex(sites, atom.getPosition(), bounds, R_CUT_OFF, i_close)) {
-				 sum_per_site[i_close]+= center_water.potentialWith_discriminated(atom, bounds,atom_mapnames_quantity_atoms_completo ,atom_mapnames_Coulomb_atoms_completo,atom_mapnames_VLJ_atoms_completo,atom_name,i_close,ID); 
-			}
-		}
-		
 
 		/**
 		 * It returns the interactions per site of the molecule specified by its ID
