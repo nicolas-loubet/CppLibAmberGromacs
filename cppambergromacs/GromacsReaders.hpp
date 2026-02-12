@@ -58,21 +58,26 @@ class GromacsTopologyReader : public TopologyReader {
 		 * Given a file, read the system flag.
 		 * @param file The file to read
 		 * @param position The position of the flag
-		 * @return The system flags mapped string -> int
+		 * @return A pair of 1) The system flags mapped string -> int, 2) The order of the molecules
 		 */
-		static map<string,int> readSystemFlag(ifstream &file, int position) {
+		static pair<map<string,int>, vector<string>> readSystemFlag(ifstream &file, int position) {
 			map<string,int> molecules;
+			vector<string> order;
 			string line= "";
+
 			file.clear();
 			file.seekg(position);
 
 			while(getline(file, line)) {
-				if(line[0] == ';') continue;
+				if(line.empty() || line[0] == ';') continue;
+
 				string molec_name= ToolKit::strip(line.substr(0,8));
-				int num_molec= stoi(line.substr(9,line.length()-9));
+				int num_molec= stoi(line.substr(9));
+
 				molecules[molec_name]= num_molec;
+				order.push_back(molec_name);
 			}
-			return molecules;
+			return {molecules,order};
 		}
 
 		/**
@@ -251,7 +256,11 @@ class GromacsTopologyReader : public TopologyReader {
 			}
 
 			map<string,int> flags= flagPositions(f);
-			ti.number_of_each_different_molecule= readSystemFlag(f, flags["[ molecules ]"]);
+			
+			pair<map<string,int>,vector<string>> system_info= readSystemFlag(f, flags["[ molecules ]"]);
+			ti.number_of_each_different_molecule= system_info.first;
+			vector<string> molec_order= system_info.second;
+
 			ti.num_molecules= sumMoleculesInMap(ti.number_of_each_different_molecule);
 			ti.num_solvents= sumMoleculesConsideredSolvent(ti.number_of_each_different_molecule);
 			ti.num_solutes= ti.num_molecules-ti.num_solvents;
@@ -260,15 +269,17 @@ class GromacsTopologyReader : public TopologyReader {
 			for(auto it= parameters_LJflag_full.begin(); it != parameters_LJflag_full.end(); it++)
 				ti.type_LJparam[it->first]= make_pair(get<2>(it->second),get<3>(it->second));
 			
-			for(auto it_molec= ti.number_of_each_different_molecule.begin(); it_molec != ti.number_of_each_different_molecule.end(); it_molec++) {
-				map<int,tuple<string,string,Real,Real>> atoms= readAtomsFlags(f, flags["[ atoms ]_"+it_molec->first]);
+			for(const auto& molec_name: molec_order) {
+				int count= ti.number_of_each_different_molecule.at(molec_name);
+				map<int,tuple<string,string,Real,Real>> atoms= readAtomsFlags(f, flags["[ atoms ]_"+molec_name]);
+
 				checkMass(atoms, parameters_LJflag_full);
-				ti.number_of_atoms_per_different_molecule[it_molec->first]= atoms.size();
-				ti.total_number_of_atoms+= atoms.size()*it_molec->second;
+				ti.number_of_atoms_per_different_molecule[molec_name]= atoms.size();
+				ti.total_number_of_atoms+= atoms.size() * count;
 				ti.atom_type_name_charge_mass.push_back(atoms);
 				for(auto it_atom= atoms.begin(); it_atom != atoms.end(); it_atom++) {
 					string type= get<0>(it_atom->second);
-					string name= it_molec->first+":"+get<1>(it_atom->second);
+					string name= molec_name+":" + get<1>(it_atom->second);
 					ti.name_type[name]= type;
 					if(!ti.type_Z.count(type))
 						ti.type_Z[type]= getZFromName(get<1>(it_atom->second));
