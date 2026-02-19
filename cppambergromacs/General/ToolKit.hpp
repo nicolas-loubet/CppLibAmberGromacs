@@ -111,15 +111,44 @@ namespace ToolKit {
 	 * @tparam Func The type of the function to execute
 	 * @tparam T The type of the elements of the list
 	 * @tparam Res The type of the return value of the function
+	 * @tparam max_threads The maximum number of threads to use
 	 * @tparam Args The types of the arguments of the function
 	 */
 	template<typename Func, typename T, typename Res, typename... Args>
-	void parallel(Func f, std::vector<T>& list, std::vector<Res>& res, Args... args) {
+	void parallel(Func f, std::vector<T>& list, std::vector<Res>& res, size_t max_threads= 0, Args... args) {
+		const size_t n_tasks= list.size();
+		if(res.size() != n_tasks) res.resize(n_tasks);
+
+		const size_t limit= (max_threads == 0) ? n_tasks : std::min(max_threads, n_tasks);
+
+		std::mutex mtx;
+		std::condition_variable cv;
+		size_t active= 0;
+
 		std::vector<std::thread> threads;
-		for(size_t i= 0; i < list.size(); i++)
-			threads.emplace_back(  [&,i]() { f(i+1, list.size(), list[i], res[i], args...); }  );
-		for(std::thread& thread: threads)
-			thread.join();
+		threads.reserve(n_tasks);
+
+		for(size_t i= 0; i < n_tasks; i++) {
+			threads.emplace_back([&,i]() {
+				{
+					std::unique_lock<std::mutex> lock(mtx);
+					cv.wait(lock, [&]() { return active < limit; });
+					active++;
+				}
+
+				f(i+1, n_tasks, list[i], res[i], args...);
+
+				{
+					std::lock_guard<std::mutex> lock(mtx);
+					active--;
+				}
+				cv.notify_one();
+			});
+		}
+
+		for(auto& t: threads)
+			t.join();
+
 		std::cout << std::endl;
 	}
 
