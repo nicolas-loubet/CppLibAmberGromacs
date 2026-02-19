@@ -53,7 +53,7 @@ class Configuration {
 		}
 
 		// Helper: Adds the potential of an atom with a water molecule to the sum_per_site vector, used in getInteractionsPerSite
-		void addToSumVector_atom(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Atom& atom, const Real R_CUT_OFF) {
+		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Atom& atom, const Real R_CUT_OFF) {
 			int i_close;
 			if(closestSiteIndex(sites, atom.getPosition(), bounds, R_CUT_OFF, i_close)) {
 				sum_per_site[i_close]+= center_water.potentialWith(atom, bounds, special_interactions);
@@ -61,8 +61,8 @@ class Configuration {
 		}
 
 		// Helper: Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite
-		void addToSumVector_water(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other,
-							      Real** potential_matrix, ToolKit::ArrInt* neighbours, const Real R_CUT_OFF) {
+		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other,
+							Real** potential_matrix, ToolKit::ArrInt* neighbours, const Real R_CUT_OFF) {
 			int i_close;
 			if(!closestSiteIndex(sites, other.getPosition(), bounds, R_CUT_OFF, i_close))
 				return;
@@ -72,49 +72,10 @@ class Configuration {
 									center_water.potentialWith(other, bounds);
 		}
 
-		// Helper: LJ interaction between atom and central water molecule
-		Real getLJPotential_atom(Water& center_water, Atom atom, Vector& bounds) {
-			Real s,e;
-			Atom ox= center_water.getOxygen();
-
-			// Check for special interaction
-			std::pair<std::string,std::string> key= make_pair(ox.getAtomType(), atom.getAtomType());
-			if(special_interactions.find(key) != special_interactions.end()) {
-				s= special_interactions.at(key).first;
-				e= special_interactions.at(key).second;
-			} else {
-				// Combination rules: Lorentz-Berthelot
-				s= .5*(ox.getSigma() + atom.getSigma());
-				e= sqrt(ox.getEpsilon() * atom.getEpsilon());
-			}
-
-			return center_water.getLJPotential(atom, s, e, bounds);
-		}
-
-		// Helper: Adds the potential of an atom with a water molecule to the sum_per_site vector, used in getInteractionsPerSite_LJOnly
-		void addToSumVector_LJ_atom(vector<Vector>& sites, vector<Real>& sum_per_site, vector<Real>& sum_LJ_only,
-		                            Water& center_water, Atom atom, const Real R_CUT_OFF) {
-			int i_close;
-			if(!closestSiteIndex(sites, atom.getPosition(), bounds, R_CUT_OFF, i_close))
-				return;
-			sum_per_site[i_close]+= center_water.potentialWith(atom, bounds, special_interactions);
-			sum_LJ_only[i_close]+= getLJPotential_atom(center_water, atom, bounds);
-		}
-
-		// Helper: Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite_LJOnly
-		void addToSumVector_LJ_water(vector<Vector>& sites, vector<Real>& sum_per_site, vector<Real>& sum_LJ_only, Water& center_water,
-							         Water& other, const Real R_CUT_OFF) {
-			int i_close;
-			if(!closestSiteIndex(sites, other.getPosition(), bounds, R_CUT_OFF, i_close))
-				return;
-
-			sum_per_site[i_close]+= center_water.potentialWith(other, bounds);
-			sum_LJ_only[i_close]+= getLJPotential_atom(center_water, other.getOxygen(), bounds);
-		}
 
 		// Helper: Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite
-		void addToSumVector_water_wonly(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water,
-							            Water& other, const Real R_CUT_OFF, vector<Real>& sum_only_water) {
+		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water,
+							Water& other, const Real R_CUT_OFF, vector<Real>& sum_only_water) {
 			int i_close;
 			if(!closestSiteIndex(sites, other.getPosition(), bounds, R_CUT_OFF, i_close))
 				return;
@@ -127,8 +88,8 @@ class Configuration {
 
 		// Helper: Adds the potential of a water molecule with another water molecule to the sum_per_site vector,
 		// used in getInteractionsPerSite flagged with water-water interactions < V_CUT_OFF
-		void addToSumVector_water_flag(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other, Real** potential_matrix,
-							           ToolKit::ArrInt* neighbours, const Real R_CUT_OFF, bool* ww_interaction, const Real V_CUT_OFF) {
+		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other, Real** potential_matrix,
+							ToolKit::ArrInt* neighbours, const Real R_CUT_OFF, bool* ww_interaction, const Real V_CUT_OFF) {
 			int i_close;
 			if(!closestSiteIndex(sites, other.getPosition(), bounds, R_CUT_OFF, i_close))
 				return;
@@ -141,33 +102,6 @@ class Configuration {
 			ww_interaction[i_close]= ww_interaction[i_close] || (pot <= V_CUT_OFF);
 		}
 
-		// Helper: Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite
-		void addToSumVector_discriminated(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other,
-							Real** potential_matrix, ToolKit::ArrInt* neighbours, const Real R_CUT_OFF,
-							std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>& atom_mapnames_quantity_atoms_completo,
-							std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_Coulomb_atoms_completo,
-							std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_VLJ_atoms_completo,std::string& atom_name,const int ID) {
-			int i_close;
-			if(!closestSiteIndex(sites, other.getPosition(), bounds, R_CUT_OFF, i_close))
-				return;
-
-			sum_per_site[i_close]+= (potential_matrix != nullptr) ?
-									checkInPotentialMatrix(center_water, other, potential_matrix, neighbours) :
-									center_water.potentialWith_discriminated(other, bounds,atom_mapnames_quantity_atoms_completo,atom_mapnames_Coulomb_atoms_completo,atom_mapnames_VLJ_atoms_completo,atom_name,i_close,ID);
-		}
-
-		// Helper: Adds the potential of an atom with a water molecule to the sum_per_site vector, used in getInteractionsPerSite
-		void addToSumVector_discriminated(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Atom& atom, const Real R_CUT_OFF,
-											std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>& atom_mapnames_quantity_atoms_completo,
-											std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_Coulomb_atoms_completo,
-											std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_VLJ_atoms_completo,std::string& atom_name,const int ID) {
-			int i_close;
-			
-			if(closestSiteIndex(sites, atom.getPosition(), bounds, R_CUT_OFF, i_close)) {
-				 sum_per_site[i_close]+= center_water.potentialWith_discriminated(atom, bounds,atom_mapnames_quantity_atoms_completo ,atom_mapnames_Coulomb_atoms_completo,atom_mapnames_VLJ_atoms_completo,atom_name,i_close,ID); 
-			}
-		}
-		
 		// Helper function to find the closest site and its distance
 		pair<int,Real> findClosestSite(vector<Vector>& sites, const Vector& target, const Vector& bounds) {
 			int closest_idx= 0;
@@ -411,9 +345,9 @@ class Configuration {
 		 * @return The interactions per site, sorted in ascending order
 		 */
 		vector<Real> getInteractionsPerSite_discriminated(const int ID, const TopolInfo& ti, 
-														std::vector<std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>>& atom_mapnames_quantity_completo,
-														std::vector<std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>>& atom_mapnames_Coulomb_completo,
-														std::vector<std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>>& atom_mapnames_VLJ_completo,
+														std::vector<std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>>& atom_mapnames_quantity_complete,
+														std::vector<std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>>& atom_mapnames_Coulomb_complete,
+														std::vector<std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>>& atom_mapnames_VLJ_complete,
 													    std::vector<std::tuple<int,Real,std::vector<int>>>& V4S_preferencia,const float MIN_BINS, const float MAX_BINS, const int N_BINS) {
 			const Real R_CUT_OFF= 5.0;
 			Real** potential_matrix= nullptr;
@@ -427,10 +361,10 @@ class Configuration {
 			Vector h2= molecule.getHydrogen_2().getPosition();
 			vector<Vector> sites= Geometrics::getPerfectTetrahedron(o, h1, h2, bounds).toVector();
 			
-			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>> atom_mapnames_quantity_atoms_completo;
-			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>> atom_mapnames_Coulomb_atoms_completo;
-			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>> atom_mapnames_VLJ_atoms_completo;
-			std::tuple<int,Real,std::vector<int>> V4S_preferencia_completo;
+			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>> atom_mapnames_quantity_atoms_complete;
+			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>> atom_mapnames_Coulomb_atoms_complete;
+			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>> atom_mapnames_VLJ_atoms_complete;
+			std::tuple<int,Real,std::vector<int>> V4S_preference_complete;
 			
 			vector<Real> sum_per_site(4,0.0);
 			for(int j= 0; j < N_MOLEC; j++) {
@@ -438,19 +372,19 @@ class Configuration {
 				
 				if((getMolec(j+1).getNAtoms() == 1) && (getMolec(j+1).getCharge() >= 1 || getMolec(j+1).getCharge() <= -1)) {
 					// We found a ion, consider it always
-					addToSumVector_atom(sites, sum_per_site, molecule, getMolec(j+1).getAtom(1), R_CUT_OFF);
+					addToSumVector(sites, sum_per_site, molecule, getMolec(j+1).getAtom(1), R_CUT_OFF);
 					continue;
 				}
 				if(molecs[j]->isWater()) { // We found a water molecule
 					Water& other= *static_cast<Water*>(molecs[j]);
 					if(molecule.distanceTo(other,bounds) > R_CUT_OFF+1.1) continue;
-					string name="O";//get<1>(ti.atom_type_name_charge_mass[other.getID()].at(0));
-					addToSumVector_discriminated(sites, sum_per_site, molecule, other, potential_matrix, neighbours, R_CUT_OFF,atom_mapnames_quantity_atoms_completo,atom_mapnames_Coulomb_atoms_completo,atom_mapnames_VLJ_atoms_completo,name,ID);
+					string name="OW";//get<1>(ti.atom_type_name_charge_mass[other.getID()].at(0));
+					addToSumVector_discriminated(sites, sum_per_site, molecule, other, potential_matrix, neighbours, R_CUT_OFF,atom_mapnames_quantity_atoms_complete,atom_mapnames_Coulomb_atoms_complete,atom_mapnames_VLJ_atoms_complete,name,ID);
 				} else { // We found another type of molecule, study atom by atom
 					for(int a= 1; a <= getMolec(j+1).getNAtoms(); a++)
 						if(molecule.distanceTo(getMolec(j+1).getAtom(a),bounds) < R_CUT_OFF+1.1) {
 							string name=get<1>(ti.atom_type_name_charge_mass[molecs[j]->getID()].at(a-1));
-							addToSumVector_discriminated(sites, sum_per_site, molecule, getMolec(j+1).getAtom(a), R_CUT_OFF,atom_mapnames_quantity_atoms_completo,atom_mapnames_Coulomb_atoms_completo,atom_mapnames_VLJ_atoms_completo,name,ID);
+							addToSumVector_discriminated(sites, sum_per_site, molecule, getMolec(j+1).getAtom(a), R_CUT_OFF,atom_mapnames_quantity_atoms_complete,atom_mapnames_Coulomb_atoms_complete,atom_mapnames_VLJ_atoms_complete,name,ID);
 						}
 				}
 			}
@@ -460,78 +394,106 @@ class Configuration {
 			{
 				std::vector<int> sitio_V4S(4,0);
 				sitio_V4S[vector_labels[3]]=1;
-				V4S_preferencia_completo=std::make_tuple(ID,sum_per_site[3],sitio_V4S);
-				V4S_preferencia.push_back(V4S_preferencia_completo);
+				V4S_preference_complete=std::make_tuple(ID,sum_per_site[3],sitio_V4S);
+				V4S_preferencia.push_back(V4S_preference_complete);
 				
 				Real total_Coulomb=0.0;
 				Real total_LJ=0.0;
 				Real total=0.0;
 
-				std::map<std::string, std::vector<std::vector<int>>>& mapa1=get<2>(atom_mapnames_quantity_atoms_completo);
-				std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>> adjuntar_tupla1;
-				std::map<std::string, std::vector<std::vector<int>>> adjuntar_mapa1;
-				for (const auto& [key, values] : mapa1) {
+				std::map<std::string, std::vector<std::vector<int>>>& map1=std::get<2>(atom_mapnames_quantity_atoms_complete);
+				std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>> add_tuple1;
+				std::map<std::string, std::vector<std::vector<int>>> addition_map1;
+				for (const auto& [key, values] : map1) {
 					if (!values.empty()) {
 						for(int i=0;i<values.size();i++)
 							{
 							std::vector<int> par1 = values[i];
-							std::vector<int> adjuntar_vector(4,0);
-							adjuntar_vector[0]=par1[vector_labels[0]];
-							adjuntar_vector[1]=par1[vector_labels[1]];
-							adjuntar_vector[2]=par1[vector_labels[2]];
-							adjuntar_vector[3]=par1[vector_labels[3]];
-							adjuntar_mapa1[key].push_back(adjuntar_vector);				
+							std::vector<int> addition_vector(4,0);
+							addition_vector[0]=par1[vector_labels[0]];
+							addition_vector[1]=par1[vector_labels[1]];
+							addition_vector[2]=par1[vector_labels[2]];
+							addition_vector[3]=par1[vector_labels[3]];
+							addition_map1[key].push_back(addition_vector);				
 							}
 					}
 				}
-				adjuntar_tupla1=std::make_tuple(ID,sum_per_site[3],adjuntar_mapa1);
-				atom_mapnames_quantity_completo.push_back(adjuntar_tupla1);
+				add_tuple1=std::make_tuple(ID,sum_per_site[3],addition_map1);
+				atom_mapnames_quantity_complete.push_back(add_tuple1);
 
-				std::map<std::string, std::vector<std::vector<Real>>>& mapa2=get<2>(atom_mapnames_Coulomb_atoms_completo);
-				std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>> adjuntar_tupla2;
-				std::map<std::string, std::vector<std::vector<Real>>> adjuntar_mapa2;
-				for (const auto& [key, values] : mapa2) {
+				std::map<std::string, std::vector<std::vector<Real>>>& map2=get<2>(atom_mapnames_Coulomb_atoms_complete);
+				std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>> add_tuple2;
+				std::map<std::string, std::vector<std::vector<Real>>> addition_map2;
+				for (const auto& [key, values] : map2) {
 					if (!values.empty()) {
 						for(int i=0;i<values.size();i++)
 							{
 							std::vector<Real> par1 = values[i];
-							std::vector<Real> adjuntar_vector(4,0.0);
-							adjuntar_vector[0]=par1[vector_labels[0]];
-							adjuntar_vector[1]=par1[vector_labels[1]];
-							adjuntar_vector[2]=par1[vector_labels[2]];
-							adjuntar_vector[3]=par1[vector_labels[3]];
-							adjuntar_mapa2[key].push_back(adjuntar_vector);				
+							std::vector<Real> addition_vector(4,0.0);
+							addition_vector[0]=par1[vector_labels[0]];
+							addition_vector[1]=par1[vector_labels[1]];
+							addition_vector[2]=par1[vector_labels[2]];
+							addition_vector[3]=par1[vector_labels[3]];
+							addition_map2[key].push_back(addition_vector);				
 							}
 					}
 				}
-				adjuntar_tupla2=std::make_tuple(ID,sum_per_site[3],adjuntar_mapa2);
-				atom_mapnames_Coulomb_completo.push_back(adjuntar_tupla2);
+				add_tuple2=std::make_tuple(ID,sum_per_site[3],addition_map2);
+				atom_mapnames_Coulomb_complete.push_back(add_tuple2);
 
-				std::map<std::string, std::vector<std::vector<Real>>>& mapa3=get<2>(atom_mapnames_VLJ_atoms_completo);
-				std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>> adjuntar_tupla3;
-				std::map<std::string, std::vector<std::vector<Real>>> adjuntar_mapa3;
-				for (const auto& [key, values] : mapa3) {
+				std::map<std::string, std::vector<std::vector<Real>>>& map3=get<2>(atom_mapnames_VLJ_atoms_complete);
+				std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>> add_tuple3;
+				std::map<std::string, std::vector<std::vector<Real>>> addition_map3;
+				for (const auto& [key, values] : map3) {
 					if (!values.empty()) {
 						for(int i=0;i<values.size();i++)
 							{
 							std::vector<Real> par1 = values[i];
-							std::vector<Real> adjuntar_vector(4,0.0);
-							adjuntar_vector[0]=par1[vector_labels[0]];
-							adjuntar_vector[1]=par1[vector_labels[1]];
-							adjuntar_vector[2]=par1[vector_labels[2]];
-							adjuntar_vector[3]=par1[vector_labels[3]];
-							adjuntar_mapa3[key].push_back(adjuntar_vector);	
+							std::vector<Real> addition_vector(4,0.0);
+							addition_vector[0]=par1[vector_labels[0]];
+							addition_vector[1]=par1[vector_labels[1]];
+							addition_vector[2]=par1[vector_labels[2]];
+							addition_vector[3]=par1[vector_labels[3]];
+							addition_map3[key].push_back(addition_vector);	
 							}
 					}
 				}
-				adjuntar_tupla3=std::make_tuple(ID,sum_per_site[3],adjuntar_mapa3);
-				atom_mapnames_VLJ_completo.push_back(adjuntar_tupla3);
+				add_tuple3=std::make_tuple(ID,sum_per_site[3],addition_map3);
+				atom_mapnames_VLJ_complete.push_back(add_tuple3);
 				
 				
 			}
 			
 			return sum_per_site;
 		}
+
+		// Helper: Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite
+		void addToSumVector_discriminated(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other,
+							Real** potential_matrix, ToolKit::ArrInt* neighbours, const Real R_CUT_OFF,
+							std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>& atom_mapnames_quantity_atoms_complete,
+							std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_Coulomb_atoms_complete,
+							std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_VLJ_atoms_complete,std::string& atom_name,const int ID) {
+			int i_close;
+			if(!closestSiteIndex(sites, other.getPosition(), bounds, R_CUT_OFF, i_close))
+				return;
+
+			sum_per_site[i_close]+= (potential_matrix != nullptr) ?
+									checkInPotentialMatrix(center_water, other, potential_matrix, neighbours) :
+									center_water.potentialWith_discriminated(other, bounds,atom_mapnames_quantity_atoms_complete,atom_mapnames_Coulomb_atoms_complete,atom_mapnames_VLJ_atoms_complete,atom_name,i_close,ID);
+		}
+
+		// Helper: Adds the potential of an atom with a water molecule to the sum_per_site vector, used in getInteractionsPerSite
+		void addToSumVector_discriminated(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Atom& atom, const Real R_CUT_OFF,
+											std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>& atom_mapnames_quantity_atoms_complete,
+											std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_Coulomb_atoms_complete,
+											std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_VLJ_atoms_complete,std::string& atom_name,const int ID) {
+			int i_close;
+			
+			if(closestSiteIndex(sites, atom.getPosition(), bounds, R_CUT_OFF, i_close)) {
+				 sum_per_site[i_close]+= center_water.potentialWith_discriminated(atom, bounds,atom_mapnames_quantity_atoms_complete ,atom_mapnames_Coulomb_atoms_complete,atom_mapnames_VLJ_atoms_complete,atom_name,i_close,ID); 
+			}
+		}
+		
 
 		/**
 		 * It returns the interactions per site of the molecule specified by its ID
@@ -557,18 +519,18 @@ class Configuration {
 				
 				if((getMolec(j+1).getNAtoms() == 1) && (getMolec(j+1).getCharge() >= 1 || getMolec(j+1).getCharge() <= -1)) {
 					// We found a ion, consider it always
-					addToSumVector_atom(sites, sum_per_site, molecule, getMolec(j+1).getAtom(1), R_CUT_OFF);
+					addToSumVector(sites, sum_per_site, molecule, getMolec(j+1).getAtom(1), R_CUT_OFF);
 					continue;
 				}
 				
 				if(molecs[j]->isWater()) { // We found a water molecule
 					Water& other= *static_cast<Water*>(molecs[j]);
 					if(molecule.distanceTo(other,bounds) > R_CUT_OFF+1.1) continue;
-					addToSumVector_water(sites, sum_per_site, molecule, other, potential_matrix, neighbours, R_CUT_OFF);
+					addToSumVector(sites, sum_per_site, molecule, other, potential_matrix, neighbours, R_CUT_OFF);
 				} else { // We found another type of molecule, study atom by atom
 					for(int a= 1; a <= getMolec(j+1).getNAtoms(); a++)
 						if(molecule.distanceTo(getMolec(j+1).getAtom(a),bounds) < R_CUT_OFF+1.1) {
-							addToSumVector_atom(sites, sum_per_site, molecule, getMolec(j+1).getAtom(a), R_CUT_OFF);
+							addToSumVector(sites, sum_per_site, molecule, getMolec(j+1).getAtom(a), R_CUT_OFF);
 						}
 				}
 			}
@@ -591,7 +553,7 @@ class Configuration {
 		 * @param R_CUT_OFF The cutoff radius, default is 5.
 		 * @param potential_matrix The matrix with the potential values, default is nullptr
 		 * @param neighbours The neighbours of the molecule, default is nullptr
-		 * @return The interactions per site, sorted in ascending order
+		 * @return The interactions per site, sorted in ascending			 order
 		 */
 		vector<Real> getInteractionsPerSite(const int ID, bool& flag_ww, const Real V_CUT_OFF= -12.0, const Real R_CUT_OFF= 5.0, Real** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr) {
 			if(!getMolec(ID).isWater()) throw invalid_argument("The molecule is not a water molecule.");
@@ -612,18 +574,18 @@ class Configuration {
 				
 				if((getMolec(j+1).getNAtoms() == 1) && (getMolec(j+1).getCharge() >= 1 || getMolec(j+1).getCharge() <= -1)) {
 					// We found a ion, consider it always
-					addToSumVector_atom(sites, sum_per_site, molecule, getMolec(j+1).getAtom(1), R_CUT_OFF);
+					addToSumVector(sites, sum_per_site, molecule, getMolec(j+1).getAtom(1), R_CUT_OFF);
 					continue;
 				}
 				
 				if(molecs[j]->isWater()) { // We found a water molecule
 					Water& other= *static_cast<Water*>(molecs[j]);
 					if(molecule.distanceTo(other,bounds) > R_CUT_OFF+1.1) continue;
-					addToSumVector_water_flag(sites, sum_per_site, molecule, other, potential_matrix, neighbours, R_CUT_OFF, water_water_interaction, V_CUT_OFF);
+					addToSumVector(sites, sum_per_site, molecule, other, potential_matrix, neighbours, R_CUT_OFF, water_water_interaction, V_CUT_OFF);
 				} else { // We found another type of molecule, study atom by atom
 					for(int a= 1; a <= getMolec(j+1).getNAtoms(); a++)
 						if(molecule.distanceTo(getMolec(j+1).getAtom(a),bounds) < R_CUT_OFF+1.1) {
-							addToSumVector_atom(sites, sum_per_site, molecule, getMolec(j+1).getAtom(a), R_CUT_OFF);
+							addToSumVector(sites, sum_per_site, molecule, getMolec(j+1).getAtom(a), R_CUT_OFF);
 						}
 				}
 			}
@@ -663,18 +625,18 @@ class Configuration {
 				
 				if((getMolec(j+1).getNAtoms() == 1) && (getMolec(j+1).getCharge() >= 1 || getMolec(j+1).getCharge() <= -1)) {
 					// We found a ion, consider it always
-					addToSumVector_atom(sites, sum_per_site, molecule, getMolec(j+1).getAtom(1), R_CUT_OFF);
+					addToSumVector(sites, sum_per_site, molecule, getMolec(j+1).getAtom(1), R_CUT_OFF);
 					continue;
 				}
 				
 				if(molecs[j]->isWater()) { // We found a water molecule
 					Water& other= *static_cast<Water*>(molecs[j]);
 					if(molecule.distanceTo(other,bounds) > R_CUT_OFF+1.1) continue;
-					addToSumVector_water_wonly(sites, sum_per_site, molecule, other, R_CUT_OFF, sum_only_water);
+					addToSumVector(sites, sum_per_site, molecule, other, R_CUT_OFF, sum_only_water);
 				} else { // We found another type of molecule, study atom by atom
 					for(int a= 1; a <= getMolec(j+1).getNAtoms(); a++)
 						if(molecule.distanceTo(getMolec(j+1).getAtom(a),bounds) < R_CUT_OFF+1.1) {
-							addToSumVector_atom(sites, sum_per_site, molecule, getMolec(j+1).getAtom(a), R_CUT_OFF);
+							addToSumVector(sites, sum_per_site, molecule, getMolec(j+1).getAtom(a), R_CUT_OFF);
 						}
 				}
 			}
@@ -683,50 +645,6 @@ class Configuration {
 			Sorter::cosort(sum_per_site, index_seq, Sorter::Order::Ascending);
 			vector<Real> sum_per_site_only_water_sorted= {sum_only_water[index_seq[0]], sum_only_water[index_seq[1]], sum_only_water[index_seq[2]], sum_only_water[index_seq[3]]};
 			return make_pair(sum_per_site,sum_per_site_only_water_sorted);
-		}
-
-		/**
-		 * It returns the interactions per site of the molecule specified by its ID, but it only considers Lennard-Jones interactions
-		 * @param ID The ID of the molecule
-		 * @param R_CUT_OFF The cutoff radius, default is 5.
-		 * @return The interactions per site, sorted in ascending order. The first element is the V_iS list (normal), the second element is the V_iS list with the interactions only due to Lennard-Jones
-		 */
-		pair<vector<Real>,vector<Real>> getInteractionsPerSite_LJOnly(const int ID, const Real R_CUT_OFF= 5.0) {
-			if(!getMolec(ID).isWater()) throw invalid_argument("The molecule is not a water molecule.");
-			Water& molecule= *static_cast<Water*>(molecs[ID-1]);
-			Vector o= molecule.getOxygen().getPosition();
-			Vector h1= molecule.getHydrogen_1().getPosition();
-			Vector h2= molecule.getHydrogen_2().getPosition();
-			vector<Vector> sites= Geometrics::getPerfectTetrahedron(o, h1, h2, bounds).toVector();
-			
-			vector<Real> sum_per_site(4,0.0);
-			vector<Real> sum_only_LJ(4,0.0);
-
-			for(int j= 0; j < N_MOLEC; j++) {
-				if(j+1 == ID) continue; // Same molecule, skip
-				
-				if((getMolec(j+1).getNAtoms() == 1) && (getMolec(j+1).getCharge() >= 1 || getMolec(j+1).getCharge() <= -1)) {
-					// We found a ion, consider it always
-					addToSumVector_LJ_atom(sites, sum_per_site, sum_only_LJ, molecule, getMolec(j+1).getAtom(1), R_CUT_OFF);
-					continue;
-				}
-				
-				if(molecs[j]->isWater()) { // We found a water molecule
-					Water& other= *static_cast<Water*>(molecs[j]);
-					if(molecule.distanceTo(other,bounds) > R_CUT_OFF+1.1) continue;
-					addToSumVector_LJ_water(sites, sum_per_site, sum_only_LJ, molecule, other, R_CUT_OFF);
-				} else { // We found another type of molecule, study atom by atom
-					for(int a= 1; a <= getMolec(j+1).getNAtoms(); a++)
-						if(molecule.distanceTo(getMolec(j+1).getAtom(a),bounds) < R_CUT_OFF+1.1) {
-							addToSumVector_LJ_atom(sites, sum_per_site, sum_only_LJ, molecule, getMolec(j+1).getAtom(a), R_CUT_OFF);
-						}
-				}
-			}
-
-			vector<int> index_seq= {0,1,2,3};
-			Sorter::cosort(sum_per_site, index_seq, Sorter::Order::Ascending);
-			vector<Real> sum_per_site_only_LJ_sorted= {sum_only_LJ[index_seq[0]],sum_only_LJ[index_seq[1]],sum_only_LJ[index_seq[2]],sum_only_LJ[index_seq[3]]};
-			return make_pair(sum_per_site,sum_per_site_only_LJ_sorted);
 		}
 
 		/**

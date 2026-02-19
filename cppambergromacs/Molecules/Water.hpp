@@ -166,9 +166,9 @@ class Water : public Molecule {
 		 * @return the potential energy in kJ/mol of the interaction between this two molecules
 		 */
 		Real potentialWith_discriminated(const Atom& atom, const Vector& bounds,
-										std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>& atom_mapnames_quantity_atoms_completo,
-										std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_Coulomb_atoms_completo,
-										std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_VLJ_atoms_completo,
+										std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>& atom_mapnames_quantity_atoms_complete,
+										std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_Coulomb_atoms_complete,
+										std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_VLJ_atoms_complete,
 										std::string& atom_name,int i_close,const int ID) {
 			Real s= .5*(atoms[0].getSigma() + atom.getSigma());
 			Real e= sqrt(atoms[0].getEpsilon() * atom.getEpsilon());
@@ -181,16 +181,16 @@ class Water : public Molecule {
 			
 			std::vector<int> quantity(4, 0);
 			quantity[i_close] += 1;
-			std::get<2>(atom_mapnames_quantity_atoms_completo)[atom_name].push_back(quantity);
+			std::get<2>(atom_mapnames_quantity_atoms_complete)[atom_name].push_back(quantity);
 
 			std::vector<Real> Coulomb(4, 0.0);
 			Coulomb[i_close] += V_Coulomb;
-			std::get<2>(atom_mapnames_Coulomb_atoms_completo)[atom_name].push_back(Coulomb);
+			std::get<2>(atom_mapnames_Coulomb_atoms_complete)[atom_name].push_back(Coulomb);
 
 
 			std::vector<Real> LJ(4, 0.0);
 			LJ[i_close] += V_LJ;
-			std::get<2>(atom_mapnames_VLJ_atoms_completo)[atom_name].push_back(LJ);
+			std::get<2>(atom_mapnames_VLJ_atoms_complete)[atom_name].push_back(LJ);
 		
 			return Vtot;  
 		}
@@ -202,9 +202,9 @@ class Water : public Molecule {
 		 * @return the potential energy in kJ/mol of the interaction between this two molecules
 		 */
 		Real potentialWith_discriminated(const Water& m, const Vector& bounds,
-			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>& atom_mapnames_quantity_atoms_completo,
-			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_Coulomb_atoms_completo,
-			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_VLJ_atoms_completo,
+			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>& atom_mapnames_quantity_atoms_complete,
+			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_Coulomb_atoms_complete,
+			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_VLJ_atoms_complete,
 			std::string& atom_name,int i_close,const int ID) const {
 
 			Real Vtot=0;
@@ -220,16 +220,16 @@ class Water : public Molecule {
 
 			std::vector<int> quantity(4, 0);
 			quantity[i_close] += 1;
-			std::get<2>(atom_mapnames_quantity_atoms_completo)[atom_name].push_back(quantity);
+			std::get<2>(atom_mapnames_quantity_atoms_complete)[atom_name].push_back(quantity);
 
 			std::vector<Real> Coulomb(4, 0.0);
 			Coulomb[i_close] += V_Coulomb;
-			std::get<2>(atom_mapnames_Coulomb_atoms_completo)[atom_name].push_back(Coulomb);
+			std::get<2>(atom_mapnames_Coulomb_atoms_complete)[atom_name].push_back(Coulomb);
 
 
 			std::vector<Real> LJ(4, 0.0);
 			LJ[i_close] += V_LJ;
-			std::get<2>(atom_mapnames_VLJ_atoms_completo)[atom_name].push_back(LJ);
+			std::get<2>(atom_mapnames_VLJ_atoms_complete)[atom_name].push_back(LJ);
 
 			return Vtot;
 		}
