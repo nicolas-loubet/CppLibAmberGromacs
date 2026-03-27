@@ -28,7 +28,11 @@ struct TopolInfo {
 	int total_number_of_atoms;
 	map<string,int> number_of_each_different_molecule;
 	map<string,int> number_of_atoms_per_different_molecule;
+#ifdef USE_VECTOR_TOPOLOGY
+	vector<vector<tuple<string,string,Real,Real>>> atom_type_name_charge_mass;
+#else
 	vector<map<int,tuple<string,string,Real,Real>>> atom_type_name_charge_mass;
+#endif
 	map<string,string> name_type;
 	map<string,int> type_Z;
 	map<string,pair<Real,Real>> type_LJparam; //0=epsilon 1=sigma
@@ -127,10 +131,18 @@ std::ostream& operator<<(std::ostream& os, const TopolInfo& info) {
 	os << "  Atom type name charge mass:\n";
 	for(size_t i = 0; i < info.atom_type_name_charge_mass.size(); i++) {
 		os << "	Map " << i << ":\n";
+#ifdef USE_VECTOR_TOPOLOGY
+		for(size_t j= 0; j < info.atom_type_name_charge_mass[i].size(); j++) {
+			const auto& data= info.atom_type_name_charge_mass[i][j];
+			os << "	  " << j << ": (" << std::get<0>(data) << ", "
+			   << std::get<1>(data) << ", " << std::get<2>(data) << ", " << std::get<3>(data) << ")\n";
+		}
+#else
 		for(const auto& [index, data]: info.atom_type_name_charge_mass[i]) {
 			os << "	  " << index << ": (" << std::get<0>(data) << ", "
 			   << std::get<1>(data) << ", "  << std::get<2>(data) << ", " << std::get<3>(data) << ")\n";
 		}
+#endif
 	}
 
 	os << "  Name type:\n";

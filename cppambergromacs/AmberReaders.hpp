@@ -11,8 +11,6 @@
 #include <fstream>
 #include <sstream>
 
-#define USE_SLOW_READER
-
 class AmberTopologyReader : public TopologyReader {
 	private:
 		/**
@@ -793,18 +791,27 @@ class AmberTopologyReader : public TopologyReader {
 			}*/
 			
 			topology.total_number_of_atoms=dict_pointers["NATOM"];
-			map<int, tuple<string, string, Real, Real>> molecule_atoms;
-			vector<map<int, tuple<string, string, Real, Real>>> atom_type_name_charge_mass;
 			int _k=0;
-			for(size_t _j=0; _j<number_solute_solvent[1];_j++)
-			{
+#ifdef USE_VECTOR_TOPOLOGY
+			for(size_t _j=0; _j<number_solute_solvent[1]; _j++) {
+				vector<tuple<string,string,Real,Real>> molecule_atoms;
+				molecule_atoms.reserve(atoms_per_molecule[_j]);
+				for(size_t i= 0; i < atoms_per_molecule[_j]; i++) {
+					molecule_atoms.emplace_back(ati_to_amber_type[atom_type_index[_k]], get<0>(map_atoms[_k]), get<1>(map_atoms[_k]), mass[_k]);
+					_k++;
+				}
+				topology.atom_type_name_charge_mass.push_back(move(molecule_atoms));
+			}
+#else
+			map<int, tuple<string, string, Real, Real>> molecule_atoms;
+			for(size_t _j=0; _j<number_solute_solvent[1];_j++) {
 				for (size_t i = 0; i < atoms_per_molecule[_j]; i+=1) {
-					
 					molecule_atoms[i] = make_tuple(ati_to_amber_type[atom_type_index[_k]], get<0>(map_atoms[_k]), get<1>(map_atoms[_k]), mass[_k]);
 					_k++;
 				}
-				topology.atom_type_name_charge_mass.push_back(molecule_atoms); //molecula numero atomo iniciando en 1 cada molecula
+				topology.atom_type_name_charge_mass.push_back(molecule_atoms);
 			}
+#endif
 			topology.type_Z=type_atomic_z;
 			topology.name_type=name_types; //atom name string  // type es un int
 			topology.type_LJparam=lj_diagonal; //0=epsilon 1=sigma //string de numero valor1 valor 2
@@ -817,7 +824,7 @@ class AmberCoordinateReader : public CoordinateReader {
 	public:
 		AmberCoordinateReader()= default;
 
-		#ifdef USE_SLOW_READER
+		#ifndef USE_FAST_READER
 		/**
 		 * Reads the coordinates file .pdb, even if the molecules are separated in different residues
 		 * @param filename The name of the coordinates file (single frame)
@@ -847,10 +854,9 @@ class AmberCoordinateReader : public CoordinateReader {
 			while(getline(f,line)) {
 				if(line.rfind("ATOM",0) == 0 || line.rfind("HETATM",0) == 0) {
 					string record, atom_name, res_name;
-					int atom_id, res_id;
+					int res_id;
 					Real x, y, z;
 					record=ToolKit::strip(line.substr(0, 6));
-					atom_id=stoi(ToolKit::strip(line.substr(6, 5)));
 					atom_name=ToolKit::strip(line.substr(11, 5));
 					res_name=ToolKit::strip(line.substr(16, 4));
 					res_id=stoi(ToolKit::strip(line.substr(20, 6)));
@@ -859,7 +865,7 @@ class AmberCoordinateReader : public CoordinateReader {
 					z=RealParser(ToolKit::strip(line.substr(46, 8)));
 					
 					is_water[molecule_number]=res_name;
-					atoms_each_order_molecule[molecule_number].push_back(atom_id);
+					atoms_each_order_molecule[molecule_number].push_back(coords.size());
 					coords.emplace_back(Vector(x,y,z));
 				}
 				if(line.rfind("TER",0) == 0) 
@@ -882,7 +888,7 @@ class AmberCoordinateReader : public CoordinateReader {
 					const auto& [epsilon,sigma]= topol_info.type_LJparam.at(type);
 
 					int Z=topol_info.type_Z.at(type);
-					atoms[j]= Atom(coords[(atoms_each_order_molecule[mol_pair.first][j])-1], atom_idx+1, mass, charge, epsilon, sigma, Z, type);
+					atoms[j]= Atom(coords[atoms_each_order_molecule[mol_pair.first][j]], atom_idx+1, mass, charge, epsilon, sigma, Z, type);
 					atom_idx+=1;
 				}
 				
@@ -902,7 +908,7 @@ class AmberCoordinateReader : public CoordinateReader {
 
 		}
 
-		#else // USE_SLOW_READER
+		#else // USE_FAST_READER
 
 		/**
 		 * Reads the coordinates file .pdb
@@ -964,7 +970,7 @@ class AmberCoordinateReader : public CoordinateReader {
 			return true;
 		}
 
-		#endif // USE_SLOW_READER
+		#endif // USE_FAST_READER
 };
 
 #endif // AMBER_READERS_HPP

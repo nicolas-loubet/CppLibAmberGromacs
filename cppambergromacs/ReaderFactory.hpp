@@ -8,7 +8,9 @@
 
 #include "AmberReaders.hpp"
 #include "GromacsReaders.hpp"
+#ifndef USE_VECTOR_TOPOLOGY
 #include "LammpsReaders.hpp"
+#endif
 
 class ReaderFactory {
 	public:
@@ -26,8 +28,10 @@ class ReaderFactory {
 					return new AmberCoordinateReader();
 				case ProgramFormat::GROMACS:
 					return new GromacsCoordinateReader();
+#ifndef USE_VECTOR_TOPOLOGY
 				case ProgramFormat::LAMMPS:
 				 	return new LammpsCoordinateReader();
+#endif
 				default:
 					throw std::runtime_error("Unsupported coordinate format");
 			}
@@ -45,8 +49,10 @@ class ReaderFactory {
 					return new AmberTopologyReader();
 				case ProgramFormat::GROMACS:
 					return new GromacsTopologyReader();
+#ifndef USE_VECTOR_TOPOLOGY
 				case ProgramFormat::LAMMPS:
 				 	return new LammpsTopologyReader();
+#endif
 				default:
 					throw std::runtime_error("Unsupported topology format");
 			}

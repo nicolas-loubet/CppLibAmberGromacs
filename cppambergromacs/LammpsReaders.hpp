@@ -6,6 +6,11 @@
 * Author: Nicolás Loubet
 */
 
+#ifdef USE_VECTOR_TOPOLOGY
+static_assert(false, "USE_VECTOR_TOPOLOGY is not compatible with LammpsReaders. "
+                     "Disable it or exclude LammpsReaders from your build.");
+#endif
+
 #include "ReaderInterfaces.hpp"
 #include <fstream>
 #include <string>

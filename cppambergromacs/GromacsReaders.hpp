@@ -276,7 +276,16 @@ class GromacsTopologyReader : public TopologyReader {
 				checkMass(atoms, parameters_LJflag_full);
 				ti.number_of_atoms_per_different_molecule[molec_name]= atoms.size();
 				ti.total_number_of_atoms+= atoms.size() * count;
+#ifdef USE_VECTOR_TOPOLOGY
+				{
+					vector<tuple<string,string,Real,Real>> atoms_vec;
+					atoms_vec.reserve(atoms.size());
+					for(auto& [k,v]: atoms) atoms_vec.push_back(v);
+					ti.atom_type_name_charge_mass.push_back(move(atoms_vec));
+				}
+#else
 				ti.atom_type_name_charge_mass.push_back(atoms);
+#endif
 				for(auto it_atom= atoms.begin(); it_atom != atoms.end(); it_atom++) {
 					string type= get<0>(it_atom->second);
 					string name= molec_name+":" + get<1>(it_atom->second);
@@ -367,7 +376,11 @@ class GromacsCoordinateReader : public CoordinateReader {
 				checkIfNewMolecule(i_molec, molec_name, atom_list, number_of_atom_in_list, topol_info, molecs, previous_molec_name, previous_different_molec_id, previous_molec_id);
 
 			string type, name; Real q, mass, e, s;
+#ifdef USE_VECTOR_TOPOLOGY
+			tie(type,name,q,mass)= topol_info.atom_type_name_charge_mass[previous_different_molec_id].at(number_of_atom_in_list);
+#else
 			tie(type,name,q,mass)= topol_info.atom_type_name_charge_mass[previous_different_molec_id].at(number_of_atom_in_list+1);
+#endif
 			int Z= topol_info.type_Z.at(type);
 			tie(e,s)= topol_info.type_LJparam.at(type);
 
