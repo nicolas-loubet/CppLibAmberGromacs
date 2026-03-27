@@ -104,6 +104,29 @@ namespace ToolKit {
 	}
 
 	/**
+	 * Function that executes a function for each element of a list, one after the other
+	 * @param f The function to execute (first and second arguments must be integers for controlling the ID;
+	 * the third must be one of the elements of the list, type T; the fourth argument must be a reference to the result of the function, type Res)
+	 * @param list The list of elements (for example, the directories to be analyzed)
+	 * @param args The arguments of the function
+	 * @tparam Func The type of the function to execute
+	 * @tparam T The type of the elements of the list
+	 * @tparam Res The type of the return value of the function
+	 * @tparam Args The types of the arguments of the function
+	 */
+	template<typename Func, typename T, typename Res, typename... Args>
+	void serial(Func f, std::vector<T>& list, std::vector<Res>& res, Args... args) {
+		for(size_t i= 0; i < list.size(); i++)
+			f(i+1, list.size(), list[i], res[i], args...);
+		std::cout << std::endl;
+	}
+
+	template<typename Func, typename T, typename Res, typename... Args>
+	void serialExecution(Func f, std::vector<T>& list, std::vector<Res>& res, Args... args) {
+		serial(f, list, res, args...);
+	}
+
+	/**
 	 * Function that executes a function in parallel for each element of a list
 	 * @param f The function to execute (first and second arguments must be integers for controlling the ID;
 	 * the third must be one of the elements of the list, type T; the fourth argument must be a reference to the result of the function, type Res)
@@ -119,6 +142,10 @@ namespace ToolKit {
 	void parallel(Func f, std::vector<T>& list, std::vector<Res>& res, size_t max_threads= 0, Args... args) {
 		const size_t n_tasks= list.size();
 		if(res.size() != n_tasks) res.resize(n_tasks);
+		if(max_threads == 1) {
+			serial(f, list, res, args...);
+			return;
+		}
 
 		const size_t limit= (max_threads == 0) ? n_tasks : std::min(max_threads, n_tasks);
 
@@ -150,24 +177,6 @@ namespace ToolKit {
 		for(auto& t: threads)
 			t.join();
 
-		std::cout << std::endl;
-	}
-
-	/**
-	 * Function that executes a function for each element of a list, one after the other
-	 * @param f The function to execute (first and second arguments must be integers for controlling the ID;
-	 * the third must be one of the elements of the list, type T; the fourth argument must be a reference to the result of the function, type Res)
-	 * @param list The list of elements (for example, the directories to be analyzed)
-	 * @param args The arguments of the function
-	 * @tparam Func The type of the function to execute
-	 * @tparam T The type of the elements of the list
-	 * @tparam Res The type of the return value of the function
-	 * @tparam Args The types of the arguments of the function
-	 */
-	template<typename Func, typename T, typename Res, typename... Args>
-	void serialExecution(Func f, std::vector<T>& list, std::vector<Res>& res, Args... args) {
-		for(size_t i= 0; i < list.size(); i++)
-			f(i+1, list.size(), list[i], res[i], args...);
 		std::cout << std::endl;
 	}
 
