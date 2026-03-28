@@ -9,32 +9,27 @@
 #include "Molecule.hpp"
 #include <string>
 
+using SiteQuantity= std::tuple<int,Real,std::map<std::string,std::vector<std::vector<int>>>>;
+using SiteEnergy  = std::tuple<int,Real,std::map<std::string,std::vector<std::vector<Real>>>>;
+
 /**
  * This class creates a Water molecule object, with the 3 atoms: H2O
  */
 class Water : public Molecule {
 	public:
 		// Getters
-		Atom getOxygen() const { return atoms[0]; }
-		Atom getHydrogen_1() const { return atoms[1]; }
-		Atom getHydrogen_2() const { return atoms[2]; }
+		const Atom& getOxygen()     const { return atoms[0]; }
+		const Atom& getHydrogen_1() const { return atoms[1]; }
+		const Atom& getHydrogen_2() const { return atoms[2]; }
 
 		/**
 		 * Basic constructor
 		 * @param id Number of ID to identify the molecule in the configuration
 		 * @param atoms *Atom for the oxygen and the two hydrogens
 		 */
-		Water(const int id, Atom* atoms, const int n_atoms): Molecule(id, atoms, n_atoms, atoms[0].getPosition()) {
-			is_water= true;
-		}
-
-		Water(): Molecule() {
-			is_water= true;
-		}
-
-		Water(const Water& other): Molecule(other) {
-			is_water= true;
-		}
+		Water(const int id, Atom* atoms, const int n_atoms): Molecule(id, atoms, n_atoms, atoms[0].getPosition()) { is_water= true; }
+		Water(): Molecule() { is_water= true; }
+		Water(const Water& other): Molecule(other) { is_water= true; }
 
 		Water& operator=(const Water& other) {
 			if(this == &other) return *this;
@@ -56,8 +51,9 @@ class Water : public Molecule {
 		 * @return true if the two molecules form an HB
 		 */
 		bool isHB(const Water& m, const Vector& bounds, const Real MAX_D_HB= 3.5, const Real MAX_A_HB= 30) const {
-			if(distanceTo(m, bounds) > MAX_D_HB) return false;
-			if(distanceTo(m, bounds) < 0.01) return false;
+			Real d= distanceTo(m, bounds);
+			if(d > MAX_D_HB) return false;
+			if(d < 0.01)     return false;
 
 			const Real MAX_A_HB_RAD= MAX_A_HB*Vector::PI/180.;
 			Atom* atoms_other= m.getAtoms();
@@ -159,17 +155,18 @@ class Water : public Molecule {
 					
 			return Vtot;
 		}
-	/**
+
+		/**
 		 * Calculates the potential of this molecule with an atom
 		 * @param atom Atom interacting with this molecule
 		 * @param bounds The coordinate of the last point, so the components are the width, height and length
 		 * @return the potential energy in kJ/mol of the interaction between this two molecules
 		 */
 		Real potentialWith_discriminated(const Atom& atom, const Vector& bounds,
-										std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>& atom_mapnames_quantity_atoms_complete,
-										std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_Coulomb_atoms_complete,
-										std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_VLJ_atoms_complete,
-										std::string& atom_name,int i_close,const int ID) {
+										 SiteQuantity& atom_mapnames_quantity_atoms_complete,
+										 SiteEnergy& atom_mapnames_Coulomb_atoms_complete,
+										 SiteEnergy& atom_mapnames_VLJ_atoms_complete,
+										 std::string& atom_name,int i_close,const int ID) const {
 			Real s= .5*(atoms[0].getSigma() + atom.getSigma());
 			Real e= sqrt(atoms[0].getEpsilon() * atom.getEpsilon());
 			Real Vtot=0;
@@ -177,19 +174,19 @@ class Water : public Molecule {
 			Real V_Coulomb=0;
 			for(int i= 0; i < n_atoms; i++)
 				V_Coulomb+= atoms[i].getCoulombPotential(atom,bounds);
-			Vtot=V_LJ+V_Coulomb;
+			Vtot= V_LJ+V_Coulomb;
 			
 			std::vector<int> quantity(4, 0);
-			quantity[i_close] += 1;
+			quantity[i_close]+= 1;
 			std::get<2>(atom_mapnames_quantity_atoms_complete)[atom_name].push_back(quantity);
 
 			std::vector<Real> Coulomb(4, 0.0);
-			Coulomb[i_close] += V_Coulomb;
+			Coulomb[i_close]+= V_Coulomb;
 			std::get<2>(atom_mapnames_Coulomb_atoms_complete)[atom_name].push_back(Coulomb);
 
 
 			std::vector<Real> LJ(4, 0.0);
-			LJ[i_close] += V_LJ;
+			LJ[i_close]+= V_LJ;
 			std::get<2>(atom_mapnames_VLJ_atoms_complete)[atom_name].push_back(LJ);
 		
 			return Vtot;  
@@ -202,33 +199,32 @@ class Water : public Molecule {
 		 * @return the potential energy in kJ/mol of the interaction between this two molecules
 		 */
 		Real potentialWith_discriminated(const Water& m, const Vector& bounds,
-			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>& atom_mapnames_quantity_atoms_complete,
-			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_Coulomb_atoms_complete,
-			std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_VLJ_atoms_complete,
-			std::string& atom_name,int i_close,const int ID) const {
+			                             SiteQuantity& atom_mapnames_quantity_atoms_complete,
+			                             SiteEnergy& atom_mapnames_Coulomb_atoms_complete,
+			                             SiteEnergy& atom_mapnames_VLJ_atoms_complete,
+			                             std::string& atom_name,int i_close,const int ID) const {
 
-			Real Vtot=0;
+			Real Vtot= 0;
 			Real V_LJ= getLJPotential(m, atoms[0].getSigma(), atoms[0].getEpsilon(), bounds);
-			Real V_Coulomb=0;
+			Real V_Coulomb= 0;
 			Atom* arr_other= m.getAtoms();
 			for(int i= 0; i < n_atoms; i++){
 				for(int j= 0; j < m.getNAtoms(); j++){
 					V_Coulomb+= atoms[i].getCoulombPotential(arr_other[j],bounds);
 				}
 			}
-			Vtot=V_LJ+V_Coulomb;
+			Vtot= V_LJ + V_Coulomb;
 
 			std::vector<int> quantity(4, 0);
-			quantity[i_close] += 1;
+			quantity[i_close]+= 1;
 			std::get<2>(atom_mapnames_quantity_atoms_complete)[atom_name].push_back(quantity);
 
 			std::vector<Real> Coulomb(4, 0.0);
-			Coulomb[i_close] += V_Coulomb;
+			Coulomb[i_close]+= V_Coulomb;
 			std::get<2>(atom_mapnames_Coulomb_atoms_complete)[atom_name].push_back(Coulomb);
 
-
 			std::vector<Real> LJ(4, 0.0);
-			LJ[i_close] += V_LJ;
+			LJ[i_close]+= V_LJ;
 			std::get<2>(atom_mapnames_VLJ_atoms_complete)[atom_name].push_back(LJ);
 
 			return Vtot;
