@@ -26,8 +26,8 @@ class Molecule : public Particle{
 		 */
 		static Real totalMass(Atom* Atoms, int nAtoms){
 			Real total_mass=0.0;
-			for(int _i=0;_i<nAtoms;++_i){
-				total_mass+=Atoms[_i].getMass();
+			for(int _i= 0; _i < nAtoms; ++_i){
+				total_mass+= Atoms[_i].getMass();
 			}
 			return(total_mass);
 		}
@@ -39,9 +39,9 @@ class Molecule : public Particle{
 		 * @return The total charge
 		 */
 		static Real totalCharge(Atom* Atoms, int nAtoms){
-			Real total_charge=0.0;
-			for(int _i=0;_i<nAtoms;++_i){
-				total_charge+=Atoms[_i].getCharge();
+			Real total_charge= 0.0;
+			for(int _i= 0; _i < nAtoms; ++_i){
+				total_charge+= Atoms[_i].getCharge();
 			}
 			return(total_charge);
 		}
@@ -50,9 +50,9 @@ class Molecule : public Particle{
 		Molecule(int id, Atom* Atoms, int nAtoms, Vector pos_molecule):
 			Particle(pos_molecule, id, totalMass(Atoms,nAtoms), totalCharge(Atoms,nAtoms)),
 			atoms(Atoms), n_atoms(nAtoms), classif(NOT_CLASSIFIED), is_water(false) {}
-		Molecule(int id, Atom* Atoms, int nAtoms) : Molecule(id, Atoms, nAtoms,
+		Molecule(int id, Atom* Atoms, int nAtoms): Molecule(id, Atoms, nAtoms,
 			centerOfMass(Atoms,nAtoms)) {}
-		Molecule() : Molecule(0,nullptr,0) {}
+		Molecule(): Molecule(0,nullptr,0) {}
 
 		/**
 		 * Copy constructor
@@ -60,13 +60,13 @@ class Molecule : public Particle{
 		Molecule(const Molecule& other): Particle(other), n_atoms(other.n_atoms), atoms(nullptr) {
 			if(n_atoms <= 0) return;
 			atoms= new Atom[n_atoms];
-			for (int i= 0; i < n_atoms; i++)
+			for(int i= 0; i < n_atoms; i++)
 				atoms[i]= other.atoms[i];
 		}
 
 		Molecule& operator=(const Molecule& other) {
 			if(this == &other) return *this;
-			Particle::operator=(other);
+			Particle::operator= (other);
 			delete[] atoms;
 			n_atoms= other.n_atoms;
 			atoms= nullptr;
@@ -84,11 +84,12 @@ class Molecule : public Particle{
 		 * @return The center of mass
 		 */
 		static Vector centerOfMass(Atom* Atoms, int nAtoms){
-			Vector com ={0.0,0.0,0.0};
-			for(int _i=0;_i<nAtoms;++_i){
-				com+=Atoms[_i].getPosition();
+			Vector com= {0.0,0.0,0.0};
+			for(int _i= 0; _i < nAtoms; ++_i){
+				com+= Atoms[_i].getPosition();
 			}
-			return(com/static_cast<Real>(nAtoms));
+			if(nAtoms > 0) com/= nAtoms;
+			return com;
 		}
 
 		/**
@@ -99,16 +100,16 @@ class Molecule : public Particle{
 		}
 
 		//Getters
-		Atom* getAtoms() const {return(atoms);}
+		Atom* getAtoms()      const {return(atoms); }
 		Atom& getAtom(int id) const { return(atoms[id-1]); }
-		int getNAtoms() const {return(n_atoms);}
-		bool isWater() const { return is_water; }
+		int   getNAtoms()     const {return(n_atoms); }
+		bool  isWater()       const { return is_water; }
 
-		void setClassification(const int c) { classif= c; }
-		void removeClassification() { classif= NOT_CLASSIFIED; }
-		int getClassification() const { return classif; }
-		bool isClassified() const { return classif != NOT_CLASSIFIED; }
-		void setIsWater(bool is_water) { this->is_water= is_water; }
+		void  setClassification(const int c) { classif= c; }
+		void  removeClassification()         { classif= NOT_CLASSIFIED; }
+		int   getClassification() const      { return classif; }
+		bool  isClassified() const           { return classif != NOT_CLASSIFIED; }
+		void  setIsWater(bool is_water)      { this->is_water= is_water; }
 
 		/**
 		 * This function find the nearest atoms to the parameter, being par of the same molecule
@@ -119,7 +120,6 @@ class Molecule : public Particle{
 		 */
 		inline std::vector<int> findNearbyAtoms(const int ID_CENTER, const Real D_MAX_NEI, const Vector& bounds) const {
 			std::vector<int> i_nearby;
-			int counter= 0;
 
 			for(int i= 1; i <= n_atoms; i++) {
 				if(i == ID_CENTER) continue;
