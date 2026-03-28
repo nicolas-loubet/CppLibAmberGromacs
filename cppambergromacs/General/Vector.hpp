@@ -353,9 +353,9 @@ inline Real distancePBC(const Vector& a, const Vector& b, const Vector& box) {
 	Real dy= a.y - b.y;
 	Real dz= a.z - b.z;
 
-	dx-= box.x * floorf(dx / box.x + 0.5f);
-	dy-= box.y * floorf(dy / box.y + 0.5f);
-	dz-= box.z * floorf(dz / box.z + 0.5f);
+	dx-= box.x * std::floor(dx / box.x + 0.5f);
+	dy-= box.y * std::floor(dy / box.y + 0.5f);
+	dz-= box.z * std::floor(dz / box.z + 0.5f);
 
 	return std::sqrt(dx*dx + dy*dy + dz*dz);
 }
@@ -384,9 +384,9 @@ inline Vector displacementPBC(const Vector& a, const Vector& b, const Vector& bo
 	Real dy= a.y - b.y;
 	Real dz= a.z - b.z;
 
-	dx-= box.x * floorf(dx / box.x + 0.5f);
-	dy-= box.y * floorf(dy / box.y + 0.5f);
-	dz-= box.z * floorf(dz / box.z + 0.5f);
+	dx-= box.x * std::floor(dx / box.x + 0.5f);
+	dy-= box.y * std::floor(dy / box.y + 0.5f);
+	dz-= box.z * std::floor(dz / box.z + 0.5f);
 
 	return Vector(dx,dy,dz);
 }
@@ -403,9 +403,9 @@ inline Real squaredDistancePBC(const Vector& a, const Vector& b, const Vector& b
 	Real dy= a.y - b.y;
 	Real dz= a.z - b.z;
 
-	dx-= box.x * floorf(dx / box.x + 0.5f);
-	dy-= box.y * floorf(dy / box.y + 0.5f);
-	dz-= box.z * floorf(dz / box.z + 0.5f);
+	dx-= box.x * std::floor(dx / box.x + 0.5f);
+	dy-= box.y * std::floor(dy / box.y + 0.5f);
+	dz-= box.z * std::floor(dz / box.z + 0.5f);
 
 	return dx*dx + dy*dy + dz*dz;
 }
@@ -426,7 +426,7 @@ inline Real angleBetweenRadians(const Vector& a, const Vector& b) {
 	Real cosTheta= dotProduct / (magA * magB);
 
 	// Clamp value to [-1, 1] to avoid NaNs due to floating point errors
-	cosTheta= std::fmax(-1.0f, std::fmin(1.0f, cosTheta));
+	cosTheta= std::max(static_cast<Real>(-1.0), std::min(static_cast<Real>(1.0), cosTheta));
 
 	return std::acos(cosTheta);
 }
@@ -455,7 +455,7 @@ inline Real getAngle(Vector c1, Vector c2, Vector c3, Vector bounds) {
 	Real c= distancePBC(c2,c3,bounds);
 	//Law of cosines
 	Real cos_angle= (pow(b,2)+pow(c,2)-pow(a,2))/(2*b*c);
-	cos_angle= std::fmax(-1.0f, std::fmin(1.0f, cos_angle)); // Clamp value to [-1, 1] to avoid NaNs due to floating point errors
+	cos_angle= std::max(-1.0f, std::fmin(1.0f, cos_angle)); // Clamp value to [-1, 1] to avoid NaNs due to floating point errors
 	return std::fabs(acos(cos_angle));
 }
 
