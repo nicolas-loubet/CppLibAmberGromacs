@@ -133,8 +133,6 @@ class ConfigurationBulk : public Configuration {
 		 * @param threshold The value of potential to which compare the vI return value, default is -12
 		 */
 		void classifyMolecules(const int V_index=4, const Real threshold=-12.0) {
-			const int NUMBER_OF_NEIGHBOURS= 4;
-
 			Real** potential_matrix= createPotentialMatrix();
 
 			//Firstly, I want to know every D molecule
@@ -189,8 +187,6 @@ class ConfigurationBulk : public Configuration {
 		 * @param threshold The value of potential to which compare the vI return value, default is -12
 		 */
 		void classifyMolecules_includePentacoordinated(const int V_index=4, const Real threshold=-12.0) {
-			const int NUMBER_OF_NEIGHBOURS= 4;
-			
 			Real** potential_matrix= createPotentialMatrix();
 
 			//Firstly, I want to know every D molecule
@@ -283,6 +279,8 @@ class ConfigurationBulk : public Configuration {
 					ls_d_nHB.push_back(dist);
 			}
 
+			if(ls_d_HB.empty()) throw std::runtime_error("Tanaka: list of HB molecules is empty for Water " + std::to_string(m->getID()));
+			if(ls_d_nHB.empty()) throw std::runtime_error("Tanaka: list of non-HB molecules is empty for Water " + std::to_string(m->getID()));
 			Real min_value= *min_element(ls_d_HB.begin(),ls_d_HB.end());
 			Real max_value= *max_element(ls_d_nHB.begin(),ls_d_nHB.end());
 			Real output= min_value-max_value;

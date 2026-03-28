@@ -23,7 +23,6 @@ class ConfigurationLipid : public Configuration {
 		inline vector<int> findCH3(const int ID_MOLEC) const
 			{
 			vector<int> list_CH3;
-			int n_CH3=0;
 			for(int i= 1; i <= getMolec(ID_MOLEC).getNAtoms(); i++) //for each atom in molecule
 				{
 				vector<int> NearbyAtoms;
@@ -33,7 +32,7 @@ class ConfigurationLipid : public Configuration {
 					bool exit=false;
 					if(NearbyAtoms.size()>0)
 						{
-						for(int j=0; j<NearbyAtoms.size(); j++)
+						for(size_t j=0; j<NearbyAtoms.size(); j++)
 							{
 							if(getMolec(ID_MOLEC).getAtom(NearbyAtoms[j]).getZ()==7) // Discards CH3 bound to N
 								{
@@ -43,14 +42,13 @@ class ConfigurationLipid : public Configuration {
 						if(exit==true){ exit=false; continue;}
 
 						int n_hydrogen=0;
-						for(int j=0; j<NearbyAtoms.size(); j++)
+						for(size_t j=0; j<NearbyAtoms.size(); j++)
 							{
 							if(getMolec(ID_MOLEC).getAtom(NearbyAtoms[j]).getZ()==1) {n_hydrogen+=1;}  // if hydrogen is found
 							}
 						if(n_hydrogen==3)
 							{
 							list_CH3.insert(list_CH3.begin(),i); // add CH3 carbon atom ID to the list
-							n_CH3+=1; 
 							}
 
 						}
@@ -60,14 +58,14 @@ class ConfigurationLipid : public Configuration {
 			}
 
 		/**
-		 * This function analize the chain from terminal CH3 going up until it finds an oxigen atom. 
+		 * This function analyze the chain from terminal CH3 going up until it finds an oxigen atom. 
 		 * @param ID_MOLEC   ID of the molecule
 		 * @param ID_CH3  ID of the CH3 residue to search up the molecule
 		 * @return returns a pair in which the first term holds if the chain is SN1 or SN1 and
 		 * a vector of maps in which the first term hold the carbon number and the second term holds the nearby atoms, generally 2 C and 2
 		 */
 
-		inline pair<int,vector<map<int,vector<int>>>> analizeChain(const int ID_MOLEC, const int ID_CH3) const
+		inline pair<int,vector<map<int,vector<int>>>> analyzeChain(const int ID_MOLEC, const int ID_CH3) const
 			{
 			vector<int> NearbyAtoms;
 			vector<map<int,vector<int>>> current_chain;
@@ -82,7 +80,7 @@ class ConfigurationLipid : public Configuration {
 			first_atom_studied[previous_c]=NearbyAtoms;   
 			current_chain.insert(current_chain.begin(),first_atom_studied);// Adds CH3 to the chain
 
-			for(int j=0; j<NearbyAtoms.size(); j++) //searchs one time for the next carbon
+			for(size_t j=0; j<NearbyAtoms.size(); j++) //searchs one time for the next carbon
 				{
 				if(getMolec(ID_MOLEC).getAtom(NearbyAtoms[j]).getZ()==6) 
 					{
@@ -102,7 +100,7 @@ class ConfigurationLipid : public Configuration {
 				failsafe+=1;
 				if(chain_lenght>=22 || failsafe>25){exit=true; break;}
 
-				for(int j=0; j<NearbyAtoms.size(); j++)
+				for(size_t j=0; j<NearbyAtoms.size(); j++)
 					{
 					if(getMolec(ID_MOLEC).getAtom(NearbyAtoms[j]).getZ()==8) // An Oxigen has been found
 						{
@@ -177,7 +175,7 @@ class ConfigurationLipid : public Configuration {
 				pair<int,vector<map<int,vector<int>>>> chain = analizeChain(ID_MOLEC, CH3_found[i]); //Chain is analyzed
 				vector<map<int,vector<int>>> chain_studied=chain.second; //Grabs the chain
 				
-				for(int j=0; j<chain_studied.size(); j++)
+				for(size_t j=0; j<chain_studied.size(); j++)
 					{
 					map<int,vector<int>> analyzed_atom=chain_studied[j];
 					Real order=0.0;
