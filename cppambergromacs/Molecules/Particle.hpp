@@ -44,16 +44,17 @@ class Particle{
 			return *this;
 		}
 
+		virtual ~Particle()= default;
+
 		/**
 		 * It returns the distance between two particles in periodic boundary conditions
 		 * @param other The other particle
 		 * @param box The box size
 		 * @return The distance between the two particles
 		 */
-		Real distanceTo(const Particle& other, const Vector box) const 
-			{
+		Real distanceTo(const Particle& other, const Vector& box) const {
 			return distancePBC(pos, other.getPosition(), box);
-			}
+		}
 };
 
 #endif // PARTICLE_HPP
