@@ -954,53 +954,6 @@ TEST_CASE("Vector - Constants and Edge Cases", "[Vector]") {
 }
 
 TEST_CASE("Toolkit - Structs", "[Toolkit]") {
-	SECTION("ArrInt initialization and access") {
-		ToolKit::ArrInt arr;
-		arr.size = 3;
-		arr.arr = new int[3]{1, 2, 3};
-		REQUIRE(arr.arr[0] == 1);
-		REQUIRE(arr.arr[1] == 2);
-		REQUIRE(arr.arr[2] == 3);
-		delete[] arr.arr;
-	}
-
-	SECTION("ArrFloat initialization and access") {
-		ToolKit::ArrFloat arr;
-		arr.size = 2;
-		arr.arr = new Real[2]{1.5, 2.5};
-		REQUIRE(arr.arr[0] == Approx(1.5));
-		REQUIRE(arr.arr[1] == Approx(2.5));
-		delete[] arr.arr;
-	}
-
-	SECTION("FlaggedArrFloat construction") {
-		Real* data = new Real[2]{1.0, 2.0};
-		ToolKit::FlaggedArrFloat arr(2, data, true);
-		REQUIRE(arr.size == 2);
-		REQUIRE(arr.arr[0] == Approx(1.0));
-		REQUIRE(arr.arr[1] == Approx(2.0));
-		REQUIRE(arr.flag == true);
-		delete[] data;
-	}
-
-	SECTION("ArrInt with zero size") {
-		ToolKit::ArrInt arr;
-		arr.size = 0;
-		arr.arr = nullptr;
-		REQUIRE(arr.size == 0);
-		REQUIRE(arr.arr == nullptr);
-	}
-
-	SECTION("FlaggedArrFloat with negative values") {
-		Real* data = new Real[2]{-1.0, -2.0};
-		ToolKit::FlaggedArrFloat arr(2, data, false);
-		REQUIRE(arr.size == 2);
-		REQUIRE(arr.arr[0] == Approx(-1.0));
-		REQUIRE(arr.arr[1] == Approx(-2.0));
-		REQUIRE(arr.flag == false);
-		delete[] data;
-	}
-
 	SECTION("Parallel execution with visual progress bar (phantom load)") {
 		std::vector<int> list(5, 0);
 		std::vector<int> res(5, 0);
@@ -1023,7 +976,6 @@ TEST_CASE("Toolkit - Structs", "[Toolkit]") {
 
 		std::cout << std::endl;
 	}
-
 }
 
 /// Helper: reads a file and returns its contents

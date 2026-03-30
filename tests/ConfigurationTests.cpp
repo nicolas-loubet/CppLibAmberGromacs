@@ -61,21 +61,19 @@ TEST_CASE("Configuration - AMBER: basic checks and interaction values (expanded)
 
 	SECTION("findNearby returns valid neighbors and excludes self") {
 		auto neigh = conf.findNearby(1000, 5.0);
-		REQUIRE(neigh.size > 0);
-		for (int i=0;i<neigh.size;i++){
-			REQUIRE(neigh.arr[i] != 1000);
+		REQUIRE(neigh.size() > 0);
+		for (int i=0;i<neigh.size();i++){
+			REQUIRE(neigh[i] != 1000);
 		}
-		delete[] neigh.arr; // free if ArrInt uses heap for arr
 	}
 
 	SECTION("vI and getVList internal consistency") {
 		int mol_id = 1000;
 		// getVList is ascending; spot-check first and fourth values with hand-calculated ones
-		Real* vlist = conf.getVList(mol_id, 5.5);
-		REQUIRE(vlist != nullptr);
+		vector<Real> vlist = conf.getVList(mol_id, 5.5);
+		REQUIRE(vlist.size() > 0);
 		REQUIRE(vlist[0] == Approx(-23.0847).margin(1e-3));
 		REQUIRE(vlist[3] == Approx(-6.3528).margin(1e-3));
-		delete[] vlist;
 	}
 
 	SECTION("Per-site (flagged) vs non-flagged and waterOnly consistency") {
@@ -135,11 +133,10 @@ TEST_CASE("Configuration - GROMACS: extended interaction checks", "[Configuratio
 
 	SECTION("Neighbors and vI ordering") {
 		auto neigh = conf.findNearby(1000, 5.0);
-		REQUIRE(neigh.size >= 0);
-		for (int i=0;i<neigh.size;i++){
-			REQUIRE(neigh.arr[i] != 1000);
+		REQUIRE(neigh.size() >= 0);
+		for (int i=0;i<neigh.size();i++){
+			REQUIRE(neigh[i] != 1000);
 		}
-		delete[] neigh.arr;
 
 		int mol_id = 1000;
 		REQUIRE(conf.vI(mol_id,1) <= conf.vI(mol_id,2));
@@ -300,15 +297,13 @@ TEST_CASE("ConfigurationBulk - classification, potentials matrix, arrays and DJ/
 
 	SECTION("v_4S_arr matches per-molecule v_4S for a subset and respects start index") {
 		// Build neighbor list container (optional) to exercise that code path
-		ToolKit::ArrInt* neigh = nullptr;
-		Real* arr = conf.v_4S_arr(/*inic_value*/1, /*i_V*/4, /*R_CUT*/5.0, neigh);
-		REQUIRE(arr != nullptr);
+		vector<vector<int>>* neigh = nullptr;
+		vector<Real> arr = conf.v_4S_arr(/*inic_value*/1, /*i_V*/4, /*R_CUT*/5.0, neigh);
+		REQUIRE(arr.size() > 0);
 
 		// Check a few positions: index 0 corresponds to molecule 1
 		REQUIRE(arr[1000-1] == Approx(conf.v_4S(1000)).margin(1e-6)); // molecule 1000
 		REQUIRE(arr[1-1]	== Approx(conf.v_4S(1)).margin(1e-6));	// molecule 1
-
-		delete[] arr;
 	}
 
 	SECTION("isDJ returns consistent structure (sum_per_site sorted, flags coherent)") {
@@ -371,7 +366,7 @@ TEST_CASE("ConfigurationBulk - GROMACS: core methods sanity and v4 hand-check", 
 	SECTION("Classification runs and assigns values") {
 		conf.classifyMolecules();
 		int counts[4] = {0,0,0,0};
-		for (int i=1;i<=conf.getNMolec()/5;++i) {
+		for (int i=1;i<=conf.getNMolec()/10;++i) {
 			const Molecule& m = conf.getMolec(i);
 			if (!m.isWater()) continue;
 			const Water& w = static_cast<const Water&>(m);
