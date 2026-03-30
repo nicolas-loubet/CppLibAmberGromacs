@@ -15,41 +15,10 @@
 #include <mutex>
 #include <condition_variable>
 
-static std::mutex mtx;
+inline std::mutex mtx;
 
 namespace ToolKit {
 	constexpr Real k_B= 1.380649*6.02214076*0.001; // Boltzmann constant in kJ/(mol*K)
-
-	/**
-	 * STRUCT that contains the pointer to an array of int and the size of that array
-	 */
-	struct ArrInt {
-		int* arr;
-		int size= 0;
-	};
-
-	/**
-	 * STRUCT that contains the pointer to an array of Real and the size of that array
-	 */
-	struct ArrFloat {
-		Real* arr;
-		int size= 0;
-	};
-
-	/**
-	 * STRUCT that contains the pointer to an array of Real and the size of that array
-	 */
-	struct FlaggedArrFloat {
-		int size;
-		Real* arr;
-		bool flag;
-	
-		FlaggedArrFloat(int size, Real* arr, bool flag) {
-			this->size= size;
-			this->arr= arr;
-			this->flag= flag;
-		}
-	};
 
 
 	/**
