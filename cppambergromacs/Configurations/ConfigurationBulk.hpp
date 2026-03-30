@@ -240,13 +240,13 @@ class ConfigurationBulk : public Configuration {
 		 * @param inic_value The initial value of the array (first water molecule), default is 1
 		 * @param i_V The potential number V_index of a sorted list of all potentials, default is 4
 		 * @param R_CUT_OFF The cutoff radius, default is 5.
-		 * @param neighbours An array with the neighbours of each molecule, default is nullptr
-		 * @return An array with the V_4S values
+		 * @param neighbours Optional: vector of neighbour ID lists per molecule, default is nullptr
+		 * @return A vector with the V_4S values
 		 */
-		Real* v_4S_arr(const int inic_value= 1, const int i_V= 4, const Real R_CUT_OFF= 5., ToolKit::ArrInt* neighbours= nullptr) {
-			Real* output= new Real[N_MOLEC];
+		vector<Real> v_4S_arr(const int inic_value= 1, const int i_V= 4, const Real R_CUT_OFF= 5., vector<vector<int>>* neighbours= nullptr) {
+			vector<Real> output(N_MOLEC - inic_value + 1);
 			Real** pm= createPotentialMatrix();
-			for(int i= inic_value; i < N_MOLEC; i++)
+			for(int i= inic_value; i <= N_MOLEC; i++)
 				output[i-inic_value]= getInteractionsPerSite(i,R_CUT_OFF,pm,neighbours)[i_V-1];
 			deletePotentialMatrix(pm);
 			return output;

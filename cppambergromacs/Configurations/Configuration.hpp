@@ -39,7 +39,7 @@ class Configuration {
 		}
 
 		// Helper: check in the potential matrix the stored value
-		inline Real checkInPotentialMatrix(Water& center_water, Water& other, Real** potential_matrix, ToolKit::ArrInt* neighbours) {
+		inline Real checkInPotentialMatrix(Water& center_water, Water& other, Real** potential_matrix, vector<vector<int>>* neighbours) {
 			int min= (center_water.getID() < other.getID() ? center_water.getID() : other.getID()) - 1;
 			int max= (center_water.getID() > other.getID() ? center_water.getID() : other.getID()) - 1;
 
@@ -48,7 +48,7 @@ class Configuration {
 
 			Real pot= potential_matrix[max][min];
 			if(neighbours != nullptr)
-				neighbours[center_water.getID()-1].arr[neighbours[center_water.getID()-1].size++]= other.getID();
+				(*neighbours)[center_water.getID()-1].push_back(other.getID());
 			return pot;
 		}
 
@@ -62,7 +62,7 @@ class Configuration {
 
 		// Helper: Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite
 		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other,
-							Real** potential_matrix, ToolKit::ArrInt* neighbours, const Real R_CUT_OFF) {
+							Real** potential_matrix, vector<vector<int>>* neighbours, const Real R_CUT_OFF) {
 			int i_close;
 			if(!closestSiteIndex(sites, other.getPosition(), bounds, R_CUT_OFF, i_close))
 				return;
@@ -89,7 +89,7 @@ class Configuration {
 		// Helper: Adds the potential of a water molecule with another water molecule to the sum_per_site vector,
 		// used in getInteractionsPerSite flagged with water-water interactions < V_CUT_OFF
 		void addToSumVector(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other, Real** potential_matrix,
-							ToolKit::ArrInt* neighbours, const Real R_CUT_OFF, bool* ww_interaction, const Real V_CUT_OFF) {
+							vector<vector<int>>* neighbours, const Real R_CUT_OFF, bool* ww_interaction, const Real V_CUT_OFF) {
 			int i_close;
 			if(!closestSiteIndex(sites, other.getPosition(), bounds, R_CUT_OFF, i_close))
 				return;
@@ -229,7 +229,9 @@ class Configuration {
 
 		Configuration& operator=(const Configuration& other) {
 			if(this == &other) return *this;
-			delete(this);
+			for(int i= 0; i < N_MOLEC; i++)
+				delete molecs[i];
+			delete[] molecs;
 
 			N_MOLEC= other.N_MOLEC;
 			bounds= other.bounds;
@@ -253,23 +255,18 @@ class Configuration {
 		/**
 		 * Finds the molecules nearby the specified one
 		 * @param ID_CENTER int The ID of the Molecule that is the center of the search
-		 * @param D_MAX_NEI Real Maximum radium of neighbour search
-		 * @return A ToolKit::ArrInt with the IDs of the molecules that are at a distance of D_MAX_NEI Angstrom or less
+		 * @param D_MAX_NEI Real Maximum radius of neighbour search
+		 * @return A vector<int> with the IDs of the molecules that are at a distance of D_MAX_NEI Angstrom or less
 		 */
-		ToolKit::ArrInt findNearby(const int ID_CENTER, const Real D_MAX_NEI) const {
-			int* i_nearby= new int[N_MOLEC];
-			int counter= 0;
-
+		vector<int> findNearby(const int ID_CENTER, const Real D_MAX_NEI) const {
+			vector<int> i_nearby;
+			i_nearby.reserve(64); // typical neighbour count
 			for(int i= 1; i <= N_MOLEC; i++) {
-				if(i == ID_CENTER) continue; //If it is the same molecule
+				if(i == ID_CENTER) continue;
 				if(getMolec(ID_CENTER).distanceTo(getMolec(i), bounds) <= D_MAX_NEI)
-					i_nearby[counter++]= i;
+					i_nearby.push_back(i);
 			}
-
-			ToolKit::ArrInt output;
-			output.arr= i_nearby;
-			output.size= counter;
-			return output;
+			return i_nearby;
 		}
 
 		/**
@@ -278,22 +275,22 @@ class Configuration {
 		 * @param MAX_V4 The radii of cut-off to not compare all the molecules
 		 * @return The potential number V_index of a sorted list of all potentials
 		 */
-		Real* getVList(const int ID_CENTER, const Real MAX_V4= 5.5) {
-			if(!getMolec(ID_CENTER).isWater()) return nullptr;
-			Water w1= *static_cast<Water*>(molecs[ID_CENTER-1]);
+		vector<Real> getVList(const int ID_CENTER, const Real MAX_V4= 5.5) {
+			if(!getMolec(ID_CENTER).isWater()) return {};
+			Water& w1= *static_cast<Water*>(molecs[ID_CENTER-1]);
 
-			int ls_V_i= 0;
-			Real* ls_V= new Real[N_MOLEC];
+			vector<Real> ls_V;
+			ls_V.reserve(64);
 
 			for(int j= 0; j < N_MOLEC; j++) {
-				if(j+1 == ID_CENTER) continue; //If they are the same molecule
+				if(j+1 == ID_CENTER) continue;
 				if(!getMolec(j+1).isWater()) continue;
-				if(getMolec(ID_CENTER).distanceTo(getMolec(j+1), bounds) > MAX_V4) continue; //Cutoff use
-				Water w2= *static_cast<Water*>(molecs[j]);
-				ls_V[ls_V_i++]= w1.potentialWith(w2, bounds);
+				if(getMolec(ID_CENTER).distanceTo(getMolec(j+1), bounds) > MAX_V4) continue;
+				Water& w2= *static_cast<Water*>(molecs[j]);
+				ls_V.push_back(w1.potentialWith(w2, bounds));
 			}
 
-			Sorter::sort(ls_V, ls_V_i, Sorter::Order::Ascending);
+			Sorter::sort(ls_V, Sorter::Order::Ascending);
 			return ls_V;
 		}
 
@@ -304,10 +301,7 @@ class Configuration {
 		 * @return The potential number V_index of a sorted list of all potentials
 		 */
 		Real vI(const int ID_CENTER, const int V_index=4) {
-			Real *ls_V= getVList(ID_CENTER);
-			Real v_i= ls_V[V_index-1];
-			delete(ls_V);
-			return v_i;
+			return getVList(ID_CENTER)[V_index-1];
 		}
 
 		/**
@@ -351,7 +345,7 @@ class Configuration {
 													    std::vector<std::tuple<int,Real,std::vector<int>>>& V4S_preferencia,const float MIN_BINS, const float MAX_BINS, const int N_BINS) {
 			const Real R_CUT_OFF= 5.0;
 			Real** potential_matrix= nullptr;
-			 ToolKit::ArrInt* neighbours= nullptr;
+			vector<vector<int>>* neighbours= nullptr;
 			int* labels= nullptr;
 
 			if(!getMolec(ID).isWater()) throw invalid_argument("The molecule is not a water molecule.");
@@ -469,7 +463,7 @@ class Configuration {
 
 		// Helper: Adds the potential of a water molecule with another water molecule to the sum_per_site vector, used in getInteractionsPerSite
 		void addToSumVector_discriminated(vector<Vector>& sites, vector<Real>& sum_per_site, Water& center_water, Water& other,
-							Real** potential_matrix, ToolKit::ArrInt* neighbours, const Real R_CUT_OFF,
+							Real** potential_matrix, vector<vector<int>>* neighbours, const Real R_CUT_OFF,
 							std::tuple<int,Real,std::map<std::string, std::vector<std::vector<int>>>>& atom_mapnames_quantity_atoms_complete,
 							std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_Coulomb_atoms_complete,
 							std::tuple<int,Real,std::map<std::string, std::vector<std::vector<Real>>>>& atom_mapnames_VLJ_atoms_complete,std::string& atom_name,const int ID) {
@@ -504,7 +498,7 @@ class Configuration {
 		 * @param labels Identification of the sorted list, default is nullptr. If you need it, declare it ass "new int[4]", result would be 0-3
 		 * @return The interactions per site, sorted in ascending order
 		 */
-		vector<Real> getInteractionsPerSite(const int ID, const Real R_CUT_OFF= 5.0, Real** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr, int* labels= nullptr) {
+		vector<Real> getInteractionsPerSite(const int ID, const Real R_CUT_OFF= 5.0, Real** potential_matrix= nullptr, vector<vector<int>>* neighbours= nullptr, int* labels= nullptr) {
 			if(!getMolec(ID).isWater()) throw invalid_argument("The molecule is not a water molecule.");
 			Water& molecule= *static_cast<Water*>(molecs[ID-1]);
 			Vector o= molecule.getOxygen().getPosition();
@@ -555,7 +549,7 @@ class Configuration {
 		 * @param neighbours The neighbours of the molecule, default is nullptr
 		 * @return The interactions per site, sorted in ascending			 order
 		 */
-		vector<Real> getInteractionsPerSite(const int ID, bool& flag_ww, const Real V_CUT_OFF= -12.0, const Real R_CUT_OFF= 5.0, Real** potential_matrix= nullptr, ToolKit::ArrInt* neighbours= nullptr) {
+		vector<Real> getInteractionsPerSite(const int ID, bool& flag_ww, const Real V_CUT_OFF= -12.0, const Real R_CUT_OFF= 5.0, Real** potential_matrix= nullptr, vector<vector<int>>* neighbours= nullptr) {
 			if(!getMolec(ID).isWater()) throw invalid_argument("The molecule is not a water molecule.");
 			Water& molecule= *static_cast<Water*>(molecs[ID-1]);
 			Vector o= molecule.getOxygen().getPosition();
