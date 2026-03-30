@@ -172,7 +172,7 @@ class ConfigurationLipid : public Configuration {
 			for(int i=0; i<CH3_found.size();i++) //for each CH3 found
 				{
 				vector<Real> order_per_carbon(22);  // sets a maximun chain lenght of 22 
-				pair<int,vector<map<int,vector<int>>>> chain = analizeChain(ID_MOLEC, CH3_found[i]); //Chain is analyzed
+				pair<int,vector<map<int,vector<int>>>> chain = analyzeChain(ID_MOLEC, CH3_found[i]); //Chain is analyzed
 				vector<map<int,vector<int>>> chain_studied=chain.second; //Grabs the chain
 				
 				for(size_t j=0; j<chain_studied.size(); j++)
