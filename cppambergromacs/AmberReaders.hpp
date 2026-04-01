@@ -702,6 +702,12 @@ class AmberTopologyReader : public TopologyReader {
 						b=get<1>(lj_coefficient[{_i,_k}]);
 						sigma=pow(a / b, 1.0 / 6.0);
 						epsilon=pow(b,2)/(4*a);
+
+						if(isnan(epsilon)) {
+							epsilon=0;
+							sigma=0;
+						}
+						
 						get<0>(lj_coefficient[{_i,_k}])=epsilon*4.184; // kcal -> kJ
 						get<1>(lj_coefficient[{_i,_k}])=sigma;
 					}
