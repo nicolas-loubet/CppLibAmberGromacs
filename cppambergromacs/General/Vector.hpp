@@ -2,7 +2,7 @@
 #define VECTOR_HPP
 
 /**
- * Version: April 2025
+ * Version: April 2026
  * Author: Nicolás Loubet
  */
 
@@ -131,11 +131,7 @@ class Vector {
 		 */
 		void normalize() {
 			Real m= magnitude();
-			if(m > EPSILON) {
-				x/= m;
-				y/= m;
-				z/= m;
-			}
+			if(m > EPSILON) { x/= m; y/= m; z/= m; }
 		}
 
 		/**
@@ -276,8 +272,7 @@ class Vector {
 		 * @return Rotated vector
 		 */
 		Vector rotatedAround(const Vector& axis, Real angle) const {
-			if(angle==0.0) return *this;
-			if(axis.magnitude()==0.0) return *this;
+			if(angle==0.0 || axis.magnitude()==0.0) return *this;
 			Vector k= axis;
 			k.normalize();
 			Real cos_theta= std::cos(angle);
@@ -323,7 +318,7 @@ inline Vector operator*(Real k, const Vector& v) {
  * @param v Vector to write
  * @return Ostream with the writed string
  */
-inline std::ostream& operator <<(std::ostream& o, const Vector& v) {
+inline std::ostream& operator<<(std::ostream& o, const Vector& v) {
 	o << "{" << v.x << " " << v.y << " " << v.z << "}";
 	return o;
 }
@@ -342,25 +337,6 @@ inline Real distanceWithoutPBC(const Vector& a, const Vector& b) {
 }
 
 /**
- * Compute the minimum-image distance between two vectors using Periodic Boundary Conditions (PBC)
- * @param a First vector (position)
- * @param b Second vector (position)
- * @param box Box dimensions in x, y, z (assumed orthorhombic)
- * @return The scalar distance between the two points using minimum image convention
- */
-inline Real distancePBC(const Vector& a, const Vector& b, const Vector& box) {
-	Real dx= a.x - b.x;
-	Real dy= a.y - b.y;
-	Real dz= a.z - b.z;
-
-	dx-= box.x * std::floor(dx / box.x + 0.5f);
-	dy-= box.y * std::floor(dy / box.y + 0.5f);
-	dz-= box.z * std::floor(dz / box.z + 0.5f);
-
-	return std::sqrt(dx*dx + dy*dy + dz*dz);
-}
-
-/**
  * Compute the 2D distance between two vectors without using PBC
  * @param a First vector (position)
  * @param b Second vector (position)
@@ -373,57 +349,16 @@ inline Real distance2D(const Vector& a, const Vector& b) {
 }
 
 /**
- * Compute the minimum image displacement vector between two positions under PBC
- * @param a First position vector
- * @param b Second position vector
- * @param box Dimensions of the periodic box (assumed orthorhombic)
- * @return Minimum image displacement vector from b to a
- */
-inline Vector displacementPBC(const Vector& a, const Vector& b, const Vector& box) {
-	Real dx= a.x - b.x;
-	Real dy= a.y - b.y;
-	Real dz= a.z - b.z;
-
-	dx-= box.x * std::floor(dx / box.x + 0.5f);
-	dy-= box.y * std::floor(dy / box.y + 0.5f);
-	dz-= box.z * std::floor(dz / box.z + 0.5f);
-
-	return Vector(dx,dy,dz);
-}
-
-/**
- * Compute the squared minimum image distance between two positions under PBC
- * @param a First position vector
- * @param b Second position vector
- * @param box Dimensions of the periodic box (assumed orthorhombic)
- * @return Squared minimum image distance
- */
-inline Real squaredDistancePBC(const Vector& a, const Vector& b, const Vector& box) {
-	Real dx= a.x - b.x;
-	Real dy= a.y - b.y;
-	Real dz= a.z - b.z;
-
-	dx-= box.x * std::floor(dx / box.x + 0.5f);
-	dy-= box.y * std::floor(dy / box.y + 0.5f);
-	dz-= box.z * std::floor(dz / box.z + 0.5f);
-
-	return dx*dx + dy*dy + dz*dz;
-}
-
-/**
  * Compute the angle (in radians) between two vectors
  * @param a First vector
  * @param b Second vector
  * @return Angle between a and b in radians (0 <= angle <= PI)
  */
 inline Real angleBetweenRadians(const Vector& a, const Vector& b) {
-	Real dotProduct= a*b;
-	Real magA= a.magnitude();
-	Real magB= b.magnitude();
-	
+	Real dp= a*b, magA= a.magnitude(), magB= b.magnitude();
 	if(magA < Vector::EPSILON || magB < Vector::EPSILON) return 0.0;
 
-	Real cosTheta= dotProduct / (magA * magB);
+	Real cosTheta= dp / (magA * magB);
 
 	// Clamp value to [-1, 1] to avoid NaNs due to floating point errors
 	cosTheta= std::max(static_cast<Real>(-1.0), std::min(static_cast<Real>(1.0), cosTheta));
@@ -442,24 +377,6 @@ inline Real angleBetweenDegrees(const Vector& a, const Vector& b) {
 }
 
 /**
- * Calculates the angle that 3 points form in a 3D system
- * @param c1 One of the point in the edges
- * @param c2 The center point
- * @param c3 The other point in an edge
- * @param bounds The coordinate of the last point, so the components are the width, height and length
- * @return The angle in radians formed by the 3 points
- */
-inline Real getAngle(Vector c1, Vector c2, Vector c3, Vector bounds) {
-	Real a= distancePBC(c1,c3,bounds); //Opposite to the angle
-	Real b= distancePBC(c1,c2,bounds);
-	Real c= distancePBC(c2,c3,bounds);
-	//Law of cosines
-	Real cos_angle= (pow(b,2)+pow(c,2)-pow(a,2))/(2*b*c);
-	cos_angle= std::max(-1.0f, std::fmin(1.0f, cos_angle)); // Clamp value to [-1, 1] to avoid NaNs due to floating point errors
-	return std::fabs(acos(cos_angle));
-}
-
-/**
  * Print a VMD-like representation of the line between two points
  * @param a Origin point
  * @param b Destination point
@@ -468,5 +385,192 @@ inline Real getAngle(Vector c1, Vector c2, Vector c3, Vector bounds) {
 inline std::string lineVMD(const Vector& a, const Vector& b) {
 	return "draw line " + a.toVMD() + " " + b.toVMD();
 }
+
+
+
+
+// ============================================================
+//  Bounds box type selection
+// ============================================================
+
+#ifndef USE_TRUNCATED_OCTAHEDRON
+    // BRANCH A - Orthorhombic (default)
+    using BoundsType= Vector;
+#else
+    // BRANCH B - Truncated Octahedron / Triclinic
+    /**
+	 * BoxTO: periodic box for a truncated octahedron (or any triclinic cell).
+	 *
+	 * Constructed from CRYST1 data: lx, ly, lz, alpha, beta, gamma (degrees).
+	 * The 3x3 cell matrix H and its inverse are computed once at construction.
+	 *
+	 * Layout of H (column = cell vector):
+	 *       | ax  bx  cx |
+	 *   H = | 0   by  cy |
+	 *       | 0   0   cz |
+	 * where ax=lx, bx=ly*cos(gamma), by=ly*sin(gamma), etc.
+	 */
+	struct BoxTO {
+		Real lx, ly, lz; // cell lengths (Angstrom)
+		Real h[3][3];    // cell matrix H
+		Real hinv[3][3]; // H^{-1}, precomputed
+
+		/**
+		* Construct from CRYST1 parameters.
+		* @param a  Cell length a (Angstrom)
+		* @param b  Cell length b (Angstrom)
+		* @param c  Cell length c (Angstrom)
+		* @param alpha Angle alpha (degrees) — between b and c
+		* @param beta  Angle beta  (degrees) — between a and c
+		* @param gamma Angle gamma (degrees) — between a and b
+		*/
+		BoxTO(Real a, Real b, Real c, Real alpha_deg, Real beta_deg, Real gamma_deg): lx(a), ly(b), lz(c) {
+			const Real alpha= alpha_deg / RAD2DEG;
+			const Real beta = beta_deg  / RAD2DEG;
+			const Real gamma= gamma_deg / RAD2DEG;
+
+			const Real cos_a= std::cos(alpha);
+			const Real cos_b= std::cos(beta);
+			const Real cos_g= std::cos(gamma);
+			const Real sin_g= std::sin(gamma);
+
+			// Cell matrix H (upper-triangular convention, column = cell vector)
+			// Column 0 (a vector): along x
+			h[0][0]= a;
+			h[1][0]= 0.0;
+			h[2][0]= 0.0;
+
+			// Column 1 (b vector): in xy plane
+			h[0][1]= b * cos_g;
+			h[1][1]= b * sin_g;
+			h[2][1]= 0.0;
+
+			// Column 2 (c vector): general
+			h[0][2]= c * cos_b;
+			h[1][2]= c * (cos_a - cos_b*cos_g) / sin_g;
+			h[2][2]= std::sqrt(c*c - h[0][2]*h[0][2] - h[1][2]*h[1][2]);
+
+			// Analytical inverse of upper-triangular 3x3
+			// | a  b  c |^(-1)   =   | 1/a   -b/(a*e)   (b*f-c*e)/(a*e*i) |
+			// | 0  e  f |            |  0      1/e         -f/(e*i)       |
+			// | 0  0  i |            |  0       0              1/i        |
+			const Real inv_a= 1.0 / h[0][0];
+			const Real inv_e= 1.0 / h[1][1];
+			const Real inv_i= 1.0 / h[2][2];
+
+			hinv[0][0]=  inv_a;
+			hinv[0][1]= -h[0][1] * inv_a * inv_e;
+			hinv[0][2]=  (h[0][1]*h[1][2] - h[0][2]*h[1][1]) * inv_a * inv_e * inv_i;
+			hinv[1][0]=  0.0;
+			hinv[1][1]=  inv_e;
+			hinv[1][2]= -h[1][2] * inv_e * inv_i;
+			hinv[2][0]=  0.0;
+			hinv[2][1]=  0.0;
+			hinv[2][2]=  inv_i;
+		}
+
+		/**
+		* Convenience constructor from an orthorhombic Vector (alpha=beta=gamma=90°).
+		* Useful for code that receives a BoundsType but started as orthorhombic.
+		*/
+		explicit BoxTO(const Vector& v): BoxTO(v.x, v.y, v.z, 90.0, 90.0, 90.0) {}
+	};
+    using BoundsType= BoxTO;
+#endif
+
+// ============================================================
+//  Generic functions (independent of the box type)
+// ============================================================
+
+/**
+ * Compute the displacement between two positions under PBC
+ * @param a First position vector
+ * @param b Second position vector
+ * @param box Box dimensions (BoundsType could be orthorhombic or triclinic)
+ * @return Displacement vector
+ */
+inline Vector displacementPBC(const Vector& a, const Vector& b, const BoundsType& box);
+
+/**
+ * Compute the squared minimum image distance between two positions under PBC
+ * @param a First position vector
+ * @param b Second position vector
+ * @param box Box dimensions (BoundsType could be orthorhombic or triclinic)
+ * @return Squared minimum image distance
+ */
+inline Real squaredDistancePBC(const Vector& a, const Vector& b, const BoundsType& box) {
+    const Vector d= displacementPBC(a, b, box);
+    return d.x*d.x + d.y*d.y + d.z*d.z;
+}
+
+/**
+ * Compute the minimum-image distance between two vectors using Periodic Boundary Conditions (PBC)
+ * @param a First vector (position)
+ * @param b Second vector (position)
+ * @param box Box dimensions (BoundsType could be orthorhombic or triclinic)
+ * @return The scalar distance between the two points using minimum image convention
+ */
+inline Real distancePBC(const Vector& a, const Vector& b, const BoundsType& box) {
+    return std::sqrt(squaredDistancePBC(a, b, box));
+}
+
+/**
+ * Calculates the angle that 3 points form in a 3D system
+ * @param c1 One of the point in the edges
+ * @param c2 The center point
+ * @param c3 The other point in an edge
+ * @param box Box dimensions (BoundsType could be orthorhombic or triclinic)
+ * @return The angle in radians formed by the 3 points
+ */
+inline Real getAngle(Vector c1, Vector c2, Vector c3, BoundsType box) {
+    Real a= distancePBC(c1, c3, box);
+    Real b= distancePBC(c1, c2, box);
+    Real c= distancePBC(c2, c3, box);
+    Real cos_angle= (b*b + c*c - a*a) / (2*b*c);
+    cos_angle= std::max(static_cast<Real>(-1.0), std::min(static_cast<Real>(1.0), cos_angle));
+    return std::fabs(std::acos(cos_angle));
+}
+
+// ============================================================
+//  Specialized functions for each BoundsType
+// ============================================================
+
+#ifndef USE_TRUNCATED_OCTAHEDRON
+// --------------------- Orthorhombic (Vector) ---------------------
+inline Vector displacementPBC(const Vector& a, const Vector& b, const BoundsType& box) {
+    Real dx= a.x - b.x;
+    Real dy= a.y - b.y;
+    Real dz= a.z - b.z;
+
+    dx-= box.x * std::floor(dx / box.x + 0.5f);
+    dy-= box.y * std::floor(dy / box.y + 0.5f);
+    dz-= box.z * std::floor(dz / box.z + 0.5f);
+    return Vector(dx, dy, dz);
+}
+
+#else // USE_TRUNCATED_OCTAHEDRON
+
+// --------------------- Triclinic / Truncated Octahedron ---------------------
+inline Vector displacementPBC(const Vector& a, const Vector& b, const BoundsType& box) {
+    Vector dr= a - b;
+
+    // fractional coordinates
+    Real sx= box.hinv[0][0]*dr.x + box.hinv[0][1]*dr.y + box.hinv[0][2]*dr.z;
+    Real sy=                       box.hinv[1][1]*dr.y + box.hinv[1][2]*dr.z;
+    Real sz=                                             box.hinv[2][2]*dr.z;
+
+    sx-= std::floor(sx + 0.5);
+    sy-= std::floor(sy + 0.5);
+    sz-= std::floor(sz + 0.5);
+
+    // back to Cartesian
+    const Real rx= box.h[0][0]*sx + box.h[0][1]*sy + box.h[0][2]*sz;
+    const Real ry=                  box.h[1][1]*sy + box.h[1][2]*sz;
+    const Real rz=                                   box.h[2][2]*sz;
+
+    return Vector(rx, ry, rz);
+}
+
+#endif // USE_TRUNCATED_OCTAHEDRON
 
 #endif // VECTOR_HPP
