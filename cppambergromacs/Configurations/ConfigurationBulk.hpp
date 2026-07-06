@@ -6,20 +6,19 @@
  * Author: Nicolás Loubet
  */
 
-#include "Configuration.hpp"
+#include "ConfigurationDefects.hpp"
 
 /**
- * This class creates a Configuration object, with an array of molecules (specific for water bulk systems)
+ * Configuration subclass for water bulk systems.
  */
-class ConfigurationBulk : public Configuration {
+class ConfigurationBulk : public ConfigurationDefects {
 	private:
-		// Helper, try to identify a defect
-		bool isDefect(const int ID_CENTER, const Real threshold=-12.0, const int V_index=4) {
+		bool isDefect(const int ID_CENTER, const Real threshold= -12.0, const int V_index= 4) {
 			return (vI(ID_CENTER, V_index) > threshold);
 		}
 
 	public:
-		static constexpr int CLASSIFICATION_D_MOLECULE= 0;
+		static constexpr int CLASSIFICATION_D_MOLECULE=  0;
 		static constexpr int CLASSIFICATION_T0_MOLECULE= 1;
 		static constexpr int CLASSIFICATION_T1_MOLECULE= 2;
 		static constexpr int CLASSIFICATION_T2_MOLECULE= 3;
@@ -28,23 +27,16 @@ class ConfigurationBulk : public Configuration {
 		static constexpr int CLASSIFICATION_TA_MOLECULE= 2;
 		static constexpr int CLASSIFICATION_TB_MOLECULE= 3;
 
-		ConfigurationBulk(CoordinateReader* coord_reader, const string& filename, TopolInfo& topol_info) :
-			Configuration(coord_reader, filename, topol_info) {}
+		ConfigurationBulk(CoordinateReader* coord_reader, const string& filename, TopolInfo& topol_info): Configuration(coord_reader, filename, topol_info) {}
 
 		/**
-		 * It indicates if the molecule is a D_MOLECULE (and also assigns this value to the classification so you don't have to use this function two times)
-		 * @param ID_CENTER int The ID of the Molecule to check
-		 * @param threshold The value of potential to which compare the vI return value, default is -12.0
-		 * @param V_index Same of vI [See vI(m,V_index)], default is 4 (V4)
-		 * @return If the v4 value is higher that the threshold, or false if it is not Water
+		 * Returns true if molecule ID_CENTER is a D-type defect (vI > threshold).
 		 */
-		bool isD(const int ID_CENTER, const Real threshold=-12.0, const int V_index=4) {
-			//If it has been classified, it returns that value
+		bool isD(const int ID_CENTER, const Real threshold= -12.0, const int V_index= 4) {
 			Water* m= dynamic_cast<Water*>(molecs[ID_CENTER-1]);
-			if(m == nullptr) return false; //If it is not a Water
+			if(m == nullptr) return false;
 			if(m->getClassification() != NOT_CLASSIFIED)
 				return (m->getClassification() == CLASSIFICATION_D_MOLECULE || m->getClassification() == CLASSIFICATION_D3_MOLECULE);
-
 			if(isDefect(ID_CENTER, threshold, V_index)) {
 				m->setClassification(CLASSIFICATION_D_MOLECULE);
 				return true;
@@ -53,18 +45,14 @@ class ConfigurationBulk : public Configuration {
 		}
 
 		/**
-		 * It indicates if the molecule is a D3_MOLECULE (and also assigns this value to the classification so you don't have to use this function two times)
-		 * @param ID_CENTER int The ID of the Molecule to check
-		 * @param threshold The value of potential to which compare the v4, default is -12.0
-		 * @return If the v4 value is higher that the threshold, or false if it is not Water
+		 * Returns true if molecule ID_CENTER is D3 (under-coordinated defect).
 		 */
-		bool isD3(const int ID_CENTER, const Real threshold=-12.0) {
-			//If it has been classified, it returns that value
+		bool isD3(const int ID_CENTER, const Real threshold= -12.0) {
 			Water* m= dynamic_cast<Water*>(molecs[ID_CENTER-1]);
-			if(m == nullptr) return false; //If it is not a Water
+			if(m == nullptr) return false;
 			if(m->getClassification() != NOT_CLASSIFIED)
-				return (m->getClassification() == CLASSIFICATION_D_MOLECULE || m->getClassification() == CLASSIFICATION_D3_MOLECULE);
-
+				return (m->getClassification() == CLASSIFICATION_D_MOLECULE ||
+				        m->getClassification() == CLASSIFICATION_D3_MOLECULE);
 			if(isDefect(ID_CENTER, threshold, 4)) {
 				m->setClassification(CLASSIFICATION_D3_MOLECULE);
 				return true;
@@ -73,18 +61,13 @@ class ConfigurationBulk : public Configuration {
 		}
 
 		/**
-		 * It indicates if the molecule is a D5_MOLECULE (and also assigns this value to the classification so you don't have to use this function two times)
-		 * @param ID_CENTER int The ID of the Molecule to check
-		 * @param threshold The value of potential to which compare the v5, default is -12.0
-		 * @return If the v5 value is lower that the threshold, or false if it is not Water
+		 * Returns true if molecule ID_CENTER is D5 (over-coordinated defect).
 		 */
-		bool isD5(const int ID_CENTER, const Real threshold=-12.0) {
-			//If it has been classified, it returns that value
+		bool isD5(const int ID_CENTER, const Real threshold= -12.0) {
 			Water* m= dynamic_cast<Water*>(molecs[ID_CENTER-1]);
-			if(m == nullptr) return false; //If it is not a Water
+			if(m == nullptr) return false;
 			if(m->getClassification() != NOT_CLASSIFIED)
 				return (m->getClassification() == CLASSIFICATION_D5_MOLECULE);
-
 			if(!isDefect(ID_CENTER, threshold, 5)) {
 				m->setClassification(CLASSIFICATION_D5_MOLECULE);
 				return true;
@@ -93,241 +76,159 @@ class ConfigurationBulk : public Configuration {
 		}
 
 		/**
-		 * It indicates if the molecule is a D3_MOLECULE or a D5_MOLECULE (and also assigns this value to the classification so you don't have to use this function two times)
-		 * @param ID_CENTER int The ID of the Molecule to check
-		 * @param threshold The value of potential to which compare the v4 and v5, default is -12.0
-		 * @return If the v4 value is higher that the threshold or v5 value is lower, or false if it is not Water
+		 * Returns true if molecule ID_CENTER is a DX-type defect (D3 or D5).
 		 */
-		bool isDX(const int ID_CENTER, const Real threshold=-12.0) {
+		bool isDX(const int ID_CENTER, const Real threshold= -12.0) {
 			return isD3(ID_CENTER, threshold) || isD5(ID_CENTER, threshold);
 		}
 
 		/**
-		 * It creates a matrix for the getNeighboursByPotential() function
-		 * @return A Real** to the matrix
+		 * Allocates the lower-triangle potential matrix used by getNeighboursByPotential.
+		 * Caller is responsible for freeing with deletePotentialMatrix.
 		 */
 		Real** createPotentialMatrix() {
-			Real** potential_matrix= new Real*[N_MOLEC];
+			Real** pm= new Real*[N_MOLEC];
 			for(int i= 1; i < N_MOLEC; i++) {
-				potential_matrix[i]= new Real[i];
-				for(int j= 0; j < i; j++)
-					potential_matrix[i][j]= NOT_CLASSIFIED;
+				pm[i]= new Real[i];
+				for(int j= 0; j < i; j++) pm[i][j]= NOT_CLASSIFIED;
 			}
-			return potential_matrix;
+			return pm;
+		}
+
+		void deletePotentialMatrix(Real** pm) {
+			for(int i= 1; i < N_MOLEC; i++) delete[] pm[i];
+			delete[] pm;
 		}
 
 		/**
-		 * It dealocates the matrix generated for the getNeighboursByPotential() function (created with createPotentialMatrix() function)
-		 * @param A Real** to the matrix
+		 * Classifies all water molecules as D/T0/T1/T2 (JCP 2023 scheme).
+		 * T0 = tetrahedral neighbour of a D; T1 = tetrahedral neighbour of a T0; T2 = bulk-like.
 		 */
-		void deletePotentialMatrix(Real** potential_matrix) {
-			for(int i= 1; i < N_MOLEC; i++)
-				delete[] potential_matrix[i];
-			delete[] potential_matrix;
-		}
+		void classifyMolecules(const int V_index= 4, const Real threshold= -12.0) {
+			Real** pm= createPotentialMatrix();
 
-		/**
-		 * Define the classification of each molecule in the configuration (D-T2), JCP 2023
-		 * The neighbours are searched with the potential
-		 * @param V_index Same of vI [See vI(m,V_index)], default is 4
-		 * @param threshold The value of potential to which compare the vI return value, default is -12
-		 */
-		void classifyMolecules(const int V_index=4, const Real threshold=-12.0) {
-			Real** potential_matrix= createPotentialMatrix();
-
-			//Firstly, I want to know every D molecule
 			for(int i= 0; i < N_MOLEC; i++) {
-				vector<Real> pots_neighs_vector;
-				vector<int> neighs_vector;
-
 				Water* w= dynamic_cast<Water*>(molecs[i]);
 				if(w == nullptr) continue;
-
-				getNeighboursByPotential(w, pots_neighs_vector, neighs_vector, potential_matrix);
-				Sorter::sort(pots_neighs_vector, Sorter::Order::Ascending);
-
-				if(pots_neighs_vector[V_index-1] > threshold)
-					w->setClassification(CLASSIFICATION_D_MOLECULE);
-				else
-					w->setClassification(CLASSIFICATION_T2_MOLECULE); //At this point, I want that if it's not D, its assigned T2
+				vector<Real> pots; vector<int> ids;
+				getNeighboursByPotential(w, pots, ids, pm);
+				Sorter::sort(pots, Sorter::Order::Ascending);
+				w->setClassification(pots[V_index-1] > threshold
+					? CLASSIFICATION_D_MOLECULE : CLASSIFICATION_T2_MOLECULE);
 			}
 
-			//I have all the D molecules, and the rest are classified as T2
-			//Now, I search for the T2 molecules if they have a D molecule as a 4th potential or less -> T0
-			//The same for T1, searching T0 neighbours
-			for(int t_order= CLASSIFICATION_T0_MOLECULE; t_order <= CLASSIFICATION_T1_MOLECULE; t_order++)
+			for(int t= CLASSIFICATION_T0_MOLECULE; t <= CLASSIFICATION_T1_MOLECULE; t++)
 				for(int i= 0; i < N_MOLEC; i++) {
 					Water* w= dynamic_cast<Water*>(molecs[i]);
-					if(w == nullptr) continue;
-					if(w->getClassification() != CLASSIFICATION_T2_MOLECULE) continue;
-
-					vector<Real> pots_neighs_vector;
-					vector<int> neighs_vector;
-
-					getNeighboursByPotential(w, pots_neighs_vector, neighs_vector, potential_matrix);
-					Sorter::cosort(pots_neighs_vector, neighs_vector, Sorter::Order::Ascending);
-
-					for(int i_v= 0; i_v < V_index; i_v++) {
-						Water* neigh= dynamic_cast<Water*>(molecs[neighs_vector[i_v]-1]);
-						
-						if(neigh->getClassification() == t_order-1) {
-							w->setClassification(t_order);
+					if(w == nullptr || w->getClassification() != CLASSIFICATION_T2_MOLECULE) continue;
+					vector<Real> pots; vector<int> ids;
+					getNeighboursByPotential(w, pots, ids, pm);
+					Sorter::cosort(pots, ids, Sorter::Order::Ascending);
+					for(int iv= 0; iv < V_index; iv++) {
+						Water* neigh= dynamic_cast<Water*>(molecs[ids[iv]-1]);
+						if(neigh->getClassification() == t-1) {
+							w->setClassification(t);
 							break;
 						}
 					}
 				}
 
-			deletePotentialMatrix(potential_matrix);
+			deletePotentialMatrix(pm);
 		}
 
 		/**
-		 * Define the classification of each molecule in the configuration (D3,D5,TA,TB), PRE 2024
-		 * The neighbours are searched with the potential
-		 * @param V_index Same of vI [See vI(m,V_index)], default is 4
-		 * @param threshold The value of potential to which compare the vI return value, default is -12
+		 * Classifies all water molecules as D3/D5/TA/TB (PRE 2024 scheme).
+		 * TA = tetrahedral neighbour of a D3 or D5; TB = bulk-like.
 		 */
-		void classifyMolecules_includePentacoordinated(const int V_index=4, const Real threshold=-12.0) {
-			Real** potential_matrix= createPotentialMatrix();
+		void classifyMolecules_includePentacoordinated(const int V_index= 4, const Real threshold= -12.0) {
+			Real** pm= createPotentialMatrix();
 
-			//Firstly, I want to know every D molecule
 			for(int i= 0; i < N_MOLEC; i++) {
-				vector<Real> pots_neighs_vector;
-				vector<int> neighs_vector;
-
 				Water* w= dynamic_cast<Water*>(molecs[i]);
 				if(w == nullptr) continue;
-
-				getNeighboursByPotential(w, pots_neighs_vector, neighs_vector, potential_matrix);
-				Sorter::cosort(pots_neighs_vector, neighs_vector, Sorter::Order::Ascending);
-
-				if(pots_neighs_vector[V_index-1] > threshold)
+				vector<Real> pots; vector<int> ids;
+				getNeighboursByPotential(w, pots, ids, pm);
+				Sorter::cosort(pots, ids, Sorter::Order::Ascending);
+				if(pots[V_index-1] > threshold)
 					w->setClassification(CLASSIFICATION_D3_MOLECULE);
-				else if(pots_neighs_vector[V_index] < threshold)
+				else if(pots[V_index] < threshold)
 					w->setClassification(CLASSIFICATION_D5_MOLECULE);
 				else
-					w->setClassification(CLASSIFICATION_TB_MOLECULE); //At this point, I want that if it's not DX, its assigned TB
+					w->setClassification(CLASSIFICATION_TB_MOLECULE);
 			}
 
-			//I have all the DX molecules, and the rest are classified as TB
-			//Now, I search for the TB molecules if they have a DX molecule as a 4th potential or less -> TA
 			for(int i= 0; i < N_MOLEC; i++) {
 				Water* w= dynamic_cast<Water*>(molecs[i]);
-				if(w == nullptr) continue;
-				if(w->getClassification() != CLASSIFICATION_TB_MOLECULE) continue;
-
-				vector<Real> pots_neighs_vector;
-				vector<int> neighs_vector;
-
-				getNeighboursByPotential(w, pots_neighs_vector, neighs_vector, potential_matrix);
-				Sorter::cosort(pots_neighs_vector, neighs_vector, Sorter::Order::Ascending);
-
-				for(int i_v= 0; i_v < V_index; i_v++) {
-					Water* neigh= dynamic_cast<Water*>(molecs[neighs_vector[i_v]-1]);
-					
-					if(neigh->getClassification() == CLASSIFICATION_D3_MOLECULE ||
-					   neigh->getClassification() == CLASSIFICATION_D5_MOLECULE) {
-
+				if(w == nullptr || w->getClassification() != CLASSIFICATION_TB_MOLECULE) continue;
+				vector<Real> pots; vector<int> ids;
+				getNeighboursByPotential(w, pots, ids, pm);
+				Sorter::cosort(pots, ids, Sorter::Order::Ascending);
+				for(int iv= 0; iv < V_index; iv++) {
+					Water* neigh= dynamic_cast<Water*>(molecs[ids[iv]-1]);
+					int cls= neigh->getClassification();
+					if(cls == CLASSIFICATION_D3_MOLECULE || cls == CLASSIFICATION_D5_MOLECULE) {
 						w->setClassification(CLASSIFICATION_TA_MOLECULE);
 						break;
 					}
 				}
 			}
-			deletePotentialMatrix(potential_matrix);
-		}
 
-		/**
-		 * It returns an array with the V_4S values of all molecules
-		 * @param inic_value The initial value of the array (first water molecule), default is 1
-		 * @param i_V The potential number V_index of a sorted list of all potentials, default is 4
-		 * @param R_CUT_OFF The cutoff radius, default is 5.
-		 * @param neighbours Optional: vector of neighbour ID lists per molecule, default is nullptr
-		 * @return A vector with the V_4S values
-		 */
-		vector<Real> v_4S_arr(const int inic_value= 1, const int i_V= 4, const Real R_CUT_OFF= 5., vector<vector<int>>* neighbours= nullptr) {
-			vector<Real> output(N_MOLEC - inic_value + 1);
-			Real** pm= createPotentialMatrix();
-			for(int i= inic_value; i <= N_MOLEC; i++)
-				output[i-inic_value]= getInteractionsPerSite(i,R_CUT_OFF,pm,neighbours)[i_V-1];
 			deletePotentialMatrix(pm);
-			return output;
 		}
 
 		/**
-		 * It calculates the Tanaka ζ value of the molecule specified
-		 * @param m The *Water to analyse
-		 * @param MAX_D_HB The maximum distance O-O that it could be considereded an HB (near 3.5A)
-		 * @param MAX_A_HB The angle O-O-H that it could be considereded an HB (near 30°)
-		 * @return The potential number V_index of a sorted list of all potentials
+		 * Calculates the Tanaka ζ parameter for molecule m.
+		 * ζ = min(d_HB) - max(d_nHB), where HB neighbours satisfy the H-bond criteria.
 		 */
-		Real Tanaka(Water* m, const Real MAX_D_HB= 3.5, const Real MAX_A_HB= 30.) {
-			const Real MAX_D_ANALYSIS= 6.0; //Maximum distance for analysis
-			Real dist;
-			vector<Real> ls_d_HB, ls_d_nHB;
+		Real Tanaka(Water* m, const Real MAX_D_HB= 3.5, const Real MAX_A_HB= 30.0) {
+			const Real MAX_D_ANALYSIS= 6.0;
+			vector<Real> ls_HB, ls_nHB;
 
 			for(int i= 0; i < N_MOLEC; i++) {
 				if(i+1 == m->getID()) continue;
-				dist= m->distanceTo(getMolec(i+1), bounds);
-
-				if(dist > MAX_D_ANALYSIS) continue;
-
+				Real d= m->distanceTo(getMolec(i+1), bounds);
+				if(d > MAX_D_ANALYSIS) continue;
 				Water* w2= dynamic_cast<Water*>(molecs[i]);
-				if(w2==nullptr) continue;
-
-				if(m->isHB(*w2, bounds, MAX_D_HB, MAX_A_HB))
-					ls_d_HB.push_back(dist);
-				else
-					ls_d_nHB.push_back(dist);
+				if(w2 == nullptr) continue;
+				(m->isHB(*w2, bounds, MAX_D_HB, MAX_A_HB) ? ls_HB : ls_nHB).push_back(d);
 			}
 
-			if(ls_d_HB.empty()) throw std::runtime_error("Tanaka: list of HB molecules is empty for Water " + std::to_string(m->getID()));
-			if(ls_d_nHB.empty()) throw std::runtime_error("Tanaka: list of non-HB molecules is empty for Water " + std::to_string(m->getID()));
-			Real min_value= *min_element(ls_d_HB.begin(),ls_d_HB.end());
-			Real max_value= *max_element(ls_d_nHB.begin(),ls_d_nHB.end());
-			Real output= min_value-max_value;
-			
-			return output;
+			if(ls_HB.empty())  throw runtime_error("Tanaka: no HB neighbours for Water "  + to_string(m->getID()));
+			if(ls_nHB.empty()) throw runtime_error("Tanaka: no nHB neighbours for Water " + to_string(m->getID()));
+			return *min_element(ls_HB.begin(),  ls_HB.end()) - *max_element(ls_nHB.begin(), ls_nHB.end());
 		}
 
 		/**
-		 * It calculates the Local Structure Index value of the molecule specified (https://doi.org/10.1039/C1CP22076D)
-		 * @param id The ID of the molecule (1-N)
-		 * @return the LSI value
+		 * Calculates the Local Structure Index for molecule id. (https://doi.org/10.1039/C1CP22076D)
 		 */
 		Real LSI(const int id) {
-			const Real R_MAX= 3.7; //A (CUT-OFF)
+			const Real R_MAX= 3.7;
 			vector<Real> distances;
-
-			Real dist_peripheral= bounds.x+bounds.y+bounds.z;
+			Real dist_peripheral= bounds.x + bounds.y + bounds.z;
 
 			for(int j= 1; j <= N_MOLEC; j++) {
-				if(j==id) continue;
+				if(j == id) continue;
 				Real d= getMolec(id).distanceTo(getMolec(j), bounds);
 				if(d > R_MAX) {
-					if(d < dist_peripheral)
-						dist_peripheral= d;
+					if(d < dist_peripheral) dist_peripheral= d;
 					continue;
 				}
 				distances.push_back(d);
 			}
-
-			//Add the first molecule outside the sphere R_MAX
-			distances.push_back(dist_peripheral);
+			distances.push_back(dist_peripheral); // first molecule outside R_MAX
 
 			Sorter::sort(distances, Sorter::Order::Ascending);
-			int N= distances.size()-1;
+			int N= (int)distances.size() - 1;
 
-			Real sum_deltas= 0.;
-			Real sum_squared_deltas= 0.;
+			Real sum_delta= 0.0, sum_sq= 0.0;
 			for(int j= 0; j < N; j++) {
-				Real delta_j= distances[j+1]-distances[j];
-				sum_deltas+= delta_j;
-				sum_squared_deltas+= delta_j*delta_j;
+				Real dj= distances[j+1] - distances[j];
+				sum_delta+= dj;
+				sum_sq   += dj * dj;
 			}
-
-			Real mean_delta= sum_deltas/N;
-			return sum_squared_deltas/N - mean_delta*mean_delta;
+			Real mean= sum_delta / N;
+			return sum_sq / N - mean * mean;
 		}
-
 };
 
 #endif // CONFIGURATIONBULK_HPP

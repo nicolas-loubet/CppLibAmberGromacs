@@ -2,7 +2,7 @@
 #define GROMACS_READERS_HPP
 
 /**
- * Version: June 2025
+ * Version: July 2025
  * Author: Nicolás Loubet
  */
 
@@ -14,220 +14,205 @@
 class GromacsTopologyReader : public TopologyReader {
 	private:
 		/**
-		 * Given a file, read the molecule type in the next line.
-		 * @param file The file to read
-		 * @return The molecule type
+		 * Reads the molecule type name from the next non-comment line.
 		 */
-		static string readMolecType(ifstream &file) {
-			string line= "";
+		static string readMolecType(ifstream& file) {
+			string line;
 			while(getline(file, line))
 				if(line[0] != ';')
-					return ToolKit::strip(line.substr(0,6));
+					return ToolKit::strip(line.substr(0, 6));
 			return "ERROR";
 		}
 
 		/**
-		 * Given a file, find the position of the flag in the file.
-		 * The returned map contains the flag name as the key and the position as the value.
-		 * The position is the byte position of the first character after the flag.
-		 * @param file The file to search
-		 * @return A map with the position of the flag.
+		 * Scans the file and records byte offsets for each [...] section flag.
+		 * Molecule-specific sections are suffixed with "_<MoleculeName>".
 		 */
-		static map<string,int> flagPositions(ifstream &file) {
-			string line= "";
-			map<string,int> flag;
-			string molec_type= "";
+		static map<string, int> flagPositions(ifstream& file) {
+			map<string, int> flag;
+			string line, molec_type;
 
 			while(getline(file, line)) {
-				size_t pos_flag= line.find('[');
-				if(pos_flag == string::npos) continue;
-				if(line[0] == ';') continue;
-				
-				line= line.substr(pos_flag, line.find(']')-pos_flag+1);
+				size_t lp= line.find('[');
+				if(lp == string::npos || line[0] == ';') continue;
+
+				line= line.substr(lp, line.find(']') - lp + 1);
 				if(line == "[ moleculetype ]") {
-					molec_type= "_"+readMolecType(file);
+					molec_type= "_" + readMolecType(file);
 					continue;
-				} else if(line == "[ system ]") molec_type= "";
-				line+= molec_type;
-				flag[line]= file.tellg();
+				} else if(line == "[ system ]") {
+					molec_type= "";
+				}
+				flag[line + molec_type]= file.tellg();
 			}
 			return flag;
 		}
 
 		/**
-		 * Given a file, read the system flag.
-		 * @param file The file to read
-		 * @param position The position of the flag
-		 * @return A pair of 1) The system flags mapped string -> int, 2) The order of the molecules
+		 * Reads the [ molecules ] section.
+		 * Returns {name -> count} and the insertion-order vector of names.
 		 */
-		static pair<map<string,int>, vector<string>> readSystemFlag(ifstream &file, int position) {
-			map<string,int> molecules;
+		static pair<map<string,int>, vector<string>> readSystemFlag(ifstream& file, int position) {
+			map<string, int> molecules;
 			vector<string> order;
-			string line= "";
+			string line;
 
 			file.clear();
 			file.seekg(position);
-
 			while(getline(file, line)) {
 				if(line.empty() || line[0] == ';') continue;
-
-				string molec_name= ToolKit::strip(line.substr(0,8));
-				int num_molec= stoi(line.substr(9));
-
-				molecules[molec_name]= num_molec;
-				order.push_back(molec_name);
+				string name= ToolKit::strip(line.substr(0, 8));
+				molecules[name]= stoi(line.substr(9));
+				order.push_back(name);
 			}
-			return {molecules,order};
+			return {molecules, order};
 		}
 
-		/**
-		 * Given a map, sum the number of molecules in the map.
-		 * @param molecules The map with the number of molecules
-		 * @return The total number of molecules
-		 */
-		static int sumMoleculesInMap(map<string,int> molecules) {
+		static int sumMoleculesInMap(const map<string,int>& molecules) {
 			int sum= 0;
-			for(auto it= molecules.begin(); it != molecules.end(); it++)
-				sum+= it->second;
+			for(const auto& [name, count] : molecules) sum+= count;
+			return sum;
+		}
+
+		static int sumMoleculesConsideredSolvent(const map<string,int>& molecules) {
+			int sum= 0;
+			for(const auto& [name, count] : molecules)
+				if(name.find("SOL") != string::npos || name.find("WAT") != string::npos)
+					sum+= count;
 			return sum;
 		}
 
 		/**
-		 * Given a map, sum the number of molecules considered solvent.
-		 * @param molecules The map with the number of molecules
-		 * @return The total number of molecules considered solvent
+		 * Reads the [ atoms ] section for one molecule type.
+		 * Returns atom index -> (type, name, charge, mass).
 		 */
-		static int sumMoleculesConsideredSolvent(map<string,int> molecules) {
-			int sum= 0;
-			for(auto it= molecules.begin(); it != molecules.end(); it++)
-				if((it->first.find("SOL") != string::npos) || (it->first.find("WAT") != string::npos))
-					sum+= it->second;
-			return sum;
-		}
-
-		/**
-		 * Given a file, read the atoms flags.
-		 * @param file The file to read
-		 * @param position The position of the flag
-		 * @return The atom info mapped int -> tuple (type, atom, charge, mass)
-		 */
-		static map<int,tuple<string,string,Real,Real>> readAtomsFlags(ifstream &file, int position) {
+#ifdef USE_VECTOR_TOPOLOGY
+		static vector<tuple<string,string,Real,Real>> readAtomsFlags(ifstream& file, int position) {
+			vector<tuple<string,string,Real,Real>> atoms;
+#else
+		static map<int,tuple<string,string,Real,Real>> readAtomsFlags(ifstream& file, int position) {
 			map<int,tuple<string,string,Real,Real>> atoms;
-			string line= "";
+#endif
+			string line;
 			file.clear();
 			file.seekg(position);
 
 			while(getline(file, line)) {
 				if(line[0] == ';') continue;
-				if(ToolKit::strip(line) == "") break;
+				if(ToolKit::strip(line).empty()) break;
 
-				stringstream ss(line.substr(0,line.find(";")));
-
-				int nr,resi,cgnr;
-				string type,res,atom;
-				Real charge,mass;
-
+				stringstream ss(line.substr(0, line.find(';')));
+				int nr, resi, cgnr;
+				string type, res, atom;
+				Real charge, mass;
 				ss >> nr >> type >> resi >> res >> atom >> cgnr >> charge >> mass;
+
+#ifdef USE_VECTOR_TOPOLOGY
+				atoms.emplace_back(type, atom, charge, mass);
+#else
 				atoms[nr]= make_tuple(type, atom, charge, mass);
+#endif
 			}
 			return atoms;
 		}
 
-		/**
-		 * Given a string, return the atomic number from the periodic table.
-		 * @param name The name of the atom
-		 * @return The atomic number
-		 */
 		static int getZFromName(string name) {
 			transform(name.begin(), name.end(), name.begin(), ::toupper);
-
-			if(name.length() >= 2)
-				if(periodic_table.count(name.substr(0,2)))
-					return periodic_table.at(name.substr(0,2));
-			if(name.length() >= 1)
-				if(periodic_table.count(name.substr(0,1)))
-					return periodic_table.at(name.substr(0,1));
+			if(name.length() >= 2 && periodic_table.count(name.substr(0, 2)))
+				return periodic_table.at(name.substr(0, 2));
+			if(name.length() >= 1 && periodic_table.count(name.substr(0, 1)))
+				return periodic_table.at(name.substr(0, 1));
 			return -1;
 		}
 
 		/**
-		 * Given a file, read the LJ parameters.
-		 * @param file The file to read
-		 * @param position The position of the flag
-		 * @return The LJ parameters mapped type -> pair (epsilon, sigma)
+		 * Reads the [ atomtypes ] section.
+		 * Returns type -> (mass, charge, epsilon, sigma[Å]).
+		 * Handles both 7-column (with bond type) and 6-column formats.
 		 */
-		static map<string,tuple<Real,Real,Real,Real>> readLJFlagFully(ifstream &file, int position) {
-			map<string,tuple<Real,Real,Real,Real>> parameters;
-			string line= "";
+		static map<string,tuple<Real,Real,Real,Real>> readLJFlagFully(ifstream& file, int position) {
+			map<string, tuple<Real,Real,Real,Real>> parameters;
+			string line;
 			file.clear();
 			file.seekg(position);
 
 			while(getline(file, line)) {
 				if(line[0] == ';') continue;
-				if(ToolKit::strip(line) == "") break;
+				if(ToolKit::strip(line).empty()) break;
 
-				stringstream ss(line.substr(0,line.find(";")));
-
-				string type1,type2;
+				stringstream ss(line.substr(0, line.find(';')));
+				string type1, type2;
 				char ptype;
-				Real sigma,epsilon,mass,q;
+				Real sigma, epsilon, mass, q;
 
+				// Try 7-column format: type bondtype mass q ptype sigma epsilon
 				ss >> type1 >> type2 >> mass >> q >> ptype >> sigma >> epsilon;
 				if(!ss.fail()) {
-					parameters[type1]= make_tuple(mass,q,epsilon,sigma*10);
+					parameters[type1]= {mass, q, epsilon, sigma * 10};
 					continue;
 				}
-				
+
+				// Try 6-column format: type mass q ptype sigma epsilon
+				ss.clear();
+				ss.str(line.substr(0, line.find(';')));
 				ss >> type1 >> mass >> q >> ptype >> sigma >> epsilon;
 				if(!ss.fail()) {
-					parameters[type1]= make_tuple(mass,q,epsilon,sigma*10);
+					parameters[type1]= {mass, q, epsilon, sigma * 10};
 					continue;
 				}
+
 				throw runtime_error("Error reading LJ parameters from GROMACS topology file.");
 			}
 			return parameters;
 		}
 
-		static void checkMass(map<int,tuple<string,string,Real,Real>> atoms, map<string,tuple<Real,Real,Real,Real>> params) {
-			for(auto it= atoms.begin(); it != atoms.end(); it++) {
-				string type, name; Real charge, mass;
-				tie(type,name,charge,mass)= it->second;
+		/**
+		 * Patches atoms whose mass is ~0 in [ atoms ] using the value from [ atomtypes ].
+		 */
+#ifdef USE_VECTOR_TOPOLOGY
+		static void checkMass(vector<tuple<string,string,Real,Real>>& atoms, const map<string,tuple<Real,Real,Real,Real>>& params) {
+			for(auto& [type, name, charge, mass] : atoms) {
 				if(mass > 0.8) continue;
-
-				Real mass_LJ, charge_LJ, s, e;
-				if(params.count(type) > 0) continue;
-				tie(mass_LJ,charge_LJ,e,s)= params.at(type);
-				
-				if(mass_LJ < 0.8) continue;
-				get<3>(it->second)= mass_LJ;
+				auto it= params.find(type);
+				if(it == params.end()) continue;
+				Real mass_LJ= get<0>(it->second);
+				if(mass_LJ > 0.8) mass= mass_LJ;
 			}
 		}
+#else
+		static void checkMass(map<int,tuple<string,string,Real,Real>>& atoms, const map<string,tuple<Real,Real,Real,Real>>& params) {
+			for(auto& [idx, data] : atoms) {
+				auto& [type, name, charge, mass]= data;
+				if(mass > 0.8) continue;
+				auto it= params.find(type);
+				if(it == params.end()) continue;
+				Real mass_LJ= get<0>(it->second);
+				if(mass_LJ > 0.8) mass= mass_LJ;
+			}
+		}
+#endif
 
 		/**
-		 * Given a file, read the LJ special parameters.
-		 * @param file The file to read
-		 * @param position The position of the flag
-		 * @return The LJ special parameters mapped pair (type1,type2) -> pair (epsilon,sigma)
+		 * Reads the [ nonbond_params ] section.
+		 * Returns (type1, type2) -> (epsilon, sigma).
 		 */
-		static map<pair<string,string>,pair<Real,Real>> readSpecialInteractions(ifstream &file, int position) {
-			map<pair<string,string>,pair<Real,Real>> parameters;
-			string line= "";
+		static map<pair<string,string>,pair<Real,Real>> readSpecialInteractions(ifstream& file, int position) {
+			map<pair<string,string>, pair<Real,Real>> parameters;
+			string line;
 			file.clear();
 			file.seekg(position);
 
 			while(getline(file, line)) {
 				if(line[0] == ';') continue;
-				if(ToolKit::strip(line) == "") break;
+				if(ToolKit::strip(line).empty()) break;
 
-				stringstream ss(line.substr(0,line.find(";")));
-
-				string type1,type2;
+				stringstream ss(line.substr(0, line.find(';')));
+				string type1, type2;
 				int func;
-				Real sigma,epsilon;
-
+				Real sigma, epsilon;
 				ss >> type1 >> type2 >> func >> sigma >> epsilon;
 				if(!ss.fail()) {
-					parameters[make_pair(type1,type2)]= make_pair(epsilon,sigma);
+					parameters[{type1, type2}]= {epsilon, sigma};
 					continue;
 				}
 				throw runtime_error("Error reading LJ special parameters from GROMACS topology file.");
@@ -235,211 +220,142 @@ class GromacsTopologyReader : public TopologyReader {
 			return parameters;
 		}
 
-
 	public:
 		GromacsTopologyReader()= default;
 
-		/**
-		 * Given a file, read the topology.
-		 * @param filename The name of the file
-		 * @return A TopolInfo object
-		 */
 		TopolInfo readTopology(const string& filename) const override {
-			TopolInfo ti= TopolInfo();
-
-			string line;
+			TopolInfo ti;
 			ifstream f(filename);
-
-			if(!f.is_open()) {
-				cerr << "Topology not found" << endl;
-				return ti;
-			}
+			if(!f.is_open()) { cerr << "Topology not found" << endl; return ti; }
 
 			map<string,int> flags= flagPositions(f);
-			
-			pair<map<string,int>,vector<string>> system_info= readSystemFlag(f, flags["[ molecules ]"]);
-			ti.number_of_each_different_molecule= system_info.first;
-			vector<string> molec_order= system_info.second;
 
-			ti.num_molecules= sumMoleculesInMap(ti.number_of_each_different_molecule);
-			ti.num_solvents= sumMoleculesConsideredSolvent(ti.number_of_each_different_molecule);
-			ti.num_solutes= ti.num_molecules-ti.num_solvents;
+			auto [mol_counts, mol_order]= readSystemFlag(f, flags["[ molecules ]"]);
+			ti.number_of_each_different_molecule= mol_counts;
+			ti.num_molecules= sumMoleculesInMap(mol_counts);
+			ti.num_solvents = sumMoleculesConsideredSolvent(mol_counts);
+			ti.num_solutes  = ti.num_molecules - ti.num_solvents;
 
-			map<string,tuple<Real,Real,Real,Real>> parameters_LJflag_full= readLJFlagFully(f, flags["[ atomtypes ]"]);
-			for(auto it= parameters_LJflag_full.begin(); it != parameters_LJflag_full.end(); it++)
-				ti.type_LJparam[it->first]= make_pair(get<2>(it->second),get<3>(it->second));
-			
-			for(const auto& molec_name: molec_order) {
-				int count= ti.number_of_each_different_molecule.at(molec_name);
-				map<int,tuple<string,string,Real,Real>> atoms= readAtomsFlags(f, flags["[ atoms ]_"+molec_name]);
+			auto lj_full= readLJFlagFully(f, flags["[ atomtypes ]"]);
+			for(const auto& [type, params] : lj_full)
+				ti.type_LJparam[type]= {get<2>(params), get<3>(params)};
 
-				checkMass(atoms, parameters_LJflag_full);
+			for(const auto& molec_name : mol_order) {
+				auto atoms= readAtomsFlags(f, flags["[ atoms ]_" + molec_name]);
+				checkMass(atoms, lj_full);
+
 				ti.number_of_atoms_per_different_molecule[molec_name]= atoms.size();
-				ti.total_number_of_atoms+= atoms.size() * count;
+				ti.total_number_of_atoms+= atoms.size() * ti.number_of_each_different_molecule.at(molec_name);
+				ti.atom_type_name_charge_mass.push_back(move(atoms));
+
 #ifdef USE_VECTOR_TOPOLOGY
-				{
-					vector<tuple<string,string,Real,Real>> atoms_vec;
-					atoms_vec.reserve(atoms.size());
-					for(auto& [k,v]: atoms) atoms_vec.push_back(v);
-					ti.atom_type_name_charge_mass.push_back(move(atoms_vec));
+				for(const auto& [type, name, charge, mass] : ti.atom_type_name_charge_mass.back()) {
+					ti.name_type[molec_name + ":" + name]= type;
+					if(!ti.type_Z.count(type)) ti.type_Z[type]= getZFromName(name);
 				}
 #else
-				ti.atom_type_name_charge_mass.push_back(atoms);
-#endif
-				for(auto it_atom= atoms.begin(); it_atom != atoms.end(); it_atom++) {
-					string type= get<0>(it_atom->second);
-					string name= molec_name+":" + get<1>(it_atom->second);
-					ti.name_type[name]= type;
-					if(!ti.type_Z.count(type))
-						ti.type_Z[type]= getZFromName(get<1>(it_atom->second));
+				for(const auto& [idx, data] : ti.atom_type_name_charge_mass.back()) {
+					const auto& [type, name, charge, mass]= data;
+					ti.name_type[molec_name + ":" + name]= type;
+					if(!ti.type_Z.count(type)) ti.type_Z[type]= getZFromName(name);
 				}
+#endif
 			}
 
-			if(flags.find("[ nonbond_params ]") == flags.end())
-				ti.special_interaction= map<pair<string,string>,pair<Real,Real>>();
-			else
-				ti.special_interaction= readSpecialInteractions(f, flags["[ nonbond_params ]"]);
+			ti.special_interaction= (flags.count("[ nonbond_params ]"))
+				? readSpecialInteractions(f, flags["[ nonbond_params ]"])
+				: map<pair<string,string>,pair<Real,Real>>{};
 
 			return ti;
 		}
 };
 
+// =============================================================================
+//  COORDINATE READER
+// =============================================================================
+
 class GromacsCoordinateReader : public CoordinateReader {
 	private:
-		/**
-		 * Create a new Molecule object
-		 * @param molec_name The name of the molecule
-		 * @param i_molec The index of the molecule
-		 * @param molecs The array of Molecule objects
-		 * @param atom_list The array of Atom objects
-		 * @param number_of_atom_in_list The number of atoms in the atom_list
-		 */
-		static void createNewMolecule(string molec_name, int i_molec, Molecule** molecs, Atom* atom_list, int number_of_atom_in_list) {
-			if(molec_name == "SOL" || molec_name == "WAT") {
-				molecs[i_molec-1]= new Water(i_molec, atom_list, number_of_atom_in_list);
-			} else {
-				molecs[i_molec-1]= new Molecule(i_molec, atom_list, number_of_atom_in_list);
-			}
+		static void createNewMolecule(const string& molec_name, int i_molec, Molecule** molecs, Atom* atom_list, int n_atoms) {
+			if(molec_name == "SOL" || molec_name == "WAT") molecs[i_molec-1]= new Water(i_molec, atom_list, n_atoms);
+			else                                           molecs[i_molec-1]= new Molecule(i_molec, atom_list, n_atoms);
 		}
 
-		/**
-		 * Check if a new Molecule object must be created
-		 * @param i_molec The index of the molecule
-		 * @param molec_name The name of the molecule
-		 * @param atom_list The array of Atom objects
-		 * @param number_of_atom_in_list The number of atoms in the atom_list
-		 * @param topol_info The topology information
-		 * @param molecs The array of Molecule objects
-		 * @param previous_molec_name The name of the previous molecule
-		 * @param previous_different_molec_id The index of the previous different molecule
-		 * @param previous_molec_id The index of the previous molecule
-		 */
-		static void checkIfNewMolecule(int i_molec, string molec_name, Atom*& atom_list, int& number_of_atom_in_list, const TopolInfo& topol_info, Molecule** molecs, string& previous_molec_name, int& previous_different_molec_id, int& previous_molec_id) {
+		static void checkIfNewMolecule(int i_molec, const string& molec_name, Atom*& atom_list, int& n_atoms, const TopolInfo& topol_info,
+		                               Molecule** molecs, string& prev_molec_name, int& prev_diff_id, int& prev_molec_id) {
 			if(atom_list != nullptr) {
-				if(i_molec < previous_molec_id)
-					i_molec= previous_molec_id+1;
-				createNewMolecule(previous_molec_name, i_molec-1, molecs, atom_list, number_of_atom_in_list);
-				number_of_atom_in_list= 0;
+				if(i_molec < prev_molec_id) i_molec= prev_molec_id + 1;
+				createNewMolecule(prev_molec_name, i_molec - 1, molecs, atom_list, n_atoms);
+				n_atoms= 0;
 			}
-
-			previous_molec_id= i_molec;
-			if(molec_name != previous_molec_name) {
-				previous_different_molec_id++;
-				previous_molec_name= molec_name;
+			prev_molec_id= i_molec;
+			if(molec_name != prev_molec_name) {
+				prev_diff_id++;
+				prev_molec_name= molec_name;
 			}
-
 			atom_list= new Atom[topol_info.number_of_atoms_per_different_molecule.at(molec_name)];
 		}
 
-		/**
-		 * Read an Atom object
-		 * @param line The line to read in .gro format
-		 * @param topol_info The topology information
-		 * @param molecs The array of Molecule objects
-		 * @param previous_molec_name The name of the previous molecule
-		 * @param previous_different_molec_id The index of the previous different molecule
-		 * @param previous_molec_id The index of the previous molecule
-		 * @param atom_list The array of Atom objects
-		 * @param number_of_atom_in_list The number of atoms in the atom_list
-		 * @return The Atom object
-		 */
-		static Atom readAtom(string line, const TopolInfo& topol_info, Molecule** molecs, string& previous_molec_name, int& previous_different_molec_id, int& previous_molec_id, Atom*& atom_list, int& number_of_atom_in_list) {
-			int i_molec= stoi(line.substr(0,5));
-			string molec_name= ToolKit::strip(line.substr(5,5));
-			string atom_name= ToolKit::strip(line.substr(10,5));
-			int i_atom= stoi(line.substr(15,5));
-			Real x= RealParser(line.substr(20,8));
-			Real y= RealParser(line.substr(28,8));
-			Real z= RealParser(line.substr(36,8));
+		static Atom readAtom(const string& line, const TopolInfo& topol_info, Molecule** molecs, string& prev_molec_name, int& prev_diff_id,
+		                     int& prev_molec_id, Atom*& atom_list, int& n_atoms) {
+			int    i_molec   = stoi(line.substr(0,  5));
+			string molec_name= ToolKit::strip(line.substr(5,  5));
+			string atom_name = ToolKit::strip(line.substr(10, 5));
+			int    i_atom    = stoi(line.substr(15, 5));
+			Real   x         = RealParser(line.substr(20, 8));
+			Real   y         = RealParser(line.substr(28, 8));
+			Real   z         = RealParser(line.substr(36, 8));
 
-			if(i_molec != previous_molec_id%100000)
-				checkIfNewMolecule(i_molec, molec_name, atom_list, number_of_atom_in_list, topol_info, molecs, previous_molec_name, previous_different_molec_id, previous_molec_id);
+			if(i_molec != prev_molec_id % 100000)
+				checkIfNewMolecule(i_molec, molec_name, atom_list, n_atoms, topol_info, molecs, prev_molec_name, prev_diff_id, prev_molec_id);
 
-			string type, name; Real q, mass, e, s;
+			const auto& [type, name, q, mass]= topol_info.atom_type_name_charge_mass[prev_diff_id].at(
 #ifdef USE_VECTOR_TOPOLOGY
-			tie(type,name,q,mass)= topol_info.atom_type_name_charge_mass[previous_different_molec_id].at(number_of_atom_in_list);
+				n_atoms
 #else
-			tie(type,name,q,mass)= topol_info.atom_type_name_charge_mass[previous_different_molec_id].at(number_of_atom_in_list+1);
+				n_atoms + 1
 #endif
+			);
+			const auto& [e,s]= topol_info.type_LJparam.at(type);
 			int Z= topol_info.type_Z.at(type);
-			tie(e,s)= topol_info.type_LJparam.at(type);
-
-			return Atom(Vector(x*10,y*10,z*10), i_atom, mass, q, e, s, Z, type);
+			return Atom(Vector(x*10, y*10, z*10), i_atom, mass, q, e, s, Z, type);
 		}
 
-		/**
-		 * Read the bounds from the .gro file
-		 * @param line The line to read
-		 * @return The bounds as a Vector object
-		 */
-		static Vector readBounds(string line) {
-			Real x,y,z;
+		static Vector readBounds(const string& line) {
+			Real x, y, z;
 			stringstream ss(line);
 			ss >> x >> y >> z;
-			return Vector(x*10,y*10,z*10);
+			return Vector(x*10, y*10, z*10);
 		}
 
 	public:
 		GromacsCoordinateReader()= default;
 
-		/**
-		 * Read the coordinates from a .gro file
-		 * @param filename The name of the file
-		 * @param topol_info The topology information
-		 * @param molecs The array of Molecule objects to be created
-		 * @param bounds The bounds of the system to be read
-		 * @return True if the coordinates were read successfully
-		 */
 		bool readCoordinates(const string& filename, const TopolInfo& topol_info, Molecule** molecs, Vector& bounds) const override {
 			ifstream f(filename);
-			if(!f.is_open()) {
-				cout << "Error: Failed to open file " << filename << endl;
-				return false;
-			}
-			if(molecs == nullptr) return false;
-			string line;
+			if(!f.is_open()) { cout << "Error: Failed to open file " << filename << endl; return false; }
+			if(!molecs) return false;
 
-			getline(f, line); // Title
+			string line;
+			getline(f, line); // title
 			getline(f, line);
 			int natoms= stoi(line);
 
-			string previous_molec_name= "ERRORMOLECULE";
-			int previous_different_molec_id= -1;
-			int previous_molec_id= -1;
+			string prev_molec_name= "ERRORMOLECULE";
+			int prev_diff_id= -1, prev_molec_id= -1;
 			Atom* atom_list= nullptr;
-			int number_of_atom_in_list= 0;
+			int n_atoms= 0;
 
 			for(int i= 0; i < natoms; i++) {
 				getline(f, line);
-				atom_list[number_of_atom_in_list++]= readAtom(line, topol_info, molecs, previous_molec_name, previous_different_molec_id, previous_molec_id, atom_list, number_of_atom_in_list);
+				Atom a= readAtom(line, topol_info, molecs, prev_molec_name, prev_diff_id, prev_molec_id, atom_list, n_atoms);
+				atom_list[n_atoms++]= a;
 			}
-
-			if(atom_list != nullptr) // Add last molecule read
-				createNewMolecule(previous_molec_name, previous_molec_id, molecs, atom_list, number_of_atom_in_list);
+			if(atom_list != nullptr)
+				createNewMolecule(prev_molec_name, prev_molec_id, molecs, atom_list, n_atoms);
 
 			getline(f, line);
 			bounds= readBounds(line);
-
 			return true;
 		}
 };

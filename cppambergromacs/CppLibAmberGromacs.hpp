@@ -12,6 +12,8 @@
 #endif
 
 #include "ReaderFactory.hpp"
+#include "Configurations/ConfigurationDefects.hpp"
+#include "Configurations/ConfigurationDiscriminated.hpp"
 #include "Configurations/ConfigurationBulk.hpp"
 #include "Configurations/ConfigurationLipid.hpp"
 #include "General/CSVWriter.hpp"

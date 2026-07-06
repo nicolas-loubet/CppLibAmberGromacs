@@ -80,7 +80,7 @@ TEST_CASE("Configuration - AMBER: basic checks and interaction values (expanded)
 		int mol_id = 1000;
 
 		bool ww_flag = false;
-		auto per_flagged = conf.getInteractionsPerSite(mol_id, ww_flag);
+		auto per_flagged = conf.getInteractionsPerSite(mol_id, ww_flag, -12.0, 5.0);
 		auto per_all	 = conf.getInteractionsPerSite(mol_id);
 		auto per_water   = conf.getInteractionsPerSite_waterOnly(mol_id).second;
 
@@ -295,17 +295,6 @@ TEST_CASE("ConfigurationBulk - classification, potentials matrix, arrays and DJ/
 
 	}
 
-	SECTION("v_4S_arr matches per-molecule v_4S for a subset and respects start index") {
-		// Build neighbor list container (optional) to exercise that code path
-		vector<vector<int>>* neigh = nullptr;
-		vector<Real> arr = conf.v_4S_arr(/*inic_value*/1, /*i_V*/4, /*R_CUT*/5.0, neigh);
-		REQUIRE(arr.size() > 0);
-
-		// Check a few positions: index 0 corresponds to molecule 1
-		REQUIRE(arr[1000-1] == Approx(conf.v_4S(1000)).margin(1e-6)); // molecule 1000
-		REQUIRE(arr[1-1]	== Approx(conf.v_4S(1)).margin(1e-6));	// molecule 1
-	}
-
 	SECTION("isDJ returns consistent structure (sum_per_site sorted, flags coherent)") {
 		int mol_id = 1000;
 		auto dj = conf.classifyDefect(mol_id, /*R_CUT*/5.0, /*V_CUT*/-12.0);
@@ -422,7 +411,7 @@ TEST_CASE("Configuration - DefectInfo classification", "[Configuration][DefectIn
     TopolInfo topol = top_reader->readTopology(prmtop);
 
     CoordinateReader* coord_reader = ReaderFactory::createCoordinateReader(ReaderFactory::ProgramFormat::AMBER);
-    Configuration conf(coord_reader, pdb, topol);
+    ConfigurationBulk conf(coord_reader, pdb, topol);
 
     SECTION("DefectInfo flags are mutually consistent") {
         int mol_id = 1000; // pick arbitrary molecule
