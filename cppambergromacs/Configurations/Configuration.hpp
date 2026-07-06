@@ -11,6 +11,7 @@
 #include "../General/Sorter.hpp"
 #include "../General/Geometrics.hpp"
 #include "../ReaderInterfaces.hpp"
+#include <array>
 
 using namespace std;
 
