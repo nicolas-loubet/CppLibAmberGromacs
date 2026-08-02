@@ -39,6 +39,11 @@ struct TopolInfo {
 	map<pair<string,string>,pair<Real,Real>> special_interaction;//keep ij and ji
 	Vector default_system_bounds;
 
+#ifdef DIFF_RESID_MOLECULE
+	vector<pair<string,int>> molecule_sequence;
+	map<string,int> name_to_diffid;
+#endif
+
 	TopolInfo(): num_molecules(0), num_solutes(0), num_solvents(0), total_number_of_atoms(0) {}
 	~TopolInfo()= default;
 };

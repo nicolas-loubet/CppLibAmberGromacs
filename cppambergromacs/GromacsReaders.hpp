@@ -74,6 +74,28 @@ class GromacsTopologyReader : public TopologyReader {
 			return sum;
 		}
 
+#ifdef DIFF_RESID_MOLECULE
+		/**
+		 * Reads the [ molecules ] section preserving the exact per-line order and
+		 * counts (unlike readSystemFlag, which collapses everything into a map and
+		 * loses both order and duplicate blocks). This is the ground truth used to
+		 * detect molecule boundaries in the .gro by atom count.
+		 */
+		static vector<pair<string,int>> readMoleculeSequence(ifstream& file, int position) {
+			vector<pair<string,int>> sequence;
+			string line;
+			file.clear();
+			file.seekg(position);
+			while(getline(file, line)) {
+				if(line.empty() || line[0] == ';') continue;
+				string name= ToolKit::strip(line.substr(0, 8));
+				int count= stoi(line.substr(9));
+				sequence.emplace_back(name, count);
+			}
+			return sequence;
+		}
+#endif
+
 		static int sumMoleculesConsideredSolvent(const map<string,int>& molecules) {
 			int sum= 0;
 			for(const auto& [name, count] : molecules)
@@ -248,6 +270,11 @@ class GromacsTopologyReader : public TopologyReader {
 				ti.total_number_of_atoms+= atoms.size() * ti.number_of_each_different_molecule.at(molec_name);
 				ti.atom_type_name_charge_mass.push_back(move(atoms));
 
+#ifdef DIFF_RESID_MOLECULE
+				if(!ti.name_to_diffid.count(molec_name))
+					ti.name_to_diffid[molec_name]= (int)ti.atom_type_name_charge_mass.size() - 1;
+#endif
+
 #ifdef USE_VECTOR_TOPOLOGY
 				for(const auto& [type, name, charge, mass] : ti.atom_type_name_charge_mass.back()) {
 					ti.name_type[molec_name + ":" + name]= type;
@@ -265,6 +292,10 @@ class GromacsTopologyReader : public TopologyReader {
 			ti.special_interaction= (flags.count("[ nonbond_params ]"))
 				? readSpecialInteractions(f, flags["[ nonbond_params ]"])
 				: map<pair<string,string>,pair<Real,Real>>{};
+
+#ifdef DIFF_RESID_MOLECULE
+			ti.molecule_sequence= readMoleculeSequence(f, flags["[ molecules ]"]);
+#endif
 
 			return ti;
 		}
@@ -293,11 +324,81 @@ class GromacsCoordinateReader : public CoordinateReader {
 				prev_diff_id++;
 				prev_molec_name= molec_name;
 			}
-			atom_list= new Atom[topol_info.number_of_atoms_per_different_molecule.at(molec_name)];
+
+			auto it= topol_info.number_of_atoms_per_different_molecule.find(molec_name);
+			atom_list= new Atom[it->second];
 		}
 
+#ifdef DIFF_RESID_MOLECULE
+		/**
+		 * Tracks progress through topol_info.molecule_sequence while scanning the
+		 * .gro file, so molecule boundaries are decided by "did we read as many
+		 * atoms as the topology says this molecule has", not by resname/resid.
+		 */
+		struct MoleculeCursor {
+			size_t block_idx= 0;         // index into topol_info.molecule_sequence
+			int    instance_in_block= 0; // which instance within that block
+			int    molecule_index= 0;    // 0-based count of molecules created so far
+			string current_name;
+			int    current_diff_id= -1;
+			int    expected_atoms= 0;
+		};
+
+		static void startNextMolecule(MoleculeCursor& cur, const TopolInfo& topol_info) {
+			cur.current_name= topol_info.molecule_sequence[cur.block_idx].first;
+			auto it_id= topol_info.name_to_diffid.find(cur.current_name);
+			cur.current_diff_id= it_id->second;
+			auto it_n= topol_info.number_of_atoms_per_different_molecule.find(cur.current_name);
+			cur.expected_atoms= it_n->second;
+		}
+
+		static void advanceMoleculeCursor(MoleculeCursor& cur, const TopolInfo& topol_info) {
+			cur.molecule_index++;
+			cur.instance_in_block++;
+			if(cur.instance_in_block >= topol_info.molecule_sequence[cur.block_idx].second) {
+				cur.block_idx++;
+				cur.instance_in_block= 0;
+			}
+		}
+
+		/**
+		 * Same purpose as readAtom(), but decides molecule membership purely from
+		 * atom counts (via MoleculeCursor) instead of resname/resid. resid/resname
+		 * are still parsed here only for diagnostic logging.
+		 */
+		static Atom readAtomByCount(const string& line, const TopolInfo& topol_info, MoleculeCursor& cur,
+		                            Atom*& atom_list, int& n_atoms, int atom_line_index) {
+			int    i_molec   = stoi(line.substr(0,  5));
+			string molec_name= ToolKit::strip(line.substr(5,  5));
+			string atom_name = ToolKit::strip(line.substr(10, 5));
+			int    i_atom    = stoi(line.substr(15, 5));
+			Real   x         = RealParser(line.substr(20, 8));
+			Real   y         = RealParser(line.substr(28, 8));
+			Real   z         = RealParser(line.substr(36, 8));
+
+			if(atom_list == nullptr) {
+				startNextMolecule(cur, topol_info);
+				atom_list= new Atom[cur.expected_atoms];
+				n_atoms= 0;
+			}
+
+			const auto& molec_atoms= topol_info.atom_type_name_charge_mass[cur.current_diff_id];
+			int lookup_idx=
+#ifdef USE_VECTOR_TOPOLOGY
+				n_atoms;
+#else
+				n_atoms + 1;
+#endif
+
+			const auto& [type, name, q, mass]= molec_atoms.at(lookup_idx);
+			const auto& [e,s]= topol_info.type_LJparam.at(type);
+			int Z= topol_info.type_Z.at(type);
+			return Atom(Vector(x*10, y*10, z*10), i_atom, mass, q, e, s, Z, type);
+		}
+#endif
+
 		static Atom readAtom(const string& line, const TopolInfo& topol_info, Molecule** molecs, string& prev_molec_name, int& prev_diff_id,
-		                     int& prev_molec_id, Atom*& atom_list, int& n_atoms) {
+		                     int& prev_molec_id, Atom*& atom_list, int& n_atoms, int atom_line_index) {
 			int    i_molec   = stoi(line.substr(0,  5));
 			string molec_name= ToolKit::strip(line.substr(5,  5));
 			string atom_name = ToolKit::strip(line.substr(10, 5));
@@ -309,13 +410,15 @@ class GromacsCoordinateReader : public CoordinateReader {
 			if(i_molec != prev_molec_id % 100000)
 				checkIfNewMolecule(i_molec, molec_name, atom_list, n_atoms, topol_info, molecs, prev_molec_name, prev_diff_id, prev_molec_id);
 
-			const auto& [type, name, q, mass]= topol_info.atom_type_name_charge_mass[prev_diff_id].at(
+			const auto& molec_atoms= topol_info.atom_type_name_charge_mass[prev_diff_id];
+			int lookup_idx=
 #ifdef USE_VECTOR_TOPOLOGY
-				n_atoms
+				n_atoms;
 #else
-				n_atoms + 1
+				n_atoms + 1;
 #endif
-			);
+
+			const auto& [type, name, q, mass]= molec_atoms.at(lookup_idx);
 			const auto& [e,s]= topol_info.type_LJparam.at(type);
 			int Z= topol_info.type_Z.at(type);
 			return Atom(Vector(x*10, y*10, z*10), i_atom, mass, q, e, s, Z, type);
@@ -341,6 +444,23 @@ class GromacsCoordinateReader : public CoordinateReader {
 			getline(f, line);
 			int natoms= stoi(line);
 
+#ifdef DIFF_RESID_MOLECULE
+			MoleculeCursor cur;
+			Atom* atom_list= nullptr;
+			int n_atoms= 0;
+
+			for(int i= 0; i < natoms; i++) {
+				getline(f, line);
+				Atom a= readAtomByCount(line, topol_info, cur, atom_list, n_atoms, i);
+				atom_list[n_atoms++]= a;
+				if(n_atoms == cur.expected_atoms) {
+					createNewMolecule(cur.current_name, cur.molecule_index + 1, molecs, atom_list, n_atoms);
+					advanceMoleculeCursor(cur, topol_info);
+					atom_list= nullptr;
+					n_atoms= 0;
+				}
+			}
+#else
 			string prev_molec_name= "ERRORMOLECULE";
 			int prev_diff_id= -1, prev_molec_id= -1;
 			Atom* atom_list= nullptr;
@@ -348,11 +468,12 @@ class GromacsCoordinateReader : public CoordinateReader {
 
 			for(int i= 0; i < natoms; i++) {
 				getline(f, line);
-				Atom a= readAtom(line, topol_info, molecs, prev_molec_name, prev_diff_id, prev_molec_id, atom_list, n_atoms);
+				Atom a= readAtom(line, topol_info, molecs, prev_molec_name, prev_diff_id, prev_molec_id, atom_list, n_atoms, i);
 				atom_list[n_atoms++]= a;
 			}
 			if(atom_list != nullptr)
 				createNewMolecule(prev_molec_name, prev_molec_id, molecs, atom_list, n_atoms);
+#endif
 
 			getline(f, line);
 			bounds= readBounds(line);
